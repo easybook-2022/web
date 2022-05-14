@@ -1,0 +1,279 @@
+#addproduct {
+  height: 100vh;
+  width: 100vw;
+
+  #box {
+    height: 100%;
+    width: 100%;
+
+    #input-container {
+      margin: 0 auto;
+      width: 50%;
+      
+      #add-header {
+        font-size: calc(100vw * 0.02);
+        font-weight: bold;
+        padding: 5px 0;
+        text-align: center;
+      }
+
+      #add-input {
+        border-radius: 5px;
+        border-style: solid;
+        border-width: 3px;
+        font-size: calc(100vw * 0.02);
+        padding: 10px;
+        width: calc(100% - 26px);
+      }
+    }
+
+    #camera-container {
+      margin: 0 auto;
+      width: 100%;
+
+      #camera-header {
+        font-size: calc(100vw * 0.02);
+        font-weight: bold;
+        padding: 5px 0;
+        text-align: center;
+      }
+
+      #camera {
+        height: 30vw;
+        margin: 0 auto;
+        width: 30vw;
+      }
+
+      #camera-actions {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        margin: 0 auto;
+        width: 420px;
+
+        .camera-action {
+          border-radius: 5px;
+          border-style: solid;
+          border-width: 2px;
+          font-size: calc(100vw * 0.015);
+          margin: 5px;
+          padding: 5px;
+          text-align: center;
+          width: 250px;
+        }
+      }
+    }
+
+    .add-option {
+      border-radius: 5px;
+      border-style: solid;
+      border-width: 2px;
+      font-size: calc(100vw * 0.02);
+      margin: 0 auto;
+      padding: 10px;
+      text-align: center;
+      width: 400px;
+    }
+
+    .options {
+      margin: 0 auto 10px auto;
+      width: 95%;
+
+      .option {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin: 0 auto 10px auto;
+        width: 50%;
+
+        .option-input {
+          border-radius: 3px;
+          border-style: solid;
+          border-width: 2px;
+          font-size: calc(100vw * 0.02);
+          width: 100%;
+        }
+
+        .option-types-box {
+          .option-types-header {
+            font-size: calc(100vw * 0.02);
+            font-weight: bold;
+            text-align: center;
+          }
+
+          .option-types {
+            display: flex;
+            flex-direction: row;
+            margin: 0 auto;
+            width: 91px;
+
+            .option-type {
+              border-radius: 3px;
+              border-style: solid;
+              border-width: 2px;
+              font-size: 30px;
+              margin: 0 2px;
+              padding: 8px;
+            }
+
+            .option-type-selected {
+              background-color: rgba(0, 0, 0, 0.4);
+              border-radius: 3px;
+              border-style: solid;
+              border-width: 2px;
+              font-size: 30px;
+              margin: 0 2px;
+              padding: 8px;
+            }
+          }
+        }
+      }
+
+      .other {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin: 0 auto 10px auto;
+        width: 50%;
+
+        .other-input {
+          border-radius: 3px;
+          border-style: solid;
+          border-width: 2px;
+          font-size: calc(100vw * 0.02);
+          width: 100%;
+        }
+
+        .other-price {
+          border-radius: 3px;
+          border-style: solid;
+          border-width: 2px;
+          font-size: calc(100vw * 0.02);
+        }
+      }
+
+      .size {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin: 0 auto 10px auto;
+        width: 50%;
+
+        .size-types-box {
+          display: flex;
+          flex-direction: row;
+        }
+
+        .size-types-header {
+          font-size: calc(100vw * 0.02);
+          font-weight: bold;
+          margin: 5px;
+        }
+
+        .size-types {
+          display: flex;
+          flex-direction: row;
+          margin: 0 20px;
+
+          .size-type {
+            border-radius: 3px;
+            border-style: solid;
+            border-width: 2px;
+            margin: 2px;
+            padding: 10px;
+          }
+
+          .size-type-selected {
+            background-color: black;
+            border-radius: 3px;
+            border-style: solid;
+            border-width: 2px;
+            margin: 2px;
+            padding: 10px;
+          }
+
+          .size-type-header {
+            font-size: calc(100vw * 0.01);
+          }
+
+          .size-type-header-selected {
+            color: white;
+            font-size: calc(100vw * 0.01);
+          }
+        }
+
+        .size-input {
+          border-radius: 3px;
+          border-style: solid;
+          border-width: 2px;
+          font-size: calc(100vw * 0.02);
+          height: 50px;
+          padding: 3px;
+          text-align: center;
+          width: 150px;
+        }
+      }
+    }
+
+    #price-box {
+      margin: 0 auto 30px auto;
+      width: 400px;
+
+      #price-header {
+        font-size: calc(100vw * 0.02);
+        font-weight: bold;
+        padding: 5px;
+        text-align: center;
+      }
+
+      #price-input {
+        border-radius: 5px;
+        border-style: solid;
+        border-width: 2px;
+        font-size: calc(100vw * 0.02);
+        padding: 5px;
+        text-align: center;
+        width: calc(100% - 14px);
+      }
+    }
+
+    #add-actions {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      margin: 0 auto;
+      width: 500px;
+
+      .add-action {
+        border-radius: 3px;
+        border-style: solid;
+        border-width: 2px;
+        font-size: calc(100vw * 0.02);
+        padding: 5px;
+        text-align: center;
+        width: 200px;
+      }
+    }
+  }
+
+  #loading {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-around;
+    width: 100%;
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+  }
+
+  .errormsg {
+    color: darkred;
+    font-size: calc(100vw * 0.015);
+    margin-bottom: 50px;
+    text-align: center;
+  }
+}

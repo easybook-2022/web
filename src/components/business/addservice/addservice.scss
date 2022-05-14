@@ -1,0 +1,98 @@
+#addservice {
+  height: 100vh;
+  width: 100vw;
+
+  #box {
+    height: 100%;
+    width: 100%;
+    
+    .input-container {
+      margin: 0 auto;
+      width: 50%;
+
+      .add-header {
+        font-size: calc(100vw * 0.02);
+        font-weight: bold;
+        padding: 5px 0;
+        text-align: center;
+      }
+
+      .add-input {
+        border-radius: 5px;
+        border-style: solid;
+        border-width: 3px;
+        font-size: calc(100vw * 0.02);
+        padding: 10px;
+        width: calc(100% - 26px);
+      }
+    }
+
+    #camera-container {
+      margin: 0 auto;
+      width: 100%;
+
+      #camera-header {
+        font-size: calc(100vw * 0.02);
+        font-weight: bold;
+        padding: 5px 0;
+        text-align: center;
+      }
+
+      #camera {
+        margin: 0 auto;
+        width: 30%;
+      }
+
+      #camera-actions {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        margin: 0 auto;
+        width: 420px;
+
+        .camera-action {
+          border-radius: 5px;
+          border-style: solid;
+          border-width: 2px;
+          font-size: calc(100vw * 0.015);
+          margin: 5px;
+          padding: 5px;
+          text-align: center;
+          width: 250px;
+        }
+      }
+    }
+
+    #add-actions {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      margin: 10px auto;
+      width: 500px;
+
+      .add-action {
+        border-radius: 3px;
+        border-style: solid;
+        border-width: 2;
+        font-size: calc(100vw * 0.02);
+        padding: 5px;
+        text-align: center;
+        width: 200px;
+      }
+    }
+  }
+
+  #loading {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-around;
+    width: 100%;
+  }
+
+  .errormsg {
+    color: darkred;
+    font-size: calc(100vw * 0.02);
+    text-align: center;
+  }
+}

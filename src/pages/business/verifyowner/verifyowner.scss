@@ -1,0 +1,91 @@
+#verifyowner {
+  background-color: white;
+  height: 100vh;
+  width: 100vw;
+
+  #background {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    margin: 0 auto;
+    position: absolute;
+    top: 0;
+    width: 100vw;
+
+    #background-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+    }
+  }
+
+  #box {
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-around;
+    position: absolute;
+    top: 0;
+    width: 100%;
+
+    #inputs-box {
+      display: flex;
+      flex-direction: column;
+      height: 50%;
+      justify-content: space-around;
+      margin: 0 auto;
+      width: 50%;
+
+      .input-container {
+        margin: 0 auto 30px auto;
+        width: 50%;
+
+        .input-header {
+          font-size: calc(100vw * 0.02);
+        }
+
+        .input {
+          background-color: white;
+          border-radius: 3px;
+          border-style: solid;
+          border-width: 2px;
+          font-size: calc(100vw * 0.02);
+          padding: 5px;
+          width: 100%;
+        }
+      }
+
+      #submit {
+        background-color: white;
+        border-radius: 3px;
+        border-style: solid;
+        border-width: 2px;
+        font-size: 20px;
+        font-weight: bold;
+        margin: 5px auto;
+        padding: 10px;
+        text-align: center;
+        width: 200px;
+      }
+    }
+
+    .errormsg {
+      color: darkred;
+      font-size: calc(100vw * 0.015);
+      font-weight: bold;
+      text-align: center;
+    }
+
+    #options {
+      .option {
+        background-color: white;
+        border-radius: 5px;
+        font-size: calc(100vw * 0.02);
+        font-weight: bold;
+        padding: 0 10px;
+        text-align: center;
+      }
+    }
+  }
+}

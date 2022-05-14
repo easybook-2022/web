@@ -1,0 +1,93 @@
+#account {
+	background-color: white;
+	height: 100vh;
+	width: 100vw;
+
+	#box {
+		background-color: #EAEAEA;
+		height: 100%;
+		width: 100%;
+
+		#inputs-box {
+			margin-bottom: 50px;
+
+			#input-container-div {
+				margin: 80px 0;
+				width: 100%;
+			}
+
+			.input-container {
+				background-color: rgba(127, 127, 127, 0.1);
+				border-radius: 10px;
+				margin: 10px auto;
+				padding: 5px;
+				width: 90%;
+
+				.input-header {
+					font-size: 20px;
+					font-weight: bold;
+				}
+
+				.input {
+					border-radius: 3px;
+					border-style: solid;
+					border-width: 2px;
+					font-size: 20px;
+					padding: 5px;
+					width: calc(100% - 10px);
+				}
+			}
+
+			#actions {
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				margin: 0 auto;
+				width: 300px;
+
+				.action {
+					border-radius: 5px;
+					border-style: solid;
+					border-width: 2px;
+					margin: 20px auto;
+					padding: 10px;
+					text-align: center;
+					width: 120px;
+				}
+			}
+		}
+	}
+
+	#hidden-box {
+		height: 100%;
+		position: absolute;
+		top: 0;
+		width: 100%;
+	}
+
+	#loading {
+		display: flex;
+		flex-direction: column;
+		height: 100vh;
+		justify-content: space-around;
+		width: 100vw;
+	}
+
+	.loading {
+		animation: rotate 1s linear infinite;
+		margin: 0 auto;
+		height: 48px;
+		width: 48px;
+
+		@keyframes rotate {
+			from { transform: rotate(0deg) }
+			to { transform: rotate(360deg) }
+		}
+	}
+
+	.errormsg {
+		color: darkred;
+		font-size: 15px;
+		text-align: center;
+	}
+}
