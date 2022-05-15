@@ -199,9 +199,10 @@ export default function Register(props) {
             const { msg } = res
 
             setLoading(false)
-            localStorage.setItem("phase", "workinghours")
+            localStorage.setItem("phase", "main")
+            localStorage.setItem("firstTime", "true")
 
-            window.location = "/workinghours"
+            window.location = "/main"
           }
         })
         .catch((err) => {
@@ -232,10 +233,6 @@ export default function Register(props) {
           msg = "Please provide a profile you like"
         }
 
-        break
-      case 2:
-        setTime()
-        
         break
       default:
     }
@@ -549,7 +546,25 @@ export default function Register(props) {
               }}>Back</div>
             )}
 
-            <div className="action" style={{ opacity: loading ? 0.3 : 1 }} disabled={loading} onClick={() => setupType === "hours" && daysInfo.done == true ? register() : saveInfo()}>{setupType === "hours" ? "Done" : "Next"}</div>
+            <div className="action" style={{ opacity: loading ? 0.3 : 1 }} disabled={loading} onClick={() => {
+              if (setupType == "hours") {
+                if (!daysInfo.done) {
+                  setTime()
+                } else {
+                  register()
+                }
+              } else {
+                saveInfo()
+              }
+            }}>{
+              setupType == "hours" ? 
+                !daysInfo.done ? 
+                  "Next"
+                  :
+                  "Done"
+                :
+                "Next"
+            }</div>
           </div>
         </div>
 

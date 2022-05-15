@@ -1,7 +1,7 @@
 import './settings.scss';
 import React, { useState, useEffect } from 'react'
 import Geocode from "react-geocode";
-//import GoogleMapReact from 'google-map-react'
+import GoogleMapReact from 'google-map-react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faLocationPin, faCircleNotch, faArrowUp, faArrowDown, faTimesCircle } from '@fortawesome/free-solid-svg-icons'
 import Webcam from "react-webcam";
@@ -1052,7 +1052,7 @@ export default function Settings() {
                     <div id="location-container-center">
                       <div className="location-header">Your {(type == 'hair' || type == 'nail') ? type + ' salon' : type} is located at</div>
 
-                      {/*(locationCoords.longitude && locationCoords.latitude) ? 
+                      {(locationCoords.longitude && locationCoords.latitude) ? 
                         <div style={{ height: '50vh', margin: '0 auto', width: '50vh' }}>
                           <GoogleMapReact
                             bootstrapURLKeys={{ key: googleApikey }}
@@ -1070,7 +1070,7 @@ export default function Settings() {
                         </div>
                         :
                         <div className="loading"><Loadingprogress/></div>
-                      */}
+                      }
 
                       <div className="location-div">Or</div>
 

@@ -31,7 +31,6 @@ import Resetpassword from './pages/business/resetpassword'
 import Verifyowner from './pages/business/verifyowner'
 import List from './pages/business/list'
 import Locationsetup from './pages/business/locationsetup'
-import Workinghours from './pages/business/workinghours'
 
 import Businessmain from './pages/business/main'
 import BusinessBooktime from './pages/business/booktime';
@@ -95,7 +94,6 @@ export default function App() {
           <Route path="/verifyowner" element={<Verifyowner/>}/>
           <Route path="/list" element={<List/>}/>
           <Route path="/locationsetup" element={<Locationsetup/>}/>
-          <Route path="/workinghours" element={<Workinghours/>}/>
           <Route path="/main" element={<Businessmain/>}/>
           <Route path="/booktime/:scheduleid/:serviceid/:serviceinfo" element={<BusinessBooktime/>}/>
           <Route path="/cartorders/:userid/:ordernumber" element={<Cartorders/>}/>

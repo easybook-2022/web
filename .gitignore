@@ -10,7 +10,7 @@
 
 # production
 /build
-/public/tutorials/*.mp4
+/public/tutorials
 /public/intro.mp4
 
 # misc

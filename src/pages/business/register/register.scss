@@ -26,6 +26,7 @@
 
     #inputs-box {
       height: 80%;
+      overflow-y: scroll;
       width: 100%;
 
       .input-header {
@@ -282,7 +283,7 @@
 
   .errormsg {
     color: darkred;
-    font-size: calc(100vw * 0.02);
+    font-size: calc(100vw * 0.01);
     text-align: center;
   }
 }
