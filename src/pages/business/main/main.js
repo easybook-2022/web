@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGear, faLocationPin } from '@fortawesome/free-solid-svg-icons'
 import { socket, logo_url } from '../../../businessInfo'
 import { displayTime } from 'geottuse-tools'
-import { updateNotificationToken } from '../../../apis/business/owners'
+import { updateNotificationToken, getOwnerInfo } from '../../../apis/business/owners'
 import { fetchNumAppointments, fetchNumCartOrderers, getLocationProfile } from '../../../apis/business/locations'
 import { getMenus, removeMenu, addNewMenu } from '../../../apis/business/menus'
 import { cancelSchedule, doneService, getAppointments, getCartOrderers } from '../../../apis/business/schedules'
@@ -14,12 +14,14 @@ import { removeProduct } from '../../../apis/business/products'
 // components
 import Loadingprogress from '../../../components/loadingprogress';
 
-const wsize = p => {return window.innerWidth * (p / 100)}
+const width = window.innerWidth
+const wsize = p => {return width * (p / 100)}
 
 export default function Main(props) {
   const params = useParams()
 
   const [ownerId, setOwnerid] = useState(null)
+  const [isOwner, setIsowner] = useState(false)
   const [storeIcon, setStoreicon] = useState('')
   const [storeName, setStorename] = useState('')
   const [locationType, setLocationtype] = useState('')
@@ -107,6 +109,26 @@ export default function Main(props) {
       })
       .catch((err) => {
         if (err.response && err.response.status === 400) {
+          const { errormsg, status } = err.response.data
+        }
+      })
+  }
+  const getTheOwnerInfo = () => {
+    const ownerid = localStorage.getItem("ownerid")
+
+    getOwnerInfo(ownerid)
+      .then((res) => {
+        if (res.status == 200) {
+          return res.data
+        }
+      })
+      .then((res) => {
+        if (res) {
+          setIsowner(res.isOwner)
+        }
+      })
+      .catch((err) => {
+        if (err.response && err.response.status == 400) {
           const { errormsg, status } = err.response.data
         }
       })
@@ -325,6 +347,7 @@ export default function Main(props) {
 
   const initialize = () => {
     getTheLocationProfile()
+    getTheOwnerInfo()
   }
   
   useEffect(() => {
@@ -433,7 +456,17 @@ export default function Main(props) {
                 </div>
               </div>
 
-              <div className="bottom-nav" onClick={() => window.location = "/menu"}>Edit Menu</div>
+              {isOwner === true && (
+                <div className="bottom-nav" onClick={() => {
+                  localStorage.removeItem("locationid")
+                  localStorage.removeItem("locationtype")
+                  localStorage.setItem("phase", "list")
+
+                  window.location = "/list"
+                }}>Switch Business</div>
+              )}
+
+              <div className="bottom-nav" onClick={() => window.location = "/menu"}>{isOwner === true ? "Edit" : "View"} Menu</div>
 
               <div className="column">
                 <div className="bottom-nav" onClick={() => logout()}>Log-Out</div>
@@ -524,18 +557,8 @@ export default function Main(props) {
           )}
           {showDisabledscreen && (
             <div id="disabled">
-              <div id="disabled-container">
-                <div id="disabled-header">
-                  There is an update to the app<br/>
-                  Please wait a moment<br/>
-                  or tap 'Close'
-                </div>
-
-                <div id="disabled-close" onClick={() => socket.emit("socket/business/login", ownerId, () => setShowdisabledscreen(false))}>Close</div>
-
-                <div style={{ margin: '0 auto' }}>
-                  <Loadingprogress/>
-                </div>
+              <div style={{ margin: '0 auto' }}>
+                <Loadingprogress/>
               </div>
             </div>
           )}

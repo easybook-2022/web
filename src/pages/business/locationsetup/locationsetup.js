@@ -1,7 +1,7 @@
 import './locationsetup.scss';
 import React, { useState, useEffect } from 'react';
 import Geocode from "react-geocode";
-import GoogleMapReact from 'google-map-react'
+import GoogleMapReact from 'google-map-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faLocationPin, faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons'
 import Webcam from "react-webcam";
@@ -17,6 +17,7 @@ const width = window.innerWidth
 const wsize = p => {return window.innerWidth * (p / 100)}
 const steps = ['type', 'name', 'location', 'phonenumber', 'logo', 'hours']
 const daysArr = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const libraries = ["places"]
 
 Geocode.setApiKey(googleApikey);
 Geocode.setLanguage("en");
@@ -465,7 +466,7 @@ export default function Locationsetup({ navigation }) {
 
               {(setupType === "location") && (
                 <div id="location-container">
-                  {locationInfo === '' ?
+                  {locationInfo === '' && (
                     <div id="location-container-center">
                       <div className="location-header">If you are at the {(type == 'hair' || type == 'nail') ? type + ' salon' : type} right now,</div>
 
@@ -488,83 +489,86 @@ export default function Locationsetup({ navigation }) {
                         setErrormsg()
                       }}>Enter address instead</div>
                     </div>
-                    :
-                    locationInfo !== 'destination' ? 
-                      <div id="location-container-center">
-                        <div id="location-infos">
-                          <div style={{ marginTop: 50 }}>
-                            <div className="location-header">If you are at the {(type == 'hair' || type == 'nail') ? type + ' salon' : type} right now,</div>
-                            <div className="location-action-option" disabled={loading} onClick={() => {
-                              setLocationinfo('destination')
+                  )}
 
-                              navigator.geolocation.getCurrentPosition(function (position) {
-                                const id = localStorage.getItem("id")
-                                const { longitude, latitude } = position.coords
-
-                                setLocationcoords({ longitude, latitude })
-                                setErrormsg()
-                              })
-                            }}>Mark your location</div>
-                          </div>
-
-                          <div className="location-div">Or</div>
-
-                          <div className="location-header">Enter your {(type == 'hair' || type == 'nail') ? type + ' salon' : type} information</div>
-
-                          <div className="input-container">
-                            <div className="input-header">Enter {(type == 'hair' || type == 'nail') ? type + ' salon' : type} address #1:</div>
-                            <input className="input" onChange={(e) => setAddressone(e.target.value)} value={addressOne}/>
-                          </div>
-                          <div className="input-container">
-                            <div className="input-header">Enter {(type == 'hair' || type == 'nail') ? type + ' salon' : type} address #2: (Optional)</div>
-                            <input className="input" onChange={(e) => setAddresstwo(e.target.value)} value={addressTwo}/>
-                          </div>
-                          <div className="input-container">
-                            <div className="input-header">Enter city:</div>
-                            <input className="input" onChange={(e) => setCity(e.target.value)} value={city} placeholder="example: Toronto"/>
-                          </div>
-                          <div className="input-container">
-                            <div className="input-header">Enter province:</div>
-                            <input className="input" onChange={(e) => setProvince(e.target.value)} value={province} placeholder="example: ON"/>
-                          </div>
-                          <div className="input-container">
-                            <div className="input-header">Enter postal code:</div>
-                            <input className="input" onChange={(e) => setPostalcode(e.target.value)} value={postalcode}/>
-                          </div>
-                        </div>
+                  {locationInfo === 'destination' && (
+                    <div id="location-container-center">
+                      <div className="location-header">Your {(type == 'hair' || type == 'nail') ? type + ' salon' : type} is located at</div>
+                      
+                      <div style={{ height: 500, margin: '0 auto', width: 500 }}>
+                        {(locationCoords.longitude !== null && locationCoords.latitude !== null) ? 
+                          <GoogleMapReact
+                            bootstrapURLKeys={{ key: googleApikey }}
+                            defaultZoom={16}
+                            defaultCenter={{ lat: locationCoords.latitude, lng: locationCoords.longitude }}
+                            options={{
+                              zoomEnabled: false
+                            }}
+                          >
+                            <LocationPin 
+                              lat={locationCoords.latitude}
+                              lng={locationCoords.longitude}
+                            />
+                          </GoogleMapReact>
+                          :
+                          <Loadingprogress/>
+                        }
                       </div>
-                      :
-                      <div id="location-container-center">
-                        <div className="location-header">Your {(type == 'hair' || type == 'nail') ? type + ' salon' : type} is located at</div>
-                        
-                        <div style={{ height: '50vh', margin: '0 auto', width: '50vh' }}>
-                          {(locationCoords.longitude && locationCoords.latitude) ? 
-                            <GoogleMapReact
-                              bootstrapURLKeys={{ key: googleApikey }}
-                              defaultZoom={16}
-                              defaultCenter={{ lat: locationCoords.latitude, lng: locationCoords.longitude }}
-                              options={{
-                                zoomEnabled: false
-                              }}
-                            >
-                              <LocationPin 
-                                lat={locationCoords.latitude}
-                                lng={locationCoords.longitude}
-                              />
-                            </GoogleMapReact>
-                            :
-                            <Loadingprogress/>
-                          }
+
+                      <div className="location-div">Or</div>
+
+                      <div className="location-action-option" onClick={() => {
+                        setLocationcoords({ longitude: null, latitude: null })
+                        setLocationinfo('away')
+                      }}>Enter address instead</div>
+                    </div>
+                  )}
+
+                  {locationInfo === 'away' && (
+                    <div id="location-container-center">
+                      <div id="location-infos">
+                        <div style={{ marginTop: 50 }}>
+                          <div className="location-header">If you are at the {(type == 'hair' || type == 'nail') ? type + ' salon' : type} right now,</div>
+                          <div className="location-action-option" disabled={loading} onClick={() => {
+                            setLocationinfo('destination')
+
+                            navigator.geolocation.getCurrentPosition(function (position) {
+                              const id = localStorage.getItem("id")
+                              const { longitude, latitude } = position.coords
+
+                              setLocationcoords({ longitude, latitude })
+                              setErrormsg()
+                            })
+                          }}>Mark your location</div>
                         </div>
 
                         <div className="location-div">Or</div>
 
-                        <div className="location-action-option" onClick={() => {
-                          setLocationcoords({ longitude: null, latitude: null })
-                          setLocationinfo('away')
-                        }}>Enter address instead</div>
+                        <div className="location-header">Enter your {(type == 'hair' || type == 'nail') ? type + ' salon' : type} information</div>
+
+                        <div className="input-container">
+                          <div className="input-header">Enter {(type == 'hair' || type == 'nail') ? type + ' salon' : type} address #1:</div>
+                          <input className="input" onChange={(e) => setAddressone(e.target.value)} value={addressOne}/>
+                        </div>
+                        <div className="input-container">
+                          <div className="input-header">Enter {(type == 'hair' || type == 'nail') ? type + ' salon' : type} address #2: (Optional)</div>
+                          <input className="input" onChange={(e) => setAddresstwo(e.target.value)} value={addressTwo}/>
+                        </div>
+                        <div className="input-container">
+                          <div className="input-header">Enter city:</div>
+                          <input className="input" onChange={(e) => setCity(e.target.value)} value={city} placeholder="example: Toronto"/>
+                        </div>
+                        <div className="input-container">
+                          <div className="input-header">Enter province:</div>
+                          <input className="input" onChange={(e) => setProvince(e.target.value)} value={province} placeholder="example: ON"/>
+                        </div>
+                        <div className="input-container">
+                          <div className="input-header">Enter postal code:</div>
+                          <input className="input" onChange={(e) => setPostalcode(e.target.value)} value={postalcode}/>
+                        </div>
                       </div>
-                  }
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -590,24 +594,11 @@ export default function Locationsetup({ navigation }) {
                       </div>
                     </>
                   ) : (
-                    <>
-                      <div id="camera">
-                        <Webcam
-                          audio={false}
-                          ref={r => {setCamcomp(r)}}
-                          screenshotFormat="image/jpeg"
-                          videoConstraints={{ facingMode: 'user', width: 640, height: 480 }}
-                          width={'100%'}
-                        />
-                      </div>
+                    <div id="camera-actions">
+                      <div className="camera-action" style={{ opacity: loading ? 0.3 : 1 }} disabled={loading} onClick={() => fileComp.click()}>Choose<br/>from computer</div>
 
-                      <div id="camera-actions">
-                        <div className="camera-action" style={{ opacity: loading ? 0.3 : 1 }} disabled={loading} onClick={snapPhoto.bind(this)}>Take<br/>this photo</div>
-                        <div className="camera-action" style={{ opacity: loading ? 0.3 : 1 }} disabled={loading} onClick={() => fileComp.click()}>Choose<br/>from computer</div>
-
-                        <input type="file" ref={r => {setFilecomp(r)}} onChange={choosePhoto} style={{ display: 'none' }}/>
-                      </div>
-                    </>
+                      <input type="file" ref={r => {setFilecomp(r)}} onChange={choosePhoto} style={{ display: 'none' }}/>
+                    </div>
                   )}
                 </div>
               )}

@@ -83,6 +83,151 @@
         }
       }
 
+      // hours
+      // select working days
+      #worker-day-header {
+        font-size: calc(100vw * 0.02);
+        text-align: center;
+      }
+
+      .worker-day-touch {
+        border-radius: 3px;
+        border-style: solid;
+        border-width: 2px;
+        font-size: calc(100vw * 0.02);
+        margin: 5px auto;
+        padding: 5px;
+        text-align: center;
+        width: 50%;
+      }
+
+      .worker-day-touch-selected {
+        background-color: rgba(0, 0, 0, 0.6);
+        border-radius: 3px;
+        border-style: solid;
+        border-width: 2px;
+        font-size: calc(100vw * 0.02);
+        margin: 5px auto;
+        padding: 5px;
+        text-align: center;
+        width: 50%;
+      }
+
+      .worker-day-touch-off {
+        border-radius: 3px;
+        border-style: solid;
+        border-width: 2px;
+        font-size: calc(100vw * 0.02);
+        margin: 5px auto;
+        opacity: 0.2;
+        padding: 5px;
+        text-align: center;
+        width: 50%;
+      }
+
+      #worker-hours {
+        margin-bottom: 50px;
+        width: 100%;
+
+        #worker-hours-back {
+          border-radius: 3px;
+          border-style: solid;
+          border-width: 2px;
+          font-size: calc(100vw * 0.02);
+          margin: 0 auto 20px auto;
+          padding: 10px;
+          text-align: center;
+          width: 150px;
+        }
+
+        // adjust working time for each day
+        .worker-hour {
+          background-color: white;
+          border-radius: 10px;
+          margin: 30px auto 0 auto;
+          padding: 5px;
+          width: 35%;
+
+          .worker-hour-header {
+            font-size: calc(100vw * 0.02);
+            font-weight: bold;
+            margin: 0 10px;
+            text-align: center;
+          }
+
+          .worker-hour-answer {
+
+          }
+
+          .worker-hour-answer-actions {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+          }
+
+          .worker-hour-answer-action {
+            align-items: center;
+            border-radius: 5px;
+            border-style: solid;
+            border-width: 2px;
+            margin: 5px;
+            padding: 10px;
+            width: calc(100vw * 0.1);
+          }
+
+          .worker-hour-answer-action-header {
+            font-size: calc(100vw * 0.02);
+          }
+
+          .time-selection-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            width: 100%;
+
+            .time-selection {
+              border-radius: 5px;
+              border-style: solid;
+              border-width: 3px;
+              display: flex;
+              flex-direction: row;
+              justify-content: space-between;
+              width: 50%;
+
+              .selection {
+                margin: 5px;
+                text-align: center;
+
+                .selection-header {
+                  border-width: 0;
+                  font-size: calc(100vw * 0.02);
+                  outline: none;
+                  text-align: center;
+                  width: 90%;
+                }
+              }
+
+              .selection-div {
+                font-size: calc(100vw * 0.02);
+              }
+            }
+
+            .time-selection-header-holder {
+              display: flex;
+              flex-direction: column;
+              justify-content: space-around;
+              width: 10%;
+
+              .time-selection-header {
+                font-size: calc(100vw * 0.02);
+                font-weight: bold;
+                text-align: center;
+              } 
+            }
+          }
+        }
+      }
+
       #actions {
         display: flex;
         flex-direction: row;
@@ -137,7 +282,7 @@
 
   .errormsg {
     color: darkred;
-    font-size: calc(100vw * 0.05);
+    font-size: calc(100vw * 0.02);
     text-align: center;
   }
 }

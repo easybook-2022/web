@@ -25,6 +25,7 @@ export const saveUserInfo = data => {
   form.append("id", data.id)
   form.append("username", data.username)
   form.append("profile", JSON.stringify(data.profile))
+  form.append("hours", JSON.stringify(data.hours))
   form.append("web", true)
 
   return axios.post(
@@ -111,6 +112,10 @@ export const getOtherWorkers = data => {
     `${url}/owners/get_other_workers`,
     data
   )
+}
+
+export const getOwnerInfo = id => {
+  return axios.get(`${url}/owners/get_owner_info/${id}`)
 }
 
 export const setOwnerHours = data => {
