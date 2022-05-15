@@ -356,31 +356,6 @@ export default function Menu(props) {
     }
   }
 
-  const snapPhoto = () => {
-    setUploadmenubox({ ...uploadMenubox, loading: true })
-
-    let letters = [
-      "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
-      "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
-    ]
-    let photo_name_length = Math.floor(Math.random() * (15 - 10)) + 10
-    let char = ""
-
-    if (camComp) {
-      let uri = camComp.getScreenshot({ width: 640, height: 480 });
-
-      for (let k = 0; k <= photo_name_length - 1; k++) {
-        char += "" + (
-          k % 2 === 0 ? 
-            letters[Math.floor(Math.random() * letters.length)].toUpperCase()
-            : 
-            Math.floor(Math.random() * 9) + 0
-          )
-      }
-
-      setUploadmenubox({ ...uploadMenubox, uri, name: char + '.jpg', size: { width: 640, height: 480 }, loading: false })
-    }
-  }
   const choosePhoto = e => {
     if (e.target.files && e.target.files[0]) {
       setUploadmenubox({ ...uploadMenubox, loading: true })
@@ -432,7 +407,6 @@ export default function Menu(props) {
       })
       .then((res) => {
         if (res) {
-          setMenuinfo(res.menus)
           setUploadmenubox({ ...uploadMenubox, show: false, action: '', uri: '', name: '' })
           getAllMenus()
         }
@@ -456,7 +430,6 @@ export default function Menu(props) {
       })
       .then((res) => {
         if (res) {
-          setMenuinfo(res.menus)
           setMenuphotooption({ ...uploadMenubox, show: false, action: '', photo: '' })
           getAllMenus()
         }
@@ -506,7 +479,7 @@ export default function Menu(props) {
                 )
               )}
 
-              {menuInfo.list[0].listType === "list" ? 
+              {menuInfo.list.length > 0 && menuInfo.list[0].listType === "list" ? 
                 displayList({ id: "", name: "", image: "", list: menuInfo, left: 0 })
                 :
                 <div id="menu-other">{displayList({ id: "", name: "", image: "", list: menuInfo.list, left: -50 })}</div>
@@ -628,7 +601,6 @@ export default function Menu(props) {
                     <FontAwesomeIcon icon={faTimesCircle} size="3x"/>
                   </div>
                   <div id="upload-menu-actions">
-                    <div className="upload-menu-action" onClick={() => setUploadmenubox({ ...uploadMenubox, action: 'camera' })}>Take a photo</div>
                     <div className="upload-menu-action" onClick={() => fileComp.click()}>Choose from phone</div>
                   </div>
 
@@ -652,7 +624,7 @@ export default function Menu(props) {
                     </div>
                     :
                     <div id="upload-menu-camera">
-                      <img alt="" style={resizePhoto(uploadMenubox, width * 0.3)} src={uploadMenubox.uri}/>
+                      <img alt="" style={{ height: '100%', width: '100%' }} src={uploadMenubox.uri}/>
                     </div>
                   }
 
@@ -660,7 +632,6 @@ export default function Menu(props) {
                     <div id="upload-menu-camera-actions">
                       <div className="upload-menu-camera-action" style={{ opacity: uploadMenubox.loading ? 0.5 : 1 }} disabled={uploadMenubox.loading} onClick={() => setUploadmenubox({ ...uploadMenubox, action: '' })}>Cancel</div>
                       <div className="upload-menu-camera-action" style={{ opacity: uploadMenubox.loading ? 0.5 : 1 }} disabled={uploadMenubox.loading} onClick={() => fileComp.click()}>Choose instead</div>
-                      <div className="upload-menu-camera-action" style={{ opacity: uploadMenubox.loading ? 0.5 : 1 }} disabled={uploadMenubox.loading} onClick={snapPhoto.bind(this)}>Take photo</div>
                       
                       <input type="file" ref={r => {setFilecomp(r)}} onChange={choosePhoto} style={{ display: 'none' }}/>
                     </div>
@@ -729,7 +700,7 @@ export default function Menu(props) {
 
                 {removeProductinfo.image.name && (
                   <div id="product-info-image-holder" style={resizePhoto(removeProductinfo.image, (width * 0.5))}>
-                    <img alt="" src={logo_url + removeProductinfo.image.name}/>
+                    <img alt="" style={{ height: '100%', width: '100%' }} src={logo_url + removeProductinfo.image.name}/>
                   </div>
                 )}
                 <div id="product-info-name">{removeProductinfo.name}</div>
@@ -778,7 +749,7 @@ export default function Menu(props) {
 
                 {removeServiceinfo.image.name && (
                   <div id="service-info-image-holder" style={resizePhoto(removeServiceinfo.image, width * 0.5)}>
-                    <img alt="" src={logo_url + removeServiceinfo.image.name}/>
+                    <img alt="" style={{ height: '100%', width: '100%' }} src={logo_url + removeServiceinfo.image.name}/>
                   </div>
                 )}
 
