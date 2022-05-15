@@ -49,13 +49,11 @@
     }
 
     #menu-other {
-      background-color: white;
       margin: 30px auto;
       width: 50%;
     }
 
     .menu {
-      background-color: white;
       margin: 30px auto;
       padding: 3px;
       width: 50%;
@@ -108,6 +106,8 @@
     }
 
     .item {
+      background-color: white;
+      margin: 10px 0;
       padding: 10px 3px;
 
       .item-row {

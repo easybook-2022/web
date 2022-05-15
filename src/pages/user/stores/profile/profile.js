@@ -14,6 +14,7 @@ import Userauth from '../../../../components/user/userauth'
 
 const width = window.innerWidth
 const height = window.innerHeight
+const wsize = p => {return window.innerWidth * (p / 100)}
 
 export default function Profile(props) {
   const { locationid } = useParams()
@@ -28,7 +29,7 @@ export default function Profile(props) {
   const [showInfo, setShowinfo] = useState(false)
 
   const [productInfo, setProductinfo] = useState('')
-  const [menuInfo, setMenuinfo] = useState({ items: [], error: false })
+  const [menuInfo, setMenuinfo] = useState({ list: [], photos: [], error: false })
 
   const [loaded, setLoaded] = useState(false)
   
@@ -97,9 +98,7 @@ export default function Profile(props) {
       })
       .then((res) => {
         if (res) {
-          const { type, menus } = res
-
-          setMenuinfo({ type, items: menus })
+          setMenuinfo({ ...menuInfo, list: res.list, photos: res.photos })
           setLoaded(true)
         }
       })
@@ -220,7 +219,7 @@ export default function Profile(props) {
           </div>
           
           <div id="body">
-            {(menuInfo.items.length > 0 && menuInfo.items[0].row) && (
+            {(menuInfo.photos.length > 0 || menuInfo.list.length > 0) && (
               <>
                 <div id="menu-input-box">
                   <div id="menu-input-container">
@@ -240,20 +239,21 @@ export default function Profile(props) {
               </>
             )}
 
-            {menuInfo.items.length ? 
-              menuInfo.items[0].row ? 
+            {menuInfo.items.length > 0 && (
+              menuInfo.items[0].row && ( 
                 menuInfo.items.map(info => (
                   info.row.map(item => (
                     (item.photo && item.photo.name) && (
-                      <div key={item.key} className="menu-photo" style={resizePhoto(item.photo, width * 0.95)}>
+                      <div key={item.key} className="menu-photo" style={resizePhoto(item.photo, wsize(95))}>
                         <img alt="" style={{ height: '100%', width: '100%' }} src={logo_url + item.photo.name}/>
                       </div>
                     )
                   ))
                 ))
-                :
-                displayList({ id: "", name: "", image: "", list: menuInfo.items, left: 0 })
-            : null }
+              )
+            )}
+
+            {displayList({ id: "", name: "", image: "", list: menuInfo.list, left: 0 })}
           </div>
 
           <div id="bottom-navs">

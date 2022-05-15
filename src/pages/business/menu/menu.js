@@ -28,7 +28,8 @@ export default function Menu(props) {
   const [locationType, setLocationtype] = useState('')
   const [isOwner, setIsowner] = useState(false)
 
-  const [menuInfo, setMenuinfo] = useState([])
+  const [menuInfo, setMenuinfo] = useState({ list: [], photos: [] })
+
   const [loaded, setLoaded] = useState(false)
 
   const [menuForm, setMenuform] = useState({ 
@@ -103,7 +104,7 @@ export default function Menu(props) {
       })
       .then((res) => {
         if (res) {
-          setMenuinfo(res.menus)
+          setMenuinfo({ ...menuInfo, list: res.list, photos: res.photos })
           setLoaded(true)
         }
       })
@@ -476,12 +477,12 @@ export default function Menu(props) {
     <div id="menu-box">
       {loaded ? 
         <div id="box">
-          <div style={{ height: '90%', width: '100%' }}>
+          <div style={{ height: '90%', overflowY: 'scroll', width: '100%' }}>
             <div style={{ padding: '10px 0' }}>
-              {menuInfo.length > 0 ? 
-                menuInfo[0].row ? 
+              {menuInfo.photos.length > 0 && (
+                menuInfo.photos[0].row && (
                   <div style={{ width: '100%' }}>
-                    {menuInfo.map(info => (
+                    {menuInfo.photos.map(info => (
                       <div key={info.key} className="menu-photo-row">
                         {info.row.map(item => (
                           <div key={item.key} className="menu-item">
@@ -502,72 +503,74 @@ export default function Menu(props) {
                       </div>
                     ))}
                   </div>
-                  :
-                  menuInfo[0].listType === "list" ? 
-                    displayList({ id: "", name: "", image: "", list: menuInfo, left: 0 })
-                    :
-                    <div id="menu-other">{displayList({ id: "", name: "", image: "", list: menuInfo, left: -50 })}</div>
-              : null }
+                )
+              )}
+
+              {menuInfo.list[0].listType === "list" ? 
+                displayList({ id: "", name: "", image: "", list: menuInfo, left: 0 })
+                :
+                <div id="menu-other">{displayList({ id: "", name: "", image: "", list: menuInfo.list, left: -50 })}</div>
+              }
             </div>
 
             {isOwner === true && (
-              <div style={{ margin: '0 auto', marginVertical: 20 }}>
-                {menuInfo.length === 0 ? 
-                  <>
-                    <div className="menu-start" onClick={() => setCreateoptionbox({ show: true, id: "", allow: "both" })}>
-                      Click to add menu/
-                      {(locationType == "hair" || locationType == "nail") && "service"}
-                      {locationType == "restaurant" && "meal"}
-                      {locationType == "store" && "product"}
-                    </div>
-                    <div id="menu-start-div">Or</div>
-                    <div className="menu-start" onClick={() => setUploadmenubox({ ...uploadMenubox, show: true, uri: '', name: '' })}>Upload menu photo</div>
-                  </>
-                  :
-                  !menuInfo[0].row ? 
-                    menuInfo[0].listType === "list" ? 
-                      <div className="item-add" onClick={() => {
-                        if (menuInfo.items.length === 0) {
-                          setCreateoptionbox({ show: true, id: "", allow: "both" })
-                        } else {
-                          window.location = "/addmenu/null/null"
-                        }
-                      }}>
-                        <div className="column">
-                          <div className="item-add-header">Add menu</div>
-                        </div>
-                        <FontAwesomeIcon icon={faCirclePlus} size="2x"/>
-                      </div>
-                      :
-                      <div className="item-add" onClick={() => {
-                        if (menuInfo.type !== "list") {
-                          if ((locationType === "hair" || locationType === "nail")) {
-                            window.location = "/addservice/null/null"
+              <>
+                <div style={{ margin: '0 auto', marginTop: 20 }}>
+                  {menuInfo.photos.length > 0 && (
+                    !menuInfo.photos[0].row && 
+                      menuInfo.photos[0].listType === "list" ? 
+                        <div className="item-add" onClick={() => {
+                          if (menuInfo.photos.length === 0) {
+                            setCreateoptionbox({ show: true, id: "", allow: "both" })
                           } else {
-                            window.location = "/addproduct/null/null"
+                            window.location = "/addmenu/null/null"
                           }
-                        } else {
-                          window.location = "/addmenu/null/null"
-                        }
-                      }}>
-                        <div className="column">
-                          <div className="item-add-header">
-                            Add {' '}
-                            {menuInfo.type !== "list" ? 
-                              <>
-                                {(locationType == "hair" || locationType == "nail") && "service"}
-                                {locationType == "restaurant" && "meal"}
-                                {locationType == "store" && "product"}
-                              </>
-                            : "menu"}
-                            </div>
+                        }}>
+                          <div className="column">
+                            <div className="item-add-header">Add menu</div>
+                          </div>
+                          <FontAwesomeIcon icon={faCirclePlus} size="2x"/>
                         </div>
-                        <FontAwesomeIcon icon={faCirclePlus} size="2x"/>
-                      </div>
-                    :
-                    <div className="menu-start" onClick={() => setUploadmenubox({ ...uploadMenubox, show: true, uri: '', name: '' })}>Upload menu photo</div>
-                }
-              </div>
+                        :
+                        <div className="item-add" onClick={() => {
+                          if (menuInfo.type !== "list") {
+                            if ((locationType === "hair" || locationType === "nail")) {
+                              window.location = "/addservice/null/null"
+                            } else {
+                              window.location = "/addproduct/null/null"
+                            }
+                          } else {
+                            window.location = "/addmenu/null/null"
+                          }
+                        }}>
+                          <div className="column">
+                            <div className="item-add-header">
+                              Add {' '}
+                              {menuInfo.photos[0].listType !== "list" ? 
+                                <>
+                                  {(locationType == "hair" || locationType == "nail") && "service"}
+                                  {locationType == "restaurant" && "meal"}
+                                  {locationType == "store" && "product"}
+                                </>
+                              : "menu"}
+                              </div>
+                          </div>
+                          <FontAwesomeIcon icon={faCirclePlus} size="2x"/>
+                        </div>
+                  )}
+                </div>
+
+                <div style={{ margin: '0 auto', marginTop: 100 }}>
+                  <div className="menu-start" onClick={() => setCreateoptionbox({ show: true, id: "", allow: "both" })}>
+                    Click to add menu/
+                    {(locationType == "hair" || locationType == "nail") && "service"}
+                    {locationType == "restaurant" && "meal"}
+                    {locationType == "store" && "product"}
+                  </div>
+                  <div id="menu-start-div">Or</div>
+                  <div className="menu-start" onClick={() => setUploadmenubox({ ...uploadMenubox, show: true, uri: '', name: '' })}>Upload menu photo</div>
+                </div>
+              </>
             )}
           </div>
 

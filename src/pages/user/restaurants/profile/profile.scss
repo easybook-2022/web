@@ -86,8 +86,7 @@
 
 			.menu-photo {
 				height: 100%;
-				margin-bottom: 10px;
-				margin: 0 auto;
+				margin: 0 auto 10px auto;
 				width: 95%;
 			}
 
@@ -131,10 +130,11 @@
 			}
 
 			.item {
+				background-color: white;
 				display: flex;
 				flex-direction: row;
 				justify-content: space-between;
-				margin-bottom: 10px;
+				margin: 10px 0;
 
 				.item-image-holder {
 					border-radius: 50px;

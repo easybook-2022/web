@@ -293,32 +293,6 @@ export default function Addproduct() {
 
     setLoading(false)
   }
-  const snapPhoto = () => {
-    setImage({ ...image, loading: true })
-
-    let letters = [
-      "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
-      "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
-    ]
-    let photo_name_length = Math.floor(Math.random() * (15 - 10)) + 10
-    let char = ""
-
-    if (camComp) {
-      let photo = camComp.getScreenshot({ width: 640, height: 480 });
-
-      for (let k = 0; k <= photo_name_length - 1; k++) {
-        char += "" + (
-          k % 2 === 0 ? 
-            letters[Math.floor(Math.random() * letters.length)].toUpperCase() 
-            : 
-            Math.floor(Math.random() * 9) + 0
-          )
-      }
-
-      setImage({ ...image, uri: photo, name: `${char}.jpg`, size: { width: 640, height: 480 }, loading: false })
-      setErrormsg('')
-    }
-  }
   const choosePhoto = e => {
     if (e.target.files && e.target.files[0]) {
       let reader = new FileReader()
@@ -445,24 +419,11 @@ export default function Addproduct() {
                   </div>
                 </>
               ) : (
-                <>
-                  <div id="camera">
-                    <Webcam
-                      audio={false}
-                      ref={r => { setCamcomp(r) }}
-                      screenshotFormat="image/jpeg"
-                      videoConstraints={{ facingMode: 'user', width: 640, height: 480 }}
-                      width={'100%'}
-                    />
-                  </div>
+                <div id="camera-actions">
+                  <div className="camera-action" style={{ opacity: image.loading ? 0.5 : 1 }} disabled={image.loading} onClick={() => fileComp.click()}>Choose{'\n'}from phone</div>
 
-                  <div id="camera-actions">
-                    <div className="camera-action" style={{ opacity: image.loading ? 0.5 : 1 }} disabled={image.loading} onClick={snapPhoto.bind(this)}>Take{'\n'}this photo</div>
-                    <div className="camera-action" style={{ opacity: image.loading ? 0.5 : 1 }} disabled={image.loading} onClick={() => fileComp.click()}>Choose{'\n'}from phone</div>
-
-                    <input type="file" ref={r => {setFilecomp(r)}} onChange={choosePhoto} style={{ display: 'none' }}/>
-                  </div>
-                </>
+                  <input type="file" ref={r => {setFilecomp(r)}} onChange={choosePhoto} style={{ display: 'none' }}/>
+                </div>
               )}  
             </div>
           )}
