@@ -29,7 +29,6 @@ export default function Settings() {
   const [ownerId, setOwnerid] = useState('')
   const [camComp, setCamcomp] = useState(null)
   const [fileComp, setFilecomp] = useState(null)
-  const [editType, setEdittype] = useState('')
 
   // location information
   const [locationInfo, setLocationinfo] = useState('')
@@ -45,7 +44,6 @@ export default function Settings() {
   const [logo, setLogo] = useState({ uri: '', name: '', size: { width: 0, height: 0 }, loading: false })
   const [locationReceivetype, setLocationreceivetype] = useState('')
   const [type, setType] = useState('')
-  const [infoLoading, setInfoloading] = useState(true)
 
   // location hours
   const [days, setDays] = useState([
@@ -57,11 +55,9 @@ export default function Settings() {
     { key: "5", header: "Friday", opentime: { hour: "12", minute: "00", period: "AM" }, closetime: { hour: "11", minute: "59", period: "PM" }, close: false },
     { key: "6", header: "Saturday", opentime: { hour: "12", minute: "00", period: "AM" }, closetime: { hour: "11", minute: "59", period: "PM" }, close: false }
   ])
-  const [daysLoading, setDaysloading] = useState(true)
 
   // co-owners
   const [accountHolders, setAccountholders] = useState([])
-  const [accountHoldersloading, setAccountholdersloading] = useState(true)
   const [hoursRange, setHoursrange] = useState([
     { key: "0", header: "Sunday", opentime: { hour: "12", minute: "00", period: "AM" }, closetime: { hour: "11", minute: "59", period: "PM" }, working: true, takeShift: "" },
     { key: "1", header: "Monday", opentime: { hour: "12", minute: "00", period: "AM" }, closetime: { hour: "11", minute: "59", period: "PM" }, working: true, takeShift: "" },
@@ -71,8 +67,6 @@ export default function Settings() {
     { key: "5", header: "Friday", opentime: { hour: "12", minute: "00", period: "AM" }, closetime: { hour: "11", minute: "59", period: "PM" }, working: true, takeShift: "" },
     { key: "6", header: "Saturday", opentime: { hour: "12", minute: "00", period: "AM" }, closetime: { hour: "11", minute: "59", period: "PM" }, working: true, takeShift: "" }
   ])
-
-  const [receiveTypeloading, setReceivetypeloading] = useState(true)
 
   const [errorMsg, setErrormsg] = useState('')
   const [loading, setLoading] = useState(false)
@@ -91,6 +85,7 @@ export default function Settings() {
     show: false,
     id: -1, username: '', profile: '', numWorkingdays: 0
   })
+  const [editInfo, setEditinfo] = useState({ show: false, type: '' })
   const [getWorkersbox, setGetworkersbox] = useState({
     show: false,
     day: '',
@@ -125,7 +120,7 @@ export default function Settings() {
           if (res) {
             const { id } = res
 
-            setEdittype('')
+            setEditinfo({ ...editInfo, type: '' })
             setLoading(false)
           }
         })
@@ -317,7 +312,6 @@ export default function Settings() {
       })
       .then((res) => {
         if (res) {
-          setEdittype('')
           setLoading(false)
         }
       })
@@ -744,11 +738,8 @@ export default function Settings() {
           setLogo({ uri: logo_url + logo.name, name: '', size: { width: logo.width, height: logo.height }})
           setType(type)
           setLocationreceivetype(receiveType)
-          setReceivetypeloading(false)
-          setInfoloading(false)
           setDays(hours)
           setHoursrange(hours)
-          setDaysloading(false)
         }
       })
       .catch((err) => {
@@ -791,7 +782,6 @@ export default function Settings() {
         if (res) {
           setOwnerid(ownerid)
           setAccountholders(res.accounts)
-          setAccountholdersloading(false)
         }
       })
       .catch((err) => {
@@ -871,31 +861,6 @@ export default function Settings() {
       reader.readAsDataURL(e.target.files[0])
     }
   }
-  const snapPhoto = () => {
-    setLogo({ ...logo, loading: true })
-
-    let letters = [
-      "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
-      "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
-    ]
-    let photo_name_length = Math.floor(Math.random() * (15 - 10)) + 10
-    let char = ""
-
-    if (camComp) {
-      let uri = camComp.getScreenshot({ width: 640, height: 480 });
-
-      for (let k = 0; k <= photo_name_length - 1; k++) {
-        char += "" + (
-          k % 2 === 0 ? 
-            letters[Math.floor(Math.random() * letters.length)].toUpperCase()
-            :
-            Math.floor(Math.random() * 9) + 0
-        )
-      }
-
-      setLogo({ ...logo, uri, name: `${char}.jpg`, loading: false, size: { width: 640, height: 480 }})
-    }
-  }
   const choosePhoto = e => {
     if (e.target.files && e.target.files[0]) {
       setLogo({ ...logo, loading: true })
@@ -969,406 +934,20 @@ export default function Settings() {
           <div id="goback" onClick={() => window.location = "/main"}>Go Back</div>
 
           {isOwner === true && (
-            !infoLoading ?
-              editType === 'information' ? 
-                <>
-                  {locationInfo === "" && (
-                    <>
-                      <div className="location-action-option" disabled={loading} onClick={() => {
-                        setLocationinfo('destination')
-
-                        navigator.geolocation.getCurrentPosition(function (position) {
-                          const id = localStorage.getItem("id")
-                          const { longitude, latitude } = position.coords
-
-                          setLocationcoords({ longitude, latitude })
-                          setErrormsg()
-                        })
-                      }}>Mark your location</div>
-
-                      <div className="location-div">Or</div>
-
-                      <div className="location-action-option" disabled={loading} onClick={() => {
-                        setLocationinfo('away')
-                        setErrormsg()
-                      }}>Enter address instead</div>
-                    </>
-                  )}
-
-                  {locationInfo === "away" && (
-                    <>
-                      <div className="location-action-option" disabled={loading} onClick={() => {
-                        setLocationinfo('destination')
-
-                        navigator.geolocation.getCurrentPosition(function (position) {
-                          const id = localStorage.getItem("id")
-                          const { longitude, latitude } = position.coords
-
-                          setLocationcoords({ longitude, latitude })
-                          setErrormsg()
-                        })
-                      }}>Mark your location</div>
-
-                      <div className="location-div">Or</div>
-
-                      <div className="header">Edit Address</div>
-
-                      <div id="inputs-box">
-                        <div className="input-container">
-                          <div className="input-header">{type}'s name:</div>
-                          <input className="input" onChange={(e) => setStorename(e.target.value)} value={storeName}/>
-                        </div>
-                        <div className="input-container">
-                          <div className="input-header">{type}'s Phone number:</div>
-                          <input className="input" onChange={(e) => setPhonenumber(displayPhonenumber(phonenumber, e.target.value, () => {}))} value={phonenumber} type="text"/>
-                        </div>
-                        <div className="input-container">
-                          <div className="input-header">{type}'s address #1:</div>
-                          <input className="input" onChange={(e) => setAddressone(e.target.value)} value={addressOne} type="text"/>
-                        </div>
-                        <div className="input-container">
-                          <div className="input-header">{type}'s address #2:</div>
-                          <input className="input" onChange={(e) => setAddresstwo(e.target.value)} value={addressTwo} type="text"/>
-                        </div>
-                        <div className="input-container">
-                          <div className="input-header">City:</div>
-                          <input className="input" onChange={(e) => setCity(e.target.value)} value={city} type="text"/>
-                        </div>
-                        <div className="input-container">
-                          <div className="input-header">Province:</div>
-                          <input className="input" onChange={(e) => setProvince(e.target.value)} value={province} type="text"/>
-                        </div>
-                        <div className="input-container">
-                          <div className="input-header">Postal Code:</div>
-                          <input className="input" onChange={(e) => setPostalcode(e.target.value)} value={postalcode} type="text"/>
-                        </div>
-
-                        {errorMsg ? <div className="errormsg">{errorMsg}</div> : null }
-                      </div>
-                    </>
-                  )}
-
-                  {locationInfo === "destination" && (
-                    <div id="location-container-center">
-                      <div className="location-header">Your {(type == 'hair' || type == 'nail') ? type + ' salon' : type} is located at</div>
-
-                      {(locationCoords.longitude && locationCoords.latitude) ? 
-                        <div style={{ height: '50vh', margin: '0 auto', width: '50vh' }}>
-                          <GoogleMapReact
-                            bootstrapURLKeys={{ key: googleApikey }}
-                            defaultZoom={16}
-                            defaultCenter={{ lat: locationCoords.latitude, lng: locationCoords.longitude }}
-                            options={{
-                              zoomEnabled: false
-                            }}
-                          >
-                            <LocationPin 
-                              lat={locationCoords.latitude}
-                              lng={locationCoords.longitude}
-                            />
-                          </GoogleMapReact>
-                        </div>
-                        :
-                        <div className="loading"><Loadingprogress/></div>
-                      }
-
-                      <div className="location-div">Or</div>
-
-                      <div className="location-action-option" onClick={() => {
-                        setLocationcoords({ longitude: null, latitude: null })
-                        setLocationinfo('away')
-                      }}>Enter address instead</div>
-                    </div>
-                  )}
-
-                  <div id="camera-container" style={{ margin: '50px auto' }}>
-                    <div className="input-header">Store Logo</div>
-
-                    {logo.uri ? (
-                      <>
-                        <div className="camera">
-                          <img alt="" style={resizePhoto(logo, width * 0.3)} src={logo.uri}/>
-                        </div>
-
-                        <div id="camera-actions">
-                          <div className="camera-action" onClick={() => setLogo({ ...logo, uri: '' })}>Cancel</div>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="camera">
-                          <Webcam
-                            audio={false}
-                            ref={r => {setCamcomp(r)}}
-                            screenshotFormat="image/jpeg"
-                            videoConstraints={{ facingMode: 'user', width: 640, height: 480 }}
-                            width={'100%'}
-                          />
-                        </div>
-
-                        <div id="camera-actions">
-                          <div className="camera-action" style={{ opacity: logo.loading ? 0.5 : 1 }} disabled={logo.loading} onClick={() => fileComp.click()}>Choose from computer</div>
-
-                          <input type="file" ref={r => {setFilecomp(r)}} onChange={choosePhoto} style={{ display: 'none' }}/>
-                        </div>
-                      </>
-                    )}  
-                  </div>
-
-                  <div className="update-button" disabled={loading} onClick={() => updateYourLocation()}>Save</div>
-                </>
-                :
-                <div className="edit-button" onClick={() => setEdittype('information')}>Edit Location Info</div>
-              :
-              <Loadingprogress/>
+            <>
+              <div className="edit-button" onClick={() => setEditinfo({ ...editInfo, show: true, type: 'information' })}>Edit Location Info</div>
+              <div className="edit-button" onClick={() => setEditinfo({ ...editInfo, show: true, type: 'hours' })}>
+                Edit 
+                {(type === "hair" || type === "nail") && " Salon "} 
+                {type === "restaurant" && " Restaurant "}
+                {type === "store" && " Store "}
+                Hour(s)
+              </div>
+            </>
           )}
 
-          {isOwner === true && (
-            !daysLoading ?
-              editType === 'hours' ? 
-                <>
-                  <div className="header">
-                    Edit 
-                    {(type === "hair" || type === "nail") && " Salon "} 
-                    {type === "restaurant" && " Restaurant "}
-                    {type === "store" && " Store "}
-                    Hour(s)
-                  </div>
-
-                  {days.map((info, index) => (
-                    <div key={index} className="worker-hour">
-                      {info.close === false ? 
-                        <>
-                          <div style={{ opacity: info.close ? 0.1 : 1, width: '100%' }}>
-                            <div className="worker-hour-header"><div style={{ fontWeight: '300' }}>Open on</div> {info.header}</div>
-                            <div className="time-selection-container">
-                              <div className="time-selection">
-                                <div className="selection">
-                                  <div className="selection-arrow" onClick={() => updateTime(index, "hour", "up", true)}>
-                                    <FontAwesomeIcon icon={faArrowUp}/>
-                                  </div>
-                                  <input className="selection-header" onChange={(e) => {
-                                    const newDays = [...days]
-
-                                    newDays[index].opentime["hour"] = e.target.value.toString()
-
-                                    setDays(newDays)
-                                  }} type="text" maxLength={2} value={info.opentime.hour}/>
-                                  <div className="selection-arrow" onClick={() => updateTime(index, "hour", "down", true)}>
-                                    <FontAwesomeIcon icon={faArrowDown}/>
-                                  </div>
-                                </div>
-                                <div className="column">
-                                  <div className="selection-div">:</div>
-                                </div>
-                                <div className="selection">
-                                  <div className="selection-arrow" onClick={() => updateTime(index, "minute", "up", true)}>
-                                    <FontAwesomeIcon icon={faArrowUp}/>
-                                  </div>
-                                  <input className="selection-header" onChange={(e) => {
-                                    const newDays = [...days]
-
-                                    newDays[index].opentime["minute"] = e.target.value.toString()
-
-                                    setDays(newDays)
-                                  }} type="text" maxLength={2} value={info.opentime.minute}/>
-                                  <div className="selection-arrow" onClick={() => updateTime(index, "minute", "down", true)}>
-                                    <FontAwesomeIcon icon={faArrowDown}/>
-                                  </div>
-                                </div>
-                                <div className="selection">
-                                  <div className="selection-arrow" onClick={() => updateTime(index, "period", "up", true)}>
-                                    <FontAwesomeIcon icon={faArrowUp}/>
-                                  </div>
-                                  <div className="selection-header">{info.opentime.period}</div>
-                                  <div className="selection-arrow" onClick={() => updateTime(index, "period", "down", true)}>
-                                    <FontAwesomeIcon icon={faArrowDown}/>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="column">
-                                <div className="time-selection-header">To</div>
-                              </div>
-                              <div className="time-selection">
-                                <div className="selection">
-                                  <div className="selection-arrow" onClick={() => updateTime(index, "hour", "up", false)}>
-                                    <FontAwesomeIcon icon={faArrowUp}/>
-                                  </div>
-                                  <input className="selection-header" onChange={(e) => {
-                                    const newDays = [...days]
-
-                                    newDays[index].closetime["hour"] = e.target.value.toString()
-
-                                    setDays(newDays)
-                                  }} type="text" maxLength={2} value={info.closetime.hour}/>
-                                  <div className="selection-arrow" onClick={() => updateTime(index, "hour", "down", false)}>
-                                    <FontAwesomeIcon icon={faArrowDown}/>
-                                  </div>
-                                </div>
-                                <div className="column">
-                                  <div className="selection-div">:</div>
-                                </div>
-                                <div className="selection">
-                                  <div className="selection-arrow" onClick={() => updateTime(index, "minute", "up", false)}>
-                                    <FontAwesomeIcon icon={faArrowUp}/>
-                                  </div>
-                                  <input className="selection-header" onChange={(e) => {
-                                    const newDays = [...days]
-
-                                    newDays[index].closetime["minute"] = e.target.value.toString()
-
-                                    setDays(newDays)
-                                  }} type="text" maxLength={2} value={info.closetime.minute}/>
-                                  <div className="selection-arrow" onClick={() => updateTime(index, "minute", "down", false)}>
-                                    <FontAwesomeIcon icon={faArrowDown}/>
-                                  </div>
-                                </div>
-                                <div className="selection">
-                                  <div className="selection-arrow" onClick={() => updateTime(index, "period", "up", false)}>
-                                    <FontAwesomeIcon icon={faArrowUp}/>
-                                  </div>
-                                  <div className="selection-header">{info.closetime.period}</div>
-                                  <div className="selection-arrow" onClick={() => updateTime(index, "period", "down", false)}>
-                                    <FontAwesomeIcon icon={faArrowDown}/>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="worker-touch" onClick={() => {
-                            const newDays = [...days]
-
-                            newDays[index].close = true
-
-                            setDays(newDays)
-                          }}>Change to not open</div>
-                        </>
-                        :
-                        <>
-                          <div className="worker-hour-header"><div style={{ fontWeight: '300' }}>Not open on</div> {info.header}</div>
-
-                          <div className="worker-touch" onClick={() => {
-                            const newDays = [...days]
-
-                            newDays[index].close = false
-
-                            setDays(newDays)
-                          }}>Change to open</div>
-                        </>
-                      }
-                    </div>
-                  ))}
-
-                  <div className="update-button" disabled={loading} onClick={() => updateLocationHours()}>Save</div>
-                </>
-                :
-                <div className="edit-button" onClick={() => setEdittype('hours')}>
-                  Edit 
-                  {(type === "hair" || type === "nail") && " Salon "} 
-                  {type === "restaurant" && " Restaurant "}
-                  {type === "store" && " Store "}
-                  Hour(s)
-                </div>
-              :
-              <Loadingprogress/>
-          )}
-
-          {(type === "hair" || type === "nail") && (
-            !accountHoldersloading ?
-              editType === 'users' ? 
-                <div id="account-holders">
-                  <div className="header">Edit Stylist(s)</div>
-
-                  {isOwner === true && (
-                    <div id="account-holders-add" onClick={() => {
-                      setAccountform({
-                        ...accountForm,
-                        show: true,
-                        type: 'add',
-                        username: ownerRegisterInfo.username,
-                        cellnumber: ownerRegisterInfo.cellnumber,
-                        currentPassword: ownerRegisterInfo.password, 
-                        newPassword: ownerRegisterInfo.password, 
-                        confirmPassword: ownerRegisterInfo.password,
-                        workerHours: [...hoursRange]
-                      })
-                    }}>Add a new stylist</div>
-                  )}
-
-                  {accountHolders.map((info, index) => (
-                    <div className="row">
-                      <div key={info.key} className="account">
-                        <div className="column">
-                          <div className="account-header">#{index + 1}:</div>
-                        </div>
-
-                        <div className="account-edit">
-                          <div className="column">
-                            <div className="account-edit-header">{info.username}</div>
-                          </div>
-                          <div className="column">
-                            <div className="account-edit-touch" onClick={() => {
-                              if (info.id === ownerId) {
-                                const { name, height, width } = info.profile
-                                const size = { height, width }
-
-                                setAccountform({
-                                  ...accountForm,
-                                  show: true, type: 'edit', 
-                                  id: info.id,
-                                  username: info.username,
-                                  cellnumber: info.cellnumber,
-                                  password: '',
-                                  confirmPassword: '',
-                                  profile: { uri: logo_url + name, name: "", size },
-                                  workerHours: info.hours
-                                })
-                              } else { // others can only edit other's hours
-                                setAccountform({ 
-                                  ...accountForm, 
-                                  show: true, type: 'edit', editType: 'hours', 
-                                  id: info.id, workerHours: info.hours
-                                })
-                              }
-                            }}>
-                              Change 
-                              {ownerId === info.id ? " Info (your)" : " hours"}
-                            </div>
-                          </div>
-                          {isOwner === true && (
-                            <div className="column">
-                              <div onClick={() => deleteTheOwner(info.id)}>
-                                <FontAwesomeIcon icon={faTimesCircle} size="2x"/>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                :
-                <div className="edit-button" onClick={() => setEdittype('users')}>Edit Stylist(s) Info</div>
-              :
-              <Loadingprogress/>
-          )}
-
-          {((type === "hair" || type === "nail") && isOwner === true) && (
-            !receiveTypeloading ? 
-              editType === 'receivetype' ? 
-                <div id="receive-types-box">
-                  <div id="receive-types-header">How do you want to receive appointments</div>
-
-                  <div id="receive-types">
-                    <div className="receive-type" style={{ backgroundColor: locationReceivetype === 'stylist' ? 'black' : '', color: locationReceivetype === 'stylist' ? 'white' : '' }} onClick={() => setTheReceiveType('stylist')}>By each stylist</div>
-                    <div className="receive-type" style={{ backgroundColor: locationReceivetype === 'computer' ? 'black' : '', color: locationReceivetype === 'computer' ? 'white' : '' }} onClick={() => setTheReceiveType('computer')}>By main computer</div>
-                  </div>
-                </div>
-                :
-                <div className="edit-button" onClick={() => setEdittype('receivetype')}>Edit Receive Type</div>
-              :
-              <Loadingprogress/>
-          )}
+          {(type === "hair" || type === "nail") && <div className="edit-button" onClick={() => setEditinfo({ ...editInfo, show: true, type: 'users' })}>Edit Stylist(s) Info</div>}
+          {((type === "hair" || type === "nail") && isOwner === true) && <div className="edit-button" onClick={() => setEditinfo({ ...editInfo, show: true, type: 'receivetype' })}>Edit Receive Type</div>}
         </div>
 
         {accountForm.show && (
@@ -1386,6 +965,7 @@ export default function Settings() {
                       profile: { uri: '', name: '', size: { height: 0, width: 0 } },
                       errorMsg: ""
                     })
+                    setEditinfo({ ...editInfo, show: true })
                   }}>
                     <FontAwesomeIcon icon={faTimesCircle} size="3x"/>
                   </div>
@@ -1792,6 +1372,7 @@ export default function Settings() {
                           workerHours: [], editHours: false,
                           errorMsg: ""
                         })
+                        setEditinfo({ ...editInfo, show: true })
                       }}>Cancel</div>
                       <div className="account-form-action" style={{ opacity: accountForm.loading ? 0.3 : 1 }} disabled={accountForm.loading} onClick={() => {
                         if (accountForm.addStep === 4) {
@@ -2131,6 +1712,377 @@ export default function Settings() {
                   <div className="delete-owner-action" onClick={() => deleteTheOwner()}>Yes</div>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+        {editInfo.show && (
+          <div id="edit-info-box">
+            <div id={"edit-info-" + editInfo.type + "-container"}>
+              <div id="edit-info-close" onClick={() => setEditinfo({ ...editInfo, show: false, type: '' })}><FontAwesomeIcon icon={faTimesCircle} size="3x"/></div>
+
+              {editInfo.type == 'information' && (
+                <>
+                  {locationInfo === "" && (
+                    <>
+                      <div className="location-action-option" disabled={loading} onClick={() => {
+                        setLocationinfo('destination')
+
+                        navigator.geolocation.getCurrentPosition(function (position) {
+                          const id = localStorage.getItem("id")
+                          const { longitude, latitude } = position.coords
+
+                          setLocationcoords({ longitude, latitude })
+                          setErrormsg()
+                        })
+                      }}>Mark your location</div>
+
+                      <div className="location-div">Or</div>
+
+                      <div className="location-action-option" disabled={loading} onClick={() => {
+                        setLocationinfo('away')
+                        setErrormsg()
+                      }}>Enter address instead</div>
+                    </>
+                  )}
+
+                  {locationInfo === "away" && (
+                    <>
+                      <div className="location-action-option" disabled={loading} onClick={() => {
+                        setLocationinfo('destination')
+
+                        navigator.geolocation.getCurrentPosition(function (position) {
+                          const id = localStorage.getItem("id")
+                          const { longitude, latitude } = position.coords
+
+                          setLocationcoords({ longitude, latitude })
+                          setErrormsg()
+                        })
+                      }}>Mark your location</div>
+
+                      <div className="location-div">Or</div>
+
+                      <div className="header">Edit Address</div>
+
+                      <div id="inputs-box">
+                        <div className="input-container">
+                          <div className="input-header">{type}'s name:</div>
+                          <input className="input" onChange={(e) => setStorename(e.target.value)} value={storeName}/>
+                        </div>
+                        <div className="input-container">
+                          <div className="input-header">{type}'s Phone number:</div>
+                          <input className="input" onChange={(e) => setPhonenumber(displayPhonenumber(phonenumber, e.target.value, () => {}))} value={phonenumber} type="text"/>
+                        </div>
+                        <div className="input-container">
+                          <div className="input-header">{type}'s address #1:</div>
+                          <input className="input" onChange={(e) => setAddressone(e.target.value)} value={addressOne} type="text"/>
+                        </div>
+                        <div className="input-container">
+                          <div className="input-header">{type}'s address #2:</div>
+                          <input className="input" onChange={(e) => setAddresstwo(e.target.value)} value={addressTwo} type="text"/>
+                        </div>
+                        <div className="input-container">
+                          <div className="input-header">City:</div>
+                          <input className="input" onChange={(e) => setCity(e.target.value)} value={city} type="text"/>
+                        </div>
+                        <div className="input-container">
+                          <div className="input-header">Province:</div>
+                          <input className="input" onChange={(e) => setProvince(e.target.value)} value={province} type="text"/>
+                        </div>
+                        <div className="input-container">
+                          <div className="input-header">Postal Code:</div>
+                          <input className="input" onChange={(e) => setPostalcode(e.target.value)} value={postalcode} type="text"/>
+                        </div>
+
+                        {errorMsg ? <div className="errormsg">{errorMsg}</div> : null }
+                      </div>
+                    </>
+                  )}
+
+                  {locationInfo === "destination" && (
+                    <div id="location-container-center">
+                      <div className="location-header">Your {(type == 'hair' || type == 'nail') ? type + ' salon' : type} is located at</div>
+
+                      {(locationCoords.longitude && locationCoords.latitude) ? 
+                        <div style={{ height: '50vh', margin: '0 auto', width: '50vh' }}>
+                          <GoogleMapReact
+                            bootstrapURLKeys={{ key: googleApikey }}
+                            defaultZoom={17}
+                            defaultCenter={{ lat: locationCoords.latitude, lng: locationCoords.longitude }}
+                            options={{
+                              scrollwheel: false,
+                              gestureHandling: 'none'
+                            }}
+                          >
+                            <LocationPin 
+                              lat={locationCoords.latitude}
+                              lng={locationCoords.longitude}
+                            />
+                          </GoogleMapReact>
+                        </div>
+                        :
+                        <div className="loading"><Loadingprogress/></div>
+                      }
+
+                      <div className="location-div">Or</div>
+
+                      <div className="location-action-option" onClick={() => {
+                        setLocationcoords({ longitude: null, latitude: null })
+                        setLocationinfo('away')
+                      }}>Enter address instead</div>
+                    </div>
+                  )}
+
+                  <div id="camera-container">
+                    <div className="input-header">Store Logo</div>
+
+                    {logo.uri ? (
+                      <>
+                        <div className="camera">
+                          <img alt="" style={resizePhoto(logo.size, width * 0.3)} src={logo.uri}/>
+                        </div>
+
+                        <div id="camera-actions">
+                          <div className="camera-action" onClick={() => setLogo({ ...logo, uri: '' })}>Cancel</div>
+                        </div>
+                      </>
+                    ) : (
+                      <div id="camera-actions">
+                        <div className="camera-action" style={{ opacity: logo.loading ? 0.5 : 1 }} disabled={logo.loading} onClick={() => fileComp.click()}>Choose from computer</div>
+
+                        <input type="file" ref={r => {setFilecomp(r)}} onChange={choosePhoto} style={{ display: 'none' }}/>
+                      </div>
+                    )}  
+                  </div>
+
+                  <div className="update-button" disabled={loading} onClick={() => updateYourLocation()}>Save</div>
+                </>
+              )}
+
+              {editInfo.type === 'hours' && (
+                <>
+                  <div className="header">
+                    Edit 
+                    {(type === "hair" || type === "nail") && " Salon "} 
+                    {type === "restaurant" && " Restaurant "}
+                    {type === "store" && " Store "}
+                    Hour(s)
+                  </div>
+
+                  {days.map((info, index) => (
+                    <div key={index} className="worker-hour">
+                      {info.close === false ? 
+                        <>
+                          <div style={{ opacity: info.close ? 0.1 : 1, width: '100%' }}>
+                            <div className="worker-hour-header"><div style={{ fontWeight: '300' }}>Open on</div> {info.header}</div>
+                            <div className="time-selection-container">
+                              <div className="time-selection">
+                                <div className="selection">
+                                  <div className="selection-arrow" onClick={() => updateTime(index, "hour", "up", true)}>
+                                    <FontAwesomeIcon icon={faArrowUp}/>
+                                  </div>
+                                  <input className="selection-header" onChange={(e) => {
+                                    const newDays = [...days]
+
+                                    newDays[index].opentime["hour"] = e.target.value.toString()
+
+                                    setDays(newDays)
+                                  }} type="text" maxLength={2} value={info.opentime.hour}/>
+                                  <div className="selection-arrow" onClick={() => updateTime(index, "hour", "down", true)}>
+                                    <FontAwesomeIcon icon={faArrowDown}/>
+                                  </div>
+                                </div>
+                                <div className="column">
+                                  <div className="selection-div">:</div>
+                                </div>
+                                <div className="selection">
+                                  <div className="selection-arrow" onClick={() => updateTime(index, "minute", "up", true)}>
+                                    <FontAwesomeIcon icon={faArrowUp}/>
+                                  </div>
+                                  <input className="selection-header" onChange={(e) => {
+                                    const newDays = [...days]
+
+                                    newDays[index].opentime["minute"] = e.target.value.toString()
+
+                                    setDays(newDays)
+                                  }} type="text" maxLength={2} value={info.opentime.minute}/>
+                                  <div className="selection-arrow" onClick={() => updateTime(index, "minute", "down", true)}>
+                                    <FontAwesomeIcon icon={faArrowDown}/>
+                                  </div>
+                                </div>
+                                <div className="selection">
+                                  <div className="selection-arrow" onClick={() => updateTime(index, "period", "up", true)}>
+                                    <FontAwesomeIcon icon={faArrowUp}/>
+                                  </div>
+                                  <div className="selection-header">{info.opentime.period}</div>
+                                  <div className="selection-arrow" onClick={() => updateTime(index, "period", "down", true)}>
+                                    <FontAwesomeIcon icon={faArrowDown}/>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="column">
+                                <div className="time-selection-header">To</div>
+                              </div>
+                              <div className="time-selection">
+                                <div className="selection">
+                                  <div className="selection-arrow" onClick={() => updateTime(index, "hour", "up", false)}>
+                                    <FontAwesomeIcon icon={faArrowUp}/>
+                                  </div>
+                                  <input className="selection-header" onChange={(e) => {
+                                    const newDays = [...days]
+
+                                    newDays[index].closetime["hour"] = e.target.value.toString()
+
+                                    setDays(newDays)
+                                  }} type="text" maxLength={2} value={info.closetime.hour}/>
+                                  <div className="selection-arrow" onClick={() => updateTime(index, "hour", "down", false)}>
+                                    <FontAwesomeIcon icon={faArrowDown}/>
+                                  </div>
+                                </div>
+                                <div className="column">
+                                  <div className="selection-div">:</div>
+                                </div>
+                                <div className="selection">
+                                  <div className="selection-arrow" onClick={() => updateTime(index, "minute", "up", false)}>
+                                    <FontAwesomeIcon icon={faArrowUp}/>
+                                  </div>
+                                  <input className="selection-header" onChange={(e) => {
+                                    const newDays = [...days]
+
+                                    newDays[index].closetime["minute"] = e.target.value.toString()
+
+                                    setDays(newDays)
+                                  }} type="text" maxLength={2} value={info.closetime.minute}/>
+                                  <div className="selection-arrow" onClick={() => updateTime(index, "minute", "down", false)}>
+                                    <FontAwesomeIcon icon={faArrowDown}/>
+                                  </div>
+                                </div>
+                                <div className="selection">
+                                  <div className="selection-arrow" onClick={() => updateTime(index, "period", "up", false)}>
+                                    <FontAwesomeIcon icon={faArrowUp}/>
+                                  </div>
+                                  <div className="selection-header">{info.closetime.period}</div>
+                                  <div className="selection-arrow" onClick={() => updateTime(index, "period", "down", false)}>
+                                    <FontAwesomeIcon icon={faArrowDown}/>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="worker-touch" onClick={() => {
+                            const newDays = [...days]
+
+                            newDays[index].close = true
+
+                            setDays(newDays)
+                          }}>Change to not open</div>
+                        </>
+                        :
+                        <>
+                          <div className="worker-hour-header"><div style={{ fontWeight: '300' }}>Not open on</div> {info.header}</div>
+
+                          <div className="worker-touch" onClick={() => {
+                            const newDays = [...days]
+
+                            newDays[index].close = false
+
+                            setDays(newDays)
+                          }}>Change to open</div>
+                        </>
+                      }
+                    </div>
+                  ))}
+
+                  <div className="update-button" disabled={loading} onClick={() => updateLocationHours()}>Save</div>
+                </>
+              )}
+
+              {editInfo.type === 'users' && (
+                <div id="account-holders">
+                  <div className="header">Edit Stylist(s)</div>
+
+                  {isOwner === true && (
+                    <div id="account-holders-add" onClick={() => {
+                      setAccountform({
+                        ...accountForm,
+                        show: true,
+                        type: 'add',
+                        username: ownerRegisterInfo.username,
+                        cellnumber: ownerRegisterInfo.cellnumber,
+                        currentPassword: ownerRegisterInfo.password, 
+                        newPassword: ownerRegisterInfo.password, 
+                        confirmPassword: ownerRegisterInfo.password,
+                        workerHours: [...hoursRange]
+                      })
+                      setEditinfo({ ...editInfo, show: false })
+                    }}>Add a new stylist</div>
+                  )}
+
+                  {accountHolders.map((info, index) => (
+                    <div className="row">
+                      <div key={info.key} className="account">
+                        <div className="column">
+                          <div className="account-header">#{index + 1}:</div>
+                        </div>
+
+                        <div className="account-edit">
+                          <div className="column">
+                            <div className="account-edit-header">{info.username}</div>
+                          </div>
+                          <div className="column">
+                            <div className="account-edit-touch" onClick={() => {
+                              if (info.id === ownerId) {
+                                const { name, height, width } = info.profile
+                                const size = { height, width }
+
+                                setAccountform({
+                                  ...accountForm,
+                                  show: true, type: 'edit', 
+                                  id: info.id,
+                                  username: info.username,
+                                  cellnumber: info.cellnumber,
+                                  password: '',
+                                  confirmPassword: '',
+                                  profile: { uri: logo_url + name, name: "", size },
+                                  workerHours: info.hours
+                                })
+                              } else { // others can only edit other's hours
+                                setAccountform({ 
+                                  ...accountForm, 
+                                  show: true, type: 'edit', editType: 'hours', 
+                                  id: info.id, workerHours: info.hours
+                                })
+                              }
+
+                              setEditinfo({ ...editInfo, show: false })
+                            }}>
+                              Change 
+                              {ownerId === info.id ? " Info (your)" : " hours"}
+                            </div>
+                          </div>
+                          {isOwner === true && (
+                            <div className="column">
+                              <div onClick={() => deleteTheOwner(info.id)}>
+                                <FontAwesomeIcon icon={faTimesCircle} size="2x"/>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {editInfo.type === 'receivetype' && (
+                <div id="receive-types-box">
+                  <div id="receive-types-header">How do you want to receive appointments</div>
+
+                  <div id="receive-types">
+                    <div className="receive-type" style={{ backgroundColor: locationReceivetype === 'stylist' ? 'black' : '', color: locationReceivetype === 'stylist' ? 'white' : '' }} onClick={() => setTheReceiveType('stylist')}>By each stylist</div>
+                    <div className="receive-type" style={{ backgroundColor: locationReceivetype === 'computer' ? 'black' : '', color: locationReceivetype === 'computer' ? 'white' : '' }} onClick={() => setTheReceiveType('computer')}>By main computer</div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

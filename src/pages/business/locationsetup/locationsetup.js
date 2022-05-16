@@ -300,33 +300,6 @@ export default function Locationsetup({ navigation }) {
     setLoading(false)
   }
 
-  const snapPhoto = () => {
-    setLoading(true)
-
-    let letters = [
-      "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
-      "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
-    ]
-    let photo_name_length = Math.floor(Math.random() * (15 - 10)) + 10
-    let char = ""
-
-    if (camComp) {
-      let uri = camComp.getScreenshot({ width: 640, height: 480 });
-
-      for (let k = 0; k <= photo_name_length - 1; k++) {
-        char += "" + (
-          k % 2 === 0 ? 
-            letters[Math.floor(Math.random() * letters.length)].toUpperCase()
-            :
-            Math.floor(Math.random() * 9) + 0
-        )
-      }
-
-      setLogo({ uri, name: `${char}.jpg`, size: { width: 640, height: 480 }})
-      setErrormsg('')
-      setLoading(false)
-    }
-  }
   const choosePhoto = e => {
     if (e.target.files && e.target.files[0]) {
       let reader = new FileReader()
@@ -464,7 +437,7 @@ export default function Locationsetup({ navigation }) {
                 </div>
               )}
 
-              {(setupType === "location") && (
+              {setupType === "location" && (
                 <div id="location-container">
                   {locationInfo === '' && (
                     <div id="location-container-center">
@@ -502,7 +475,8 @@ export default function Locationsetup({ navigation }) {
                             defaultZoom={16}
                             defaultCenter={{ lat: locationCoords.latitude, lng: locationCoords.longitude }}
                             options={{
-                              zoomEnabled: false
+                              scrollwheel: false,
+                              gestureHandling: 'none'
                             }}
                           >
                             <LocationPin 
@@ -582,7 +556,7 @@ export default function Locationsetup({ navigation }) {
               {setupType === "logo" && (
                 <div id="camera-container">
                   <div id="camera-header">Provide a photo for {(type == 'hair' || type == 'nail') ? type + ' salon' : type}</div>
-
+                  
                   {logo.uri ? (
                     <>
                       <div id="camera">
