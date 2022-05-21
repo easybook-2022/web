@@ -124,11 +124,9 @@ export default function Cartorders(props) {
         {orders.map((item, index) => (
           <div className="item" key={item.key}>
             <div className="item-row">
-              {item.image ? 
-                <div className="item-image-holder">
-                  <img alt="" src={logo_url + item.image.name} style={resizePhoto(item.image, width * 0.1)} className="item-image"/>
-                </div>
-              : null }
+              <div className="item-image-holder">
+                {item.image.name && <img alt="" src={logo_url + item.image.name} style={resizePhoto(item.image, width * 0.1)} className="item-image"/>}
+              </div>
 
               <div className="item-infos">
                 <div className="item-name">{item.name}</div>

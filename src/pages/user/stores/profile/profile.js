@@ -121,11 +121,9 @@ export default function Profile(props) {
         {name ?
           <div className="menu">
             <div className="menu-row">
-              {image.name ? 
-                <div className="menu-image-holder">
-                  <img alt="" className="menu-image" style={resizePhoto(image, 50)} src={logo_url + image.name}/>
-                </div>
-              : null }
+              <div className="menu-image-holder">
+                {image.name && <img alt="" className="menu-image" style={resizePhoto(image, 50)} src={logo_url + image.name}/>}
+              </div>
               <div className="column">
                 <div className="menu-name">{name} (Menu)</div>
               </div>
@@ -136,11 +134,9 @@ export default function Profile(props) {
                   displayList({ id: info.id, name: info.name, image: info.image, list: info.list, left: left + 10 })
                   :
                   <div className="item">
-                    {info.image ? 
-                      <div className="item-image-holder">
-                        <img alt="" className="item-image" style={resizePhoto(info.image, 50)} src={logo_url + info.image.name}/>
-                      </div>
-                    : null }
+                    <div className="item-image-holder">
+                      {info.image.name && <img alt="" className="item-image" style={resizePhoto(info.image, 50)} src={logo_url + info.image.name}/>}
+                    </div>
                     <div className="column">
                       <div className="item-header">{info.name}</div>
                     </div>
@@ -168,11 +164,9 @@ export default function Profile(props) {
                 displayList({ id: info.id, name: info.name, image: info.image, list: info.list, left: left + 10 })
                 :
                 <div className="item">
-                  {info.image.name ? 
-                    <div className="item-image-holder">
-                      <img alt="" className="item-image" style={resizePhoto(info.image, 50)} src={logo_url + info.image.name}/>
-                    </div>
-                  : null }
+                  <div className="item-image-holder">
+                    {info.image.name && <img alt="" className="item-image" style={resizePhoto(info.image, 50)} src={logo_url + info.image.name}/>}
+                  </div>
                   <div className="column">
                     <div className="item-header">{info.name}</div>
                   </div>
@@ -243,7 +237,7 @@ export default function Profile(props) {
               menuInfo.items[0].row && ( 
                 menuInfo.items.map(info => (
                   info.row.map(item => (
-                    (item.photo && item.photo.name) && (
+                    item.photo && (
                       <div key={item.key} className="menu-photo" style={resizePhoto(item.photo, wsize(95))}>
                         <img alt="" style={{ height: '100%', width: '100%' }} src={logo_url + item.photo.name}/>
                       </div>

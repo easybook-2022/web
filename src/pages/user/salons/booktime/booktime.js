@@ -18,12 +18,12 @@ const wsize = p => {return window.innerWidth * (p / 100)}
 
 export default function Booktime(props) {
   const params = useParams()
-  const { locationid, menuid, serviceid, serviceinfo } = params
+  const { locationid, serviceid, serviceinfo } = params
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
   const pushtime = 1000 * (60 * 15)
 
-  const scheduleid = params.scheduleid ? params.scheduleid : null
+  const scheduleid = params.scheduleid !== "null" ? params.scheduleid : null
 
   const [name, setName] = useState()
   const [allWorkers, setAllworkers] = useState({})
@@ -577,7 +577,7 @@ export default function Booktime(props) {
         workerid: worker !== null ? worker.id : workerIds[Math.floor(Math.random() * (workerIds.length - 1)) + 0], 
         locationid, 
         serviceid: serviceid !== 'null' ? serviceid : -1, 
-        serviceinfo: serviceinfo ? serviceinfo : "",
+        serviceinfo: serviceinfo ? serviceinfo : name,
         oldtime: oldTime, 
         time: selecteddate, note: note ? note : "", 
         type: scheduleid ? "remakeAppointment" : "makeAppointment"
@@ -591,7 +591,7 @@ export default function Booktime(props) {
         })
         .then((res) => {
           if (res) {
-            data = { ...data, receiver: res.receiver, time, speak: res.speak }
+            data = { ...data, receiver: res.receiver, time: JSON.parse(selecteddate), speak: res.speak }
             socket.emit("socket/makeAppointment", data, () => {
               setConfirm({ ...confirm, requested: true, loading: false })
 
@@ -652,7 +652,7 @@ export default function Booktime(props) {
                         info.id ? 
                           <div key={info.key} className="worker" style={{ backgroundColor: (selectedWorkerinfo.worker && selectedWorkerinfo.worker.id === info.id) ? 'rgba(0, 0, 0, 0.3)' : null }} disabled={selectedWorkerinfo.loading} onClick={() => selectWorker(info.id)}>
                             <div className="worker-profile">
-                              <img alt="" src={logo_url + info.profile.name} style={resizePhoto(info.profile, 70)}/>
+                              {info.profile.name && <img alt="" src={logo_url + info.profile.name} style={resizePhoto(info.profile, 70)}/>}
                             </div>
                             <div className="worker-header">{info.username}</div>
                           </div>
@@ -847,7 +847,7 @@ export default function Booktime(props) {
                   {oldTime === 0 ? 
                     <div id="confirm-header">
                       <div style={{ fontFamily: 'appFont' }}>Make an appointment for</div>
-                      <br/>{confirm.service}<br/>
+                      {confirm.service}<br/>
                       {displayTime(confirm.time)}<br/>
                     </div>
                     :

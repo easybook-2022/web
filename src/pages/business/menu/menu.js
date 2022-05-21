@@ -122,11 +122,9 @@ export default function Menu(props) {
         {name ? 
           <div className="menu">
             <div className="menu-row">
-              {image.name ? 
-                <div className="menu-image-holder">
-                  <img alt="" style={resizePhoto(image, width * 0.08)} src={logo_url + image.name}/>
-                </div>
-              : null }
+              <div className="menu-image-holder">
+                {image.name && <img alt="" style={resizePhoto(image, width * 0.08)} src={logo_url + image.name}/>}
+              </div>
                 
               <div className="column">
                <div className="menu-name">{name} (Menu)</div>
@@ -159,11 +157,9 @@ export default function Menu(props) {
                     :
                     <div className="item">
                       <div className="item-row">
-                        {info.image.name ? 
-                          <div className="item-image-holder">
-                            <img alt="" style={resizePhoto(info.image, width * 0.09)} src={logo_url + info.image.name}/>
-                          </div>
-                        : null }
+                        <div className="item-image-holder">
+                          {info.image.name && <img alt="" style={resizePhoto(info.image, width * 0.09)} src={logo_url + info.image.name}/>}
+                        </div>
                           
                         <div className="column">
                           <div className="item-header">{info.name}</div>
@@ -214,11 +210,10 @@ export default function Menu(props) {
                 :
                 <div className="item">
                   <div className="item-row">
-                    {info.image.name ? 
-                      <div className="item-image-holder">
-                        <img alt="" style={resizePhoto(info.image, width * 0.09)} src={logo_url + info.image.name}/>
-                      </div>
-                    : null }
+                    <div className="item-image-holder">
+                      {info.image.name && <img alt="" style={resizePhoto(info.image, width * 0.09)} src={logo_url + info.image.name}/>}
+                    </div>
+
                     <div className="item-header">{info.name}</div>
                     <div className="item-header">{info.price ? '$' + info.price : info.sizes.length + ' size(s)'}</div>
                   </div>
@@ -385,7 +380,7 @@ export default function Menu(props) {
           size['width'] = imageReader.width
           size['height'] = imageReader.height
 
-          setUploadmenubox({ ...uploadMenubox, action: 'choose', uri: e.target.result, name: `${char}.jpg`, size })
+          setUploadmenubox({ ...uploadMenubox, action: 'choose', uri: e.target.result, name: `${char}.jpg`, size, action: 'choose' })
         }
 
         imageReader.src = e.target.result
@@ -459,7 +454,7 @@ export default function Menu(props) {
                       <div key={info.key} className="menu-photo-row">
                         {info.row.map(item => (
                           <div key={item.key} className="menu-item">
-                            {(item.photo && item.photo.name) && (
+                            {item.photo && (
                               <>
                                 <div className="menu-item-photo">
                                   <img alt="" style={{ height: '100%', width: '100%' }} src={logo_url + item.photo.name}/>
@@ -480,7 +475,7 @@ export default function Menu(props) {
               )}
 
               {menuInfo.list.length > 0 && menuInfo.list[0].listType === "list" ? 
-                displayList({ id: "", name: "", image: "", list: menuInfo, left: 0 })
+                displayList({ id: "", name: "", image: "", list: menuInfo.list, left: 0 })
                 :
                 <div id="menu-other">{displayList({ id: "", name: "", image: "", list: menuInfo.list, left: -50 })}</div>
               }
@@ -648,9 +643,11 @@ export default function Menu(props) {
           )}
           {menuPhotooption.show && (
             <div id="menu-photo-option-container">
-              <div id="menu-photo-option-photo" style={resizePhoto(menuPhotooption.info, width * 0.5)}>
-                <img alt="" style={{ height: '100%', width: '100%' }} src={logo_url + menuPhotooption.info.name}/>
-              </div>
+              {menuPhotooption.info.name && (
+                <div id="menu-photo-option-photo" style={resizePhoto(menuPhotooption.info, width * 0.35)}>
+                  <img alt="" style={{ height: '100%', width: '100%' }} src={logo_url + menuPhotooption.info.name}/>
+                </div>
+              )}
 
               {menuPhotooption.action === "delete" ? 
                 <div id="menu-photo-option-bottom-container">

@@ -75,7 +75,7 @@ export default function App() {
           <Route path="/orders" element={<Orders/>}/>
           <Route path="/salonprofile/:locationid" element={<Salonprofile/>}/>
           <Route path="/storeprofile/:locationid" element={<Storeprofile/>}/>
-          <Route path="/booktime/:locationid/:scheduleid/:menuid/:serviceid/:serviceinfo" element={<UserBooktime/>}/>
+          <Route path="/booktime/:locationid/:scheduleid/:serviceid/:serviceinfo" element={<UserBooktime/>}/>
           <Route path="/account" element={<Account/>}/>
         </Routes>
       </BrowserRouter>

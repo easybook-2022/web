@@ -102,9 +102,10 @@ export default function Settings() {
       longitude = lat
       latitude = lng
 
+      const id = localStorage.getItem("locationid")
       const time = (Date.now() / 1000).toString().split(".")[0]
       const data = {
-        storeName, phonenumber, addressOne, addressTwo, city, province, postalcode, logo,
+        id, storeName, phonenumber, addressOne, addressTwo, city, province, postalcode, logo,
         longitude, latitude, ownerid: ownerId, time
       }
 
@@ -120,7 +121,7 @@ export default function Settings() {
           if (res) {
             const { id } = res
 
-            setEditinfo({ ...editInfo, type: '' })
+            setEditinfo({ ...editInfo, show: false, type: '' })
             setLoading(false)
           }
         })
@@ -384,8 +385,9 @@ export default function Settings() {
       }
     })
 
+    const id = localStorage.getItem("locationid")
     const { cellnumber, username, newPassword, confirmPassword, profile } = accountForm
-    const data = { ownerid: ownerId, cellnumber, username, password: newPassword, confirmPassword, hours, profile }
+    const data = { id, cellnumber, username, password: newPassword, confirmPassword, hours, profile }
 
     addOwner(data)
       .then((res) => {
@@ -707,7 +709,6 @@ export default function Settings() {
             closeHour = closeInfo.period === "PM" ? closeHour + 12 : closeHour
 
             currDate = new Date()
-
             calcDate = new Date(currDate.setDate(currDate.getDate() - currDate.getDay() + k)).toUTCString();
             calcDate = calcDate.split(" ")
             calcDate.pop()
@@ -735,7 +736,7 @@ export default function Settings() {
           setCity(city)
           setProvince(province)
           setPostalcode(postalcode)
-          setLogo({ uri: logo_url + logo.name, name: '', size: { width: logo.width, height: logo.height }})
+          setLogo({ ...logo, uri: logo_url + logo.name, name: '', size: { width: logo.width, height: logo.height }})
           setType(type)
           setLocationreceivetype(receiveType)
           setDays(hours)

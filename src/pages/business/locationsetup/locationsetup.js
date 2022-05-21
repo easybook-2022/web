@@ -27,6 +27,7 @@ const LocationPin = () => <FontAwesomeIcon icon={faLocationPin} size="2x"/>
 export default function Locationsetup({ navigation }) {
   const [setupType, setSetuptype] = useState('')
   const [locationPermission, setLocationpermission] = useState(null)
+  const [newBusiness, setNewbusiness] = useState(null)
 
   const [locationInfo, setLocationinfo] = useState('')
   const [camComp, setCamcomp] = useState(null)
@@ -144,15 +145,26 @@ export default function Locationsetup({ navigation }) {
               localStorage.setItem("locationid", id.toString())
               localStorage.setItem("locationtype", type)
 
+              setLoading(false)
+
               if (type === "restaurant" || type === "store") {
                 localStorage.setItem("phase", "main")
-                localStorage.setItem("firstTime", "true")
+
+                if (newBusiness !== "true") {
+                  localStorage.setItem("firstTime", "true")
+                }
 
                 window.location = "/main"
               } else {
-                localStorage.setItem("phase", "register")
+                if (newBusiness) {
+                  localStorage.setItem("phase", "main")
 
-                window.location = "/register"
+                  window.location = "/main"
+                } else {
+                  localStorage.setItem("phase", "register")
+
+                  window.location = "/register"
+                }
               }
             }
           })
@@ -364,6 +376,10 @@ export default function Locationsetup({ navigation }) {
 
     setDays(newDays)
   }
+
+  useEffect(() => {
+    setNewbusiness(localStorage.getItem("newBusiness"))
+  }, [])
     
   return (
     <div id="locationsetup" style={{ opacity: loading ? 0.5 : 1 }}>
@@ -599,6 +615,12 @@ export default function Locationsetup({ navigation }) {
 
           <div id="bottom-navs">
             <div id="bottom-navs-row">
+              {newBusiness && <div className="bottom-nav" onClick={() => {
+                localStorage.removeItem("newBusiness")
+
+                window.location = "/list"
+              }}>Cancel</div>}
+
               <div className="bottom-nav" onClick={() => {
                 localStorage.clear()
 
@@ -761,6 +783,12 @@ export default function Locationsetup({ navigation }) {
 
           <div id="bottom-navs">
             <div id="bottom-navs-row">
+              {newBusiness && <div className="bottom-nav" onClick={() => {
+                localStorage.removeItem("newBusiness")
+
+                window.location = "/list"
+              }}>Cancel</div>}
+
               <div className="bottom-nav" onClick={() => {
                 localStorage.clear()
 

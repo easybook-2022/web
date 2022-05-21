@@ -28,9 +28,11 @@ export default function Seeorders(props) {
       })
       .then((res) => {
         if (res) {
-          setUserid(userid)
-          setOrders(res.orders)
-          setLoading(false)
+          socket.emit("socket/user/login", userid, () => {
+            setUserid(userid)
+            setOrders(res.orders)
+            setLoading(false)
+          })
         }
       })
       .catch((err) => {
@@ -42,9 +44,14 @@ export default function Seeorders(props) {
   const startWebsocket = () => {
     socket.on("updateSeeorders", data => {
       if (data.type === "orderDone") {
-        localStorage.setItem("openNotif", "true")
-
         window.location = "/"
+      } else if (data.type === "setWaitTime") {
+
+      }
+    })
+    socket.io.on("open", () => {
+      if (userId !== null) {
+        socket.emit("socket/user/login", userId, () => setShowdisabledscreen(false))
       }
     })
     socket.io.on("close", () => userId !== null ? setShowdisabledscreen(true) : {})
@@ -76,11 +83,11 @@ export default function Seeorders(props) {
             {orders.map((item, index) => (
               <div className="item" key={item.key}>
                 <div className="item-row">
-                  {item.image && (
+                  {item.image ? 
                     <div className="item-image-holder">
                       <img src={logo_url + item.image.name} style={resizePhoto(item.image, 100)} className="item-image"/>
                     </div>
-                  )}
+                  : null }
 
                   <div className="item-infos">
                     <div className="item-name">{item.name}</div>

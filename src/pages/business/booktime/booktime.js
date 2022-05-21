@@ -405,7 +405,7 @@ export default function Booktime(props) {
       })
       .then((res) => {
         if (res) {
-          data = { ...data, receiver: res.receiver, time }
+          data = { ...data, receiver: res.receiver, time: JSON.parse(selecteddate) }
           socket.emit("socket/salonChangeAppointment", data, () => {
             setConfirm({ ...confirm, requested: true, loading: false })
 
@@ -471,7 +471,7 @@ export default function Booktime(props) {
                         info.id ? 
                           <div key={info.key} className="worker" style={{ backgroundColor: (selectedWorkerinfo.worker && selectedWorkerinfo.worker.id === info.id) ? 'rgba(0, 0, 0, 0.3)' : null }} disabled={selectedWorkerinfo.loading} onClick={() => selectWorker(info.id)}>
                             <div className="worker-profile">
-                              <img alt="" src={logo_url + info.profile.name} style={resizePhoto(info.profile, 70)}/>
+                              {info.profile.name && <img alt="" src={logo_url + info.profile.name} style={resizePhoto(info.profile, 70)}/>}
                             </div>
                             <div className="worker-header">{info.username}</div>
                           </div>

@@ -6,12 +6,7 @@ import { socket, logo_url } from '../../../userInfo'
 import { searchFriends, selectUser, requestUserPaymentMethod } from '../../../apis/user/users'
 import { getCartItems, getCartItemsTotal, editCartItem, updateCartItem, removeFromCart, changeCartItem, checkoutCart } from '../../../apis/user/carts'
 
-const wsize = p => {
-  return window.innerWidth * (p / 100)
-}
-const hsize = p => {
-  return window.innerHeight * (p / 100)
-}
+const wsize = p => {return window.innerWidth * (p / 100)}
 
 export default function Orders(props) {
   const [userId, setUserid] = useState(null)
@@ -270,7 +265,7 @@ export default function Orders(props) {
       })
       .then((res) => {
         if (res) {
-          data = { ...data, receiver: res.receiver }
+          data = { ...data, receiver: res.receiver, speak: res.speak }
           socket.emit("socket/checkoutCart", data, () => {
             setActivecheckout(false)
             setShowconfirm(true)
@@ -397,7 +392,7 @@ export default function Orders(props) {
                           </div>
                           {item.image && (
                             <div className="item-image-holder">
-                              <img src={logo_url + item.image} sid="item-image"/>
+                              <img src={logo_url + item.image.name} sid="item-image"/>
                             </div>
                           )}
                           <div className="item-infos">
@@ -486,7 +481,7 @@ export default function Orders(props) {
               <div id="item-info-container">
                 {itemInfo.image && (
                   <div id="image-holder">
-                    <img src={logo_url + itemInfo.image} id="image"/>
+                    <img src={logo_url + itemInfo.image.name} id="image"/>
                   </div>
                 )}
                   

@@ -9,12 +9,7 @@ import { getWorkers, searchWorkers } from '../../../apis/user/owners'
 import { cancelCartOrder, confirmCartOrder } from '../../../apis/user/products'
 import { acceptRequest, closeSchedule, cancelRequest } from '../../../apis/user/schedules'
 
-const wsize = p => {
-  return window.innerWidth * (p / 100)
-}
-const hsize = p => {
-  return window.innerHeight * (p / 100)
-}
+const wsize = p => {return window.innerWidth * (p / 100)}
 
 export default function Notification(props) {
   const [userId, setUserid] = useState(null)
@@ -123,7 +118,7 @@ export default function Notification(props) {
         })
         .then((res) => {
           if (res) {
-            data = { ...data, receivers: res.receivers, locationType: res.type }
+            data = { ...data, receivers: res.receivers, locationType: res.type, speak: res.speak }
             socket.emit("socket/cancelRequest", data, () => {
               const newItems = [...items]
 
@@ -313,7 +308,7 @@ export default function Notification(props) {
                   {item.type === "cart-order-self" && (
                     <>
                       <div className="item-order-number">Your order#: {item.orderNumber}</div>
-
+                      
                       <div className="item-header">
                         {item.status === 'checkout' ? 
                           item.locationType === 'restaurant' ? 
@@ -348,12 +343,8 @@ export default function Notification(props) {
                           {'for ' + item.service} <br/>
                           {'at ' + item.location} <br/>
                           {displayTime(item.time)} <br/><br/>
-                          {(item.worker !== null && '\nwith stylist: ' + item.worker.username)}
+                          {(item.worker !== null && 'with stylist: ' + item.worker.username)}
                         </div>
-
-                        {(item.action === "requested" || item.action === "change") && 
-                          <div className="item-header">waiting for the restaurant's response</div>
-                        }
 
                         {item.action === "confirmed" && (
                           <div style={{ alignItems: 'center' }}>
@@ -364,12 +355,7 @@ export default function Notification(props) {
                                   <div className="action" onClick={() => {
                                     props.close()
 
-                                    window.location.replace("/booktime/" + 
-                                      item.locationid + "/" + 
-                                      item.id + 
-                                      "/null/" + 
-                                      (item.serviceid ? item.serviceid : "null") + 
-                                      "/null")
+                                    window.location = "/booktime/" + item.locationid + "/" + item.id + "/" + (item.serviceid ? item.serviceid : "null") + "/" + (item.service ? item.service : "null")
                                   }}>Rebook</div>
                                 </div>
                               </div>
@@ -381,11 +367,7 @@ export default function Notification(props) {
                                     <div className="action" onClick={() => {
                                       props.close()
 
-                                      window.location.replace("/booktime/" + 
-                                        item.locationid + "/" + 
-                                        item.id + "/null/" + 
-                                        (item.serviceid ? item.serviceid : "null") + "/" + 
-                                        (item.service ? item.service : "null"))
+                                      window.location = "/booktime/" + item.locationid + "/" + item.id + "/" + (item.serviceid ? item.serviceid : "null") + "/" + (item.service ? item.service : "null")
                                     }}>Rebook</div>
                                   </div>
                                 </div>
@@ -393,57 +375,6 @@ export default function Notification(props) {
                             }
                           </div>
                         )}
-
-                        {(item.action === "cancel" || item.action === "rebook") && 
-                          <div className="store-requested">
-                            <div className="item-service-header">
-                              {item.action === "cancel" ? "Appointment cancelled" : "Time taken"}
-                              {'\n'}
-                              {item.reason && <div>Reason: <div style={{ fontWeight: '500' }}>{item.reason}</div></div>}
-                            </div>
-                            {item.action === "cancel" && (
-                              <div className="row">
-                                <div style={{ alignItems: 'center' }}>
-                                  <div className="action" onClick={() => closeTheSchedule(index)}>Cancel</div>
-                                  <div className="action" onClick={() => {
-                                    props.close()
-
-                                    window.location.replace("/booktime/" + 
-                                      item.locationid + "/" + 
-                                      item.id + 
-                                      "/null/" + 
-                                      (item.serviceid ? item.serviceid : "null") + "/" + 
-                                      (item.service ? item.service : "null"))
-                                  }}>Rebook</div>
-                                </div>
-                              </div>
-                            )}
-                            {(item.action === "rebook" && item.nextTime > 0) && (
-                              <>
-                                <div className="item-header">
-                                  <div>New requested time</div>
-                                  {'\n'}
-                                  <div className="item-service-header">{displayTime(item.nextTime)}</div>
-                                </div>
-                                <div className="row">
-                                  <div style={{ alignItems: 'center' }}>
-                                    <div className="action" onClick={() => cancelTheRequest(item, index)}>Cancel</div>
-                                    <div className="action" onClick={() => {
-                                      props.close()
-
-                                      window.location.replace("/booktime/" + 
-                                        item.locationid + "/" + 
-                                        item.id + 
-                                        "/null/" + 
-                                        (item.serviceid ? item.serviceid : "null") + "/" + 
-                                        (item.service ? item.service : "null"))
-                                    }}>Rebook</div>
-                                  </div>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        }
                       </div>
                     </div>
                   )}
@@ -467,9 +398,9 @@ export default function Notification(props) {
           <div id="confirm-box">
             <div id="confirm-container">
               <div id="confirm-header">
-                Confirmed Cart Order: 
-                {'\n\n Quantity: ' + confirm.quantity + '\n\n'}
-                {confirm.name + '\n\n'}
+                Confirmed Cart Order: <br/><br/>
+                {'Quantity: ' + confirm.quantity}<br/><br/>
+                {confirm.name}
               </div>
             </div>
           </div>
@@ -481,13 +412,13 @@ export default function Notification(props) {
             <div id="confirm-container">
               <div id="confirm-header">
                 <div style={{ fontFamily: 'Arial', fontWeight: 'bold' }}>Cancel Appointment</div><br/>
-                {cancelSchedule.service ? '\n\nfor ' + cancelSchedule.service : '\n'}<br/>
-                {'\nat ' + cancelSchedule.location + '\n'}<br/>
+                {cancelSchedule.service && 'for ' + cancelSchedule.service}<br/>
+                {'at ' + cancelSchedule.location}<br/>
                 {displayTime(cancelSchedule.time)}
               </div>
 
               <div id="confirm-options">
-                <div className="confirm-option" onClick={() => setCancelschedule({ show: false, service: "", time: 0, index: -1 })}>No</div>
+                <div className="confirm-option" onClick={() => setCancelschedule({ ...cancelSchedule, show: false, service: "", time: 0, index: -1 })}>No</div>
                 <div className="confirm-option" onClick={() => cancelTheRequest()}>Yes</div>
               </div>
 

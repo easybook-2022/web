@@ -121,11 +121,9 @@ export default function Profile(props) {
         {name ?
           <div className="menu">
             <div className="menu-row">
-              {image.name ? 
-                <div className="menu-image-holder">
-                  <img alt="" className="menu-image" style={resizePhoto(image, 50)} src={logo_url + image.name}/>
-                </div>
-              : null }
+              <div className="menu-image-holder">
+                {image.name && <img alt="" className="menu-image" style={resizePhoto(image, 50)} src={logo_url + image.name}/>}
+              </div>
               <div className="column">
                 <div className="menu-name">{name} (Menu)</div>
               </div>
@@ -136,11 +134,9 @@ export default function Profile(props) {
                   displayList({ id: info.id, name: info.name, image: info.image, list: info.list, left: left + 10 })
                   :
                   <div className="item">
-                    {info.image ? 
-                      <div className="item-image-holder">
-                        <img alt="" className="item-image" style={resizePhoto(info.image, 50)} src={logo_url + info.image.name}/>
-                      </div>
-                    : null }
+                    <div className="item-image-holder">
+                      {info.image.name && <img alt="" className="item-image" style={resizePhoto(info.image, 50)} src={logo_url + info.image.name}/>}
+                    </div>
                     <div className="column">
                       <div className="item-header">{info.name}</div>
                     </div>
@@ -148,13 +144,7 @@ export default function Profile(props) {
                       <div className="item-header">{info.price ? '$' + info.price : info.sizes.length + ' size(s)'}</div>
                     </div>
                     <div className="column">
-                      <div className="item-action" onClick={() => 
-                        window.location.replace(
-                          "/itemprofile/" + 
-                          locationid + "/null/" + 
-                          info.id + "/null/restaurant"
-                        )
-                      }>See / Buy</div>
+                      <div className="item-action" onClick={() => window.location = "/itemprofile/" + locationid + "/null/" + info.id + "/null/restaurant"}>See / Buy</div>
                     </div>
                   </div>
                 }
@@ -168,11 +158,9 @@ export default function Profile(props) {
                 displayList({ id: info.id, name: info.name, image: info.image, list: info.list, left: left + 10 })
                 :
                 <div className="item">
-                  {info.image.name ? 
-                    <div className="item-image-holder">
-                      <img alt="" className="item-image" style={resizePhoto(info.image, 50)} src={logo_url + info.image.name}/>
-                    </div>
-                  : null }
+                  <div className="item-image-holder">
+                    {info.image.name && <img alt="" className="item-image" style={resizePhoto(info.image, 50)} src={logo_url + info.image.name}/>}
+                  </div>
                   <div className="column">
                     <div className="item-header">{info.name}</div>
                   </div>
@@ -180,12 +168,7 @@ export default function Profile(props) {
                     <div className="item-header">{info.price ? '$' + info.price : info.sizes.length + ' size(s)'}</div>
                   </div>
                   <div className="column">
-                    <div className="item-action" onClick={() => 
-                      window.location.replace(
-                        '/itemprofile/' + 
-                        locationid + '/null/' + info.id + '/null/restaurant'
-                      )
-                    }>See / Buy</div>
+                    <div className="item-action" onClick={() => window.location = '/itemprofile/' + locationid + '/null/' + info.id + '/null/restaurant'}>See / Buy</div>
                   </div>
                 </div>
               }
@@ -228,7 +211,7 @@ export default function Profile(props) {
                   <div id="menu-input-actions">
                     <div id="menu-input-touch" onClick={() => {
                       if (productInfo) {
-                        window.location.replace("/itemprofile/" + locationid + "/null/null/" + productInfo + "/restaurant")
+                        window.location = "/itemprofile/" + locationid + "/null/null/" + productInfo + "/restaurant"
                       } else {
                         setMenuinfo({ ...menuInfo, error: true })
                       }
@@ -276,7 +259,7 @@ export default function Profile(props) {
               )}
 
               <div className="column">
-                <div className="bottom-nav" onClick={() => window.location.replace("/")}><FontAwesomeIcon icon={faHome} size="2x"/></div>
+                <div className="bottom-nav" onClick={() => window.location = "/"}><FontAwesomeIcon icon={faHome} size="2x"/></div>
               </div>
 
               <div className="column">

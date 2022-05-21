@@ -59,14 +59,14 @@ export default function List(props) {
 
         <div id="body">
           {locations.map((location, index) => (
-            <div className="location" onClick={() => {
+            <div className="location" key={location.key} onClick={() => {
               localStorage.setItem("locationid", location.id.toString())
               localStorage.setItem("locationtype", location.type)
               localStorage.setItem("phase", "main")
 
               window.location = "/main"
             }}>
-              <div className="logo">
+              <div className="logo" style={resizePhoto(location.logo, 200)}>
                 <img style={{ height: '100%', width: '100%' }} src={logo_url + location.logo.name}/>
               </div>
               <div className="column">

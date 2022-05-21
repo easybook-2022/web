@@ -349,8 +349,12 @@ export default function Main(props) {
       {openNotifications && 
         <div id="hidden-box">
           <NotificationsBox close={() => {
-            fetchTheNumNotifications()
-            setOpennotifications(false)
+            const userid = localStorage.getItem("userid")
+            
+            socket.emit("socket/user/login", userid, () => {
+              fetchTheNumNotifications()
+              setOpennotifications(false)
+            })
           }}/>
         </div>
       }

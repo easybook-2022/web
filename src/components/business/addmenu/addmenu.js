@@ -213,7 +213,7 @@ export default function Addmenu(props) {
           )}
           
           <div class="errormsg">{errorMsg}</div>
-
+          
           <div id="add-actions">
             <div className="add-action" disabled={loading} onClick={() => window.location = "/menu"}>Cancel</div>
             <div className="add-action" disabled={loading} onClick={() => {

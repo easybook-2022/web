@@ -37,7 +37,7 @@ export const saveUserInfo = data => {
 export const addOwner = data => {
 	const form = new FormData()
 
-	form.append("ownerid", data.ownerid)
+	form.append("id", data.id)
 	form.append("cellnumber", data.cellnumber)
 	form.append("username", data.username)
 	form.append("password", data.password)

@@ -42,6 +42,7 @@ export const setupLocation = data => {
 export const updateLocation = data => {
 	const form = new FormData()
 
+  form.append("id", data.id)
 	form.append("storeName", data.storeName)
 	form.append("phonenumber", data.phonenumber)
 	form.append("addressOne", data.addressOne)
