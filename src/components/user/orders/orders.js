@@ -2,6 +2,7 @@ import './orders.scss';
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimesCircle, faCircleNotch } from '@fortawesome/fontawesome-free-solid'
+import { resizePhoto } from 'geottuse-tools';
 import { socket, logo_url } from '../../../userInfo'
 import { searchFriends, selectUser, requestUserPaymentMethod } from '../../../apis/user/users'
 import { getCartItems, getCartItemsTotal, editCartItem, updateCartItem, removeFromCart, changeCartItem, checkoutCart } from '../../../apis/user/carts'
@@ -390,11 +391,9 @@ export default function Orders(props) {
                           <div disabled={item.status === "checkout"} onClick={() => removeTheCartItem(item.id)}>
                             <FontAwesomeIcon icon={faTimesCircle} size="2x"/>
                           </div>
-                          {item.image && (
-                            <div className="item-image-holder">
-                              <img src={logo_url + item.image.name} sid="item-image"/>
-                            </div>
-                          )}
+                          <div className="item-image-holder">
+                            <img src={item.image.name ? logo_url + item.image.name : "/noimage.jpeg"} style={resizePhoto(item.image, 70)}/>
+                          </div>
                           <div className="item-infos">
                             <div className="item-name">{item.name}</div>
 
@@ -479,11 +478,9 @@ export default function Orders(props) {
                 </div>
               </div>
               <div id="item-info-container">
-                {itemInfo.image && (
-                  <div id="image-holder">
-                    <img src={logo_url + itemInfo.image.name} id="image"/>
-                  </div>
-                )}
+                <div id="image-holder">
+                  <img src={itemInfo.image.name ? logo_url + itemInfo.image.name : "/noimage.jpeg"} id="image"/>
+                </div>
                   
                 <div id="box-item-header">{itemInfo.name}</div>
                 <div id="box-item-header-info">{itemInfo.info}</div>

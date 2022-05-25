@@ -24,7 +24,7 @@
         width: calc(100vw * 0.3);
 
         .menu-item-photo {
-          width: 100%;
+          width: 30%;
         }
       }
 
@@ -146,15 +146,15 @@
       border-radius: 5px;
       border-style: solid;
       border-width: 2px;
-      font-size: calc(100vw * 0.01);
+      font-size: calc(100vw * 0.03);
       margin: 10px auto;
       padding: 5px;
       text-align: center;
-      width: 300px;
+      width: 50%;
     }
     
     #menu-start-div {
-      font-size: calc(100vw * 0.02);
+      font-size: calc(100vw * 0.03);
       font-weight: bold;
       margin: 20px 0;
       text-align: center;
@@ -600,9 +600,7 @@
 
   .loading {
     animation: rotate 1s linear infinite;
-    height: 48px;
     margin: 0 auto;
-    width: 48px;
   }
 
   @keyframes rotate {

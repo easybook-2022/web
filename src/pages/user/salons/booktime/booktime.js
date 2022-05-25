@@ -11,8 +11,12 @@ import { getWorkers, getWorkerInfo, getAllWorkersTime } from '../../../../apis/u
 import { getAppointmentInfo, makeAppointment } from '../../../../apis/user/schedules'
 import { getNumCartItems } from '../../../../apis/user/carts'
 
+// components
 import Orders from '../../../../components/user/orders'
-import Userauth from '../../../../components/user/userauth'
+
+// widgets
+import Userauth from '../../../../widgets/user/userauth'
+import Loadingprogress from '../../../../widgets/loadingprogress';
 
 const wsize = p => {return window.innerWidth * (p / 100)}
 
@@ -68,7 +72,7 @@ export default function Booktime(props) {
   const [times, setTimes] = useState([])
   const [selectedWorkerinfo, setSelectedworkerinfo] = useState({ worker: null, workers: [], numWorkers: 0, loading: false })
   const [loaded, setLoaded] = useState(false)
-  const [showAuth, setShowauth] = useState(false)
+  const [showAuth, setShowauth] = useState({ show: false, booking: false })
   const [step, setStep] = useState(0)
 
   const [openOrders, setOpenorders] = useState(false)
@@ -560,9 +564,10 @@ export default function Booktime(props) {
     setSelecteddateinfo({ ...selectedDateinfo, name, time })
     setConfirm({ ...confirm, show: true, service: name ? name : serviceinfo, time, workerIds })
   }
-  const makeAnAppointment = () => {
-    if (userId) {
+  const makeAnAppointment = id => {
+    if (userId || id) {
       setConfirm({ ...confirm, loading: true })
+      setShowauth({ ...showAuth, show: false })
 
       const { time } = selectedDateinfo
       const { worker } = selectedWorkerinfo
@@ -573,14 +578,15 @@ export default function Booktime(props) {
       const selecteddate = JSON.stringify({ day, month, date, year, hour, minute })
       let data = { 
         id: scheduleid, // id for socket purpose (updating)
-        userid: userId, 
+        userid: userId || id, 
         workerid: worker !== null ? worker.id : workerIds[Math.floor(Math.random() * (workerIds.length - 1)) + 0], 
         locationid, 
         serviceid: serviceid !== 'null' ? serviceid : -1, 
         serviceinfo: serviceinfo ? serviceinfo : name,
         oldtime: oldTime, 
         time: selecteddate, note: note ? note : "", 
-        type: scheduleid ? "remakeAppointment" : "makeAppointment"
+        type: scheduleid ? "remakeAppointment" : "makeAppointment",
+        timeDisplay: displayTime({ day, month, date, year, hour, minute })
       }
 
       makeAppointment(data)
@@ -593,7 +599,7 @@ export default function Booktime(props) {
           if (res) {
             data = { ...data, receiver: res.receiver, time: JSON.parse(selecteddate), speak: res.speak }
             socket.emit("socket/makeAppointment", data, () => {
-              setConfirm({ ...confirm, requested: true, loading: false })
+              setConfirm({ ...confirm, show: true, requested: true, loading: false })
 
               setTimeout(function () {
                 setConfirm({ ...confirm, show: false, requested: false })
@@ -614,7 +620,7 @@ export default function Booktime(props) {
         })
     } else {
       setConfirm({ ...confirm, show: false })
-      setShowauth(true)
+      setShowauth({ ...showAuth, show: true, booking: true })
     }
   }
 
@@ -828,7 +834,7 @@ export default function Booktime(props) {
                     setUserid(null)
                   })
                 } else {
-                  setShowauth(true)
+                  setShowauth({ ...showAuth, show: true })
                 }
               }}>
                 {userId ? 'Log-Out' : 'Log-In'}
@@ -892,12 +898,15 @@ export default function Booktime(props) {
         getTheNumCartItems()
         setOpenorders(false)
       }}/></div>}
-      {showAuth && (
+      {showAuth.show && (
         <div id="hidden-box">
-          <Userauth close={() => setShowauth(false)} done={id => {
+          <Userauth close={() => setShowauth({ ...showAuth, show: false })} done={id => {
             socket.emit("socket/user/login", "user" + id, () => {
               setUserid(id)
-              setShowauth(false)
+
+              if (showAuth.booking === true) {
+                makeAnAppointment(id)
+              }
             })
           }}/>
         </div>

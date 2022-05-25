@@ -4,14 +4,13 @@ import Geocode from "react-geocode";
 import GoogleMapReact from 'google-map-react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faLocationPin, faCircleNotch, faArrowUp, faArrowDown, faTimesCircle } from '@fortawesome/free-solid-svg-icons'
-import Webcam from "react-webcam";
 import { loginInfo, ownerRegisterInfo, logo_url, googleApikey, timeControl } from '../../../businessInfo'
 import { displayPhonenumber, resizePhoto } from 'geottuse-tools'
 import { addOwner, updateOwner, deleteOwner, getWorkerInfo, getOtherWorkers, getAccounts, getOwnerInfo } from '../../../apis/business/owners'
 import { getLocationProfile, updateLocation, setLocationHours, setReceiveType } from '../../../apis/business/locations'
 
-// components
-import Loadingprogress from '../../../components/loadingprogress';
+// widgets
+import Loadingprogress from '../../../widgets/loadingprogress';
 
 // bank account
 let { accountNumber, countryCode, currency, routingNumber, accountHolderName } = loginInfo
@@ -1179,24 +1178,11 @@ export default function Settings() {
                             </div>
                           </>
                           :
-                          <>
-                            <div className="camera">
-                              <Webcam
-                                audio={false}
-                                ref={r => {setCamcomp(r)}}
-                                screenshotFormat="image/jpeg"
-                                videoConstraints={{ facingMode: 'user', width: 640, height: 480 }}
-                                height={'100%'}
-                              />
-                            </div>
+                          <div id="camera-actions">
+                            <div className="camera-action" style={{ opacity: accountForm.loading ? 0.5 : 1 }} disabled={accountForm.loading} onClick={() => fileComp.click()}>Choose from phone</div>
 
-                            <div id="camera-actions">
-                              <div className="camera-action" style={{ opacity: accountForm.loading ? 0.5 : 1 }} disabled={accountForm.loading} onClick={snapProfile.bind(this)}>Take this photo</div>
-                              <div className="camera-action" style={{ opacity: accountForm.loading ? 0.5 : 1 }} disabled={accountForm.loading} onClick={() => fileComp.click()}>Choose from phone</div>
-
-                              <input type="file" ref={r => {setFilecomp(r)}} onChange={chooseProfile} style={{ display: 'none' }}/>
-                            </div>
-                          </>
+                            <input type="file" ref={r => {setFilecomp(r)}} onChange={chooseProfile} style={{ display: 'none' }}/>
+                          </div>
                         } 
                       </div>
                     )}
@@ -1427,22 +1413,9 @@ export default function Settings() {
                             </div>
                           </>
                           :
-                          <>
-                            <div className="camera">
-                              <Webcam
-                                audio={false}
-                                ref={r => {setCamcomp(r)}}
-                                screenshotFormat="image/jpeg"
-                                videoConstraints={{ facingMode: 'user', width: 640, height: 480 }}
-                                width={'100%'}
-                              />
-                            </div>
-
-                            <div id="camera-actions">
-                              <div className="camera-action" style={{ opacity: accountForm.loading ? 0.5 : 1 }} disabled={accountForm.loading} onClick={snapProfile.bind(this)}>Take this photo</div>
-                              <div className="camera-action" style={{ opacity: accountForm.loading ? 0.5 : 1 }} disabled={accountForm.loading} onClick={() => chooseProfile()}>Choose from phone</div>
-                            </div>
-                          </>
+                          <div id="camera-actions">
+                            <div className="camera-action" style={{ opacity: accountForm.loading ? 0.5 : 1 }} disabled={accountForm.loading} onClick={() => chooseProfile()}>Choose from phone</div>
+                          </div>
                         } 
                       </div>
                     )}

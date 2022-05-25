@@ -394,7 +394,8 @@ export default function Booktime(props) {
       serviceid: serviceid != "null" ? serviceid : -1, 
       serviceinfo: serviceinfo ? serviceinfo : "",
       time: selecteddate, note: note ? note : "", 
-      type: "salonChangeAppointment"
+      type: "salonChangeAppointment",
+      timeDisplay: displayTime({ day, month, date, year, hour, minute })
     }
 
     salonChangeAppointment(data)

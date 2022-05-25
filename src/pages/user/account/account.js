@@ -6,8 +6,8 @@ import { logo_url } from '../../../userInfo'
 import { displayPhonenumber } from 'geottuse-tools'
 import { getUserInfo, updateUser } from '../../../apis/user/users'
 
-// components
-import Loadingprogress from '../../../components/loadingprogress';
+// widgets
+import Loadingprogress from '../../../widgets/loadingprogress';
 
 const wsize = p => {return window.innerWidth * (p / 100)}
 

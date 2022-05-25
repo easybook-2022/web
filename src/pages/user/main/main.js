@@ -10,9 +10,12 @@ import { getNumNotifications } from '../../../apis/user/users'
 import { getLocations, getMoreLocations } from '../../../apis/user/locations'
 import { getNumCartItems } from '../../../apis/user/carts'
 
-import NotificationsBox from '../../../components/user/notification'
+// widgets
+import NotificationsBox from '../../../widgets/user/notification'
+import Userauth from '../../../widgets/user/userauth'
+
+// components
 import Orders from '../../../components/user/orders'
-import Userauth from '../../../components/user/userauth'
 
 const wsize = p => {return window.innerWidth * (p / 100)}
 
@@ -241,7 +244,7 @@ export default function Main(props) {
               <div id="search-input-container">
                 <input 
                   type="text" id="search-input" placeholdertextcolor="rgba(127, 127, 127, 0.5)"
-                  placeholder="Search name" onChange={(e) => getTheLocations(geolocation.longitude, geolocation.latitude, e.target.value)}
+                  placeholder="Search salons, restaurants and stores" onChange={(e) => getTheLocations(geolocation.longitude, geolocation.latitude, e.target.value)}
                 />
               </div>
 

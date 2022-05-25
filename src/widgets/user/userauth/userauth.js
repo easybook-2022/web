@@ -8,12 +8,7 @@ import { getCode, verifyUser, resetPassword, registerUser, loginUser } from '../
 
 const { username, cellnumber, password, confirmPassword } = loginInfo
 
-const wsize = p => {
-  return window.innerWidth * (p / 100)
-}
-const hsize = p => {
-  return window.innerHeight * (p / 100)
-}
+const wsize = p => {return window.innerWidth * (p / 100)}
 
 export default function Userauth(props) {
   const [authInfo, setAuthinfo] = useState({ type: '', info: { username, cellnumber, password, confirmPassword, usercode: '' }, loading: false, verifycode: null, codesent: false, errormsg: "" })

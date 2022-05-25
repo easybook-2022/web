@@ -1,14 +1,13 @@
 import './addmenu.scss';
 import React, { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import Webcam from "react-webcam";
 import { useParams } from 'react-router-dom';
 import { logo_url } from '../../../businessInfo'
-import { resizePhoto } from 'geottuse-tools'
+import { getId, resizePhoto } from 'geottuse-tools'
 import { addNewMenu, getMenuInfo, saveMenu } from '../../../apis/business/menus'
 
-// components
-import Loadingprogress from '../../../components/loadingprogress';
+// widgets
+import Loadingprogress from '../../../widgets/loadingprogress';
 
 const width = window.innerWidth;
 const height = window.innerHeight;
@@ -135,21 +134,7 @@ export default function Addmenu(props) {
   const choosePhoto = e => {
     if (e.target.files && e.target.files[0]) {
       let reader = new FileReader()
-      let letters = [
-        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
-        "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
-      ]
-      let photo_name_length = Math.floor(Math.random() * (15 - 10)) + 10
-      let char = ""
-
-      for (let k = 0; k <= photo_name_length - 1; k++) {
-        char += "" + (
-          k % 2 === 0 ? 
-            letters[Math.floor(Math.random() * letters.length)].toUpperCase()
-            :
-            Math.floor(Math.random() * 9) + 0
-        )
-      }
+      let char = getId()
 
       reader.onload = e => {
         let imageReader = new Image()
@@ -172,7 +157,7 @@ export default function Addmenu(props) {
   useEffect(() => {
     getTheMenuInfo()
   }, [])
-
+  
   return (
     <div id="addmenu" style={{ opacity: loading ? 0.5 : 1 }}>
       {loaded ? 

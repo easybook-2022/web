@@ -11,8 +11,8 @@ import { getMenus, removeMenu, addNewMenu } from '../../../apis/business/menus'
 import { cancelSchedule, doneService, getAppointments, getCartOrderers } from '../../../apis/business/schedules'
 import { removeProduct } from '../../../apis/business/products'
 
-// components
-import Loadingprogress from '../../../components/loadingprogress';
+// widgets
+import Loadingprogress from '../../../widgets/loadingprogress';
 
 const width = window.innerWidth
 const wsize = p => {return width * (p / 100)}
@@ -299,41 +299,12 @@ export default function Main(props) {
   }
   const startWebsocket = () => {
     socket.on("updateSchedules", data => {
-      if (data.type === "makeAppointment") {
-        // if rebook 
-        const newAppointments = [...appointments]
-
-        newAppointments.forEach(function (info) {
-          if (info.id === data.id) {
-            info.time = data.time
-          }
-        })
-
-        setAppointments(newAppointments)
-
+      if (
+        data.type === "makeAppointment" || 
+        data.type === "cancelRequest" || 
+        data.type === "remakeAppointment"
+      ) {
         getAllAppointments()
-      } else if (data.type === "cancelRequest") {
-        const newAppointments = [...appointments]
-
-        newAppointments.forEach(function (item, index) {
-          if (item.id === data.scheduleid) {
-            newAppointments.splice(index, 1)
-          }
-        })
-
-        setAppointments(newAppointments)
-        fetchTheNumAppointments()
-      } else if (data.type === "cancelService") {
-        const newAppointments = [...appointments]
-
-        newAppointments.forEach(function(item, index) {
-          if (item.id === data.id) {
-            newAppointments.splice(index, 1)
-          }
-        })
-
-        setAppointments(newAppointments)
-        fetchTheNumAppointments()
       }
     })
     socket.on("updateOrders", () => getAllCartOrderers())
@@ -384,11 +355,13 @@ export default function Main(props) {
               appointments.length > 0 ? 
                 appointments.map((item, index) => (
                   <div key={item.key} className="schedule">
-                    {item.image ?
-                      <div className="schedule-image">
-                        <img alt="" style={{ height: '100%', width: '100%' }} src={logo_url + item.image.name}/>
-                      </div>
-                    : null }
+                    <div className="schedule-image">
+                      <img 
+                        alt="" 
+                        style={{ height: '100%', width: '100%' }} 
+                        src={item.image.name ? logo_url + item.image.name : "/noimage.jpeg"}
+                      />
+                    </div>
                       
                     <div className="schedule-header">
                       Client: {item.client.username}

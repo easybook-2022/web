@@ -7,15 +7,13 @@ import { socket, logo_url } from '../../../userInfo'
 import { getProductInfo } from '../../../apis/user/products'
 import { getNumCartItems, addItemtocart } from '../../../apis/user/carts'
 
+// components
 import Orders from '../../../components/user/orders'
-import Userauth from '../../../components/user/userauth'
 
-const wsize = p => {
-  return window.innerWidth * (p / 100)
-}
-const hsize = p => {
-  return window.innerHeight * (p / 100)
-}
+// widgets
+import Userauth from '../../../widgets/user/userauth'
+
+const wsize = p => {return window.innerWidth * (p / 100)}
 
 export default function Itemprofile(props) {
   const { locationid, productid, productinfo, type } = useParams()
@@ -31,7 +29,7 @@ export default function Itemprofile(props) {
   const [cost, setCost] = useState(0)
   const [errorMsg, setErrormsg] = useState('')
   const [showNotifyUser, setShownotifyuser] = useState({ show: false, userid: 0, username: "" })
-  const [showAuth, setShowauth] = useState({ show: false, action: "" })
+  const [showAuth, setShowauth] = useState({ show: false, addcart: false })
   const [userId, setUserid] = useState(null)
 
   const [orderingItem, setOrderingitem] = useState({ name: "", image: "", options: [], others: [], sizes: [], quantity: 0, cost: 0 })
@@ -152,8 +150,10 @@ export default function Itemprofile(props) {
     setQuantity(newQuantity)
     setCost(newCost)
   }
-  const addCart = async() => {
-    if (userId) {
+  const addCart = async(id) => {
+    if (userId || id) {
+      setShowauth({ ...showAuth, show: false })
+      
       let callfor = [], receiver = []
       let newOptions = JSON.parse(JSON.stringify(options))
       let newOthers = JSON.parse(JSON.stringify(others))
@@ -184,7 +184,7 @@ export default function Itemprofile(props) {
 
       if (price || productinfo) {
         const data = { 
-          userid: userId, locationid, 
+          userid: userId || id, locationid, 
           productid: productid !== 'null' ? productid : -1, 
           productinfo: productinfo !== 'null' ? productinfo : "", 
           quantity, 
@@ -214,7 +214,7 @@ export default function Itemprofile(props) {
         setErrormsg("Please choose a size")
       }
     } else {
-      setShowauth({ show: true, action: "addcart" })
+      setShowauth({ ...showAuth, show: true, addcart: true })
     }
   }
   const showOrders = () => {
@@ -416,7 +416,7 @@ export default function Itemprofile(props) {
                   setUserid(null)
                 })
               } else {
-                setShowauth(true)
+                setShowauth({ ...showAuth, show: true })
               }
             }}>
               {userId ? 'Log-Out' : 'Log-In'}
@@ -431,12 +431,14 @@ export default function Itemprofile(props) {
       }}/></div>}
       {showAuth.show && (
         <div id="hidden-box">
-          <Userauth close={() => setShowauth({ ...showAuth, show: false, action: "" })} done={id => {
+          <Userauth close={() => setShowauth({ ...showAuth, show: false })} done={id => {
             socket.emit("socket/user/login", "user" + id, () => {
               setUserid(id)
-              addCart()
+
+              if (showAuth.addcart === true) {
+                addCart(id)
+              }
             })
-            setShowauth({ show: false, action: false })
           }}/>
         </div>
       )}

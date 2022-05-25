@@ -3,17 +3,16 @@ import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faHome, faGear, faTimesCircle, faCirclePlus, faCircleNotch } from '@fortawesome/free-solid-svg-icons'
-import Webcam from "react-webcam";
 import { logo_url } from '../../../businessInfo'
-import { resizePhoto } from 'geottuse-tools'
+import { getId, resizePhoto } from 'geottuse-tools'
 import { getLocationProfile } from '../../../apis/business/locations'
 import { getOwnerInfo } from '../../../apis/business/owners'
 import { getMenus, addNewMenu, removeMenu, getMenuInfo, saveMenu, uploadMenu, deleteMenu } from '../../../apis/business/menus'
-import { getProducts, getProductInfo, removeProduct } from '../../../apis/business/products'
+import { getProductInfo, removeProduct } from '../../../apis/business/products'
 import { getServices, getServiceInfo, removeService } from '../../../apis/business/services'
 
-// components
-import Loadingprogress from '../../../components/loadingprogress';
+// widgets
+import Loadingprogress from '../../../widgets/loadingprogress';
 
 const height = window.innerWidth
 const width = window.innerHeight
@@ -123,19 +122,21 @@ export default function Menu(props) {
           <div className="menu">
             <div className="menu-row">
               <div className="menu-image-holder">
-                {image.name && <img alt="" style={resizePhoto(image, width * 0.08)} src={logo_url + image.name}/>}
+                <img alt="" style={resizePhoto(image, width * 0.08)} src={image.name ? logo_url + image.name : "/noimage.jpeg"}/>
               </div>
                 
-              <div className="column">
-               <div className="menu-name">{name} (Menu)</div>
-              </div>
-              <div className="column">
-                <div className="menu-actions">
-                  <div className="menu-action" onClick={() => window.location = "/addmenu/" + id + "/" + id}>Change</div>
-                  <div className="menu-action" onClick={() => removeTheMenu(id)}>Delete</div>
+              <div className="column"><div className="menu-name">{name} (Menu)</div></div>
+
+              {isOwner === true && (
+                <div className="column">
+                  <div className="menu-actions">
+                    <div className="menu-action" onClick={() => window.location = "/addmenu/" + id + "/" + id}>Change</div>
+                    <div className="menu-action" onClick={() => removeTheMenu(id)}>Delete</div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
+
             {list.length === 0 ?
               <div style={{ margin: '0 auto', marginTop: 10 }}>
                 <div className="item-add" onClick={() => {
@@ -145,40 +146,46 @@ export default function Menu(props) {
                     window.location = "/addproduct/" + id + "/null"
                   }
                 }}>
-                  <div className="column"><div className="item-add-header">Add {(locationType === "hair" || locationType === "nail") ? "service" : "meal"}</div></div>
+                  <div className="column">
+                    <div className="item-add-header">
+                      Add{' '}
+                      {(locationType == "hair" || locationType == "nail") && "service"}
+                      {locationType == "restaurant" && "meal"}
+                      {locationType == "store" && "product"}
+                    </div>
+                  </div>
                   <FontAwesomeIcon icon={faCirclePlus} size="2x"/>
                 </div>
               </div>
               :
               list.map((info, index) => (
-                <div key={"list-" + index} style={{ marginLeft: left + 50 }}>
+                <div key={"list-" + index} style={{ backgroundColor: 'white', marginLeft: left + 50 }}>
                   {info.listType === "list" ? 
-                    displayList({ id: info.id, name: info.name, image: info.image, list: info.list, left: left + 10 })
+                    displayList({ id: info.id, name: info.name, image: info.image, list: info.list, left: left == 0 ? left : left + 10 })
                     :
                     <div className="item">
                       <div className="item-row">
                         <div className="item-image-holder">
-                          {info.image.name && <img alt="" style={resizePhoto(info.image, width * 0.09)} src={logo_url + info.image.name}/>}
+                          <img alt="" style={resizePhoto(info.image, width * 0.09)} src={info.image.name ? logo_url + info.image.name : "/noimage.jpeg"}/>
                         </div>
                           
-                        <div className="column">
-                          <div className="item-header">{info.name}</div>
-                        </div>
-                        <div className="column">
-                          <div className="item-header">{info.price ? '$' + info.price : info.sizes.length + ' size(s)'}</div>
-                        </div>
-                        <div className="column">
-                          <div className="item-actions">
-                            <div className="item-action" onClick={() => {
-                              if ((locationType === "hair" || locationType === "nail")) {
-                                window.location = "/addservice/" + id + "/" + info.id
-                              } else {
-                                window.location = "/addproduct/" + id + "/" + info.id
-                              }
-                            }}>Change</div>
-                            <div className="item-action" onClick={() => (locationType === "hair" || locationType === "nail") ? removeTheService(info.id) : removeTheProduct(info.id)}>Delete</div>
+                        <div className="column"><div className="item-header">{info.name}</div></div>
+                        <div className="column"><div className="item-header">{info.price ? '$' + info.price : info.sizes.length + ' size(s)'}</div></div>
+
+                        {isOwner === true && (
+                          <div className="column">
+                            <div className="item-actions">
+                              <div className="item-action" onClick={() => {
+                                if ((locationType === "hair" || locationType === "nail")) {
+                                  window.location = "/addservice/" + id + "/" + info.id
+                                } else {
+                                  window.location = "/addproduct/" + id + "/" + info.id
+                                }
+                              }}>Change</div>
+                              <div className="item-action" onClick={() => (locationType === "hair" || locationType === "nail") ? removeTheService(info.id) : removeTheProduct(info.id)}>Delete</div>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     </div>
                   }
@@ -211,15 +218,18 @@ export default function Menu(props) {
                 <div className="item">
                   <div className="item-row">
                     <div className="item-image-holder">
-                      {info.image.name && <img alt="" style={resizePhoto(info.image, width * 0.09)} src={logo_url + info.image.name}/>}
+                      <img alt="" style={resizePhoto(info.image, width * 0.09)} src={info.image.name ? logo_url + info.image.name : "/noimage.jpeg"}/>
                     </div>
 
                     <div className="item-header">{info.name}</div>
                     <div className="item-header">{info.price ? '$' + info.price : info.sizes.length + ' size(s)'}</div>
-                  </div>
-                  <div className="item-actions">
-                    <div className="item-action" onClick={() => window.location = "/" + ((locationType === "hair" || locationType === "nail") ? "addservice" : "addproduct") + "/" + (id ? id : "null") + "/" + info.id}>Change</div>
-                    <div className="item-action" onClick={() => (locationType === "hair" || locationType === "nail") ? removeTheService(info.id) : removeTheProduct(info.id)}>Delete</div>
+
+                    {isOwner === true && (
+                      <div className="item-actions">
+                        <div className="item-action" onClick={() => window.location = "/" + ((locationType === "hair" || locationType === "nail") ? "addservice" : "addproduct") + "/" + (id ? id : "null") + "/" + info.id}>Change</div>
+                        <div className="item-action" onClick={() => (locationType === "hair" || locationType === "nail") ? removeTheService(info.id) : removeTheProduct(info.id)}>Delete</div>
+                      </div>
+                    )}
                   </div>
                 </div>
               }
@@ -356,21 +366,7 @@ export default function Menu(props) {
       setUploadmenubox({ ...uploadMenubox, loading: true })
 
       let reader = new FileReader()
-      let letters = [
-        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
-        "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
-      ]
-      let photo_name_length = Math.floor(Math.random() * (15 - 10)) + 10
-      let char = ""
-
-      for (let k = 0; k <= photo_name_length - 1; k++) {
-        char += "" + (
-          k % 2 === 0 ? 
-            letters[Math.floor(Math.random() * letters.length)].toUpperCase()
-            :
-            Math.floor(Math.random() * 9) + 0
-        )
-      }
+      let char = getId()
 
       reader.onload = e => {
         let imageReader = new Image()
@@ -457,7 +453,7 @@ export default function Menu(props) {
                             {item.photo && (
                               <>
                                 <div className="menu-item-photo">
-                                  <img alt="" style={{ height: '100%', width: '100%' }} src={logo_url + item.photo.name}/>
+                                  <img alt="" style={resizePhoto(item.photo, width * 0.3)} src={logo_url + item.photo.name}/>
                                 </div>
 
                                 <div id="menu-photo-actions">
@@ -477,68 +473,21 @@ export default function Menu(props) {
               {menuInfo.list.length > 0 && menuInfo.list[0].listType === "list" ? 
                 displayList({ id: "", name: "", image: "", list: menuInfo.list, left: 0 })
                 :
-                <div id="menu-other">{displayList({ id: "", name: "", image: "", list: menuInfo.list, left: -50 })}</div>
+                <div id="menu-other">{displayList({ id: "", name: "", image: "", list: menuInfo.list })}</div>
               }
             </div>
-
+            
             {isOwner === true && (
-              <>
-                <div style={{ margin: '0 auto', marginTop: 20 }}>
-                  {menuInfo.photos.length > 0 && (
-                    !menuInfo.photos[0].row && 
-                      menuInfo.photos[0].listType === "list" ? 
-                        <div className="item-add" onClick={() => {
-                          if (menuInfo.photos.length === 0) {
-                            setCreateoptionbox({ show: true, id: "", allow: "both" })
-                          } else {
-                            window.location = "/addmenu/null/null"
-                          }
-                        }}>
-                          <div className="column">
-                            <div className="item-add-header">Add menu</div>
-                          </div>
-                          <FontAwesomeIcon icon={faCirclePlus} size="2x"/>
-                        </div>
-                        :
-                        <div className="item-add" onClick={() => {
-                          if (menuInfo.type !== "list") {
-                            if ((locationType === "hair" || locationType === "nail")) {
-                              window.location = "/addservice/null/null"
-                            } else {
-                              window.location = "/addproduct/null/null"
-                            }
-                          } else {
-                            window.location = "/addmenu/null/null"
-                          }
-                        }}>
-                          <div className="column">
-                            <div className="item-add-header">
-                              Add {' '}
-                              {menuInfo.photos[0].listType !== "list" ? 
-                                <>
-                                  {(locationType == "hair" || locationType == "nail") && "service"}
-                                  {locationType == "restaurant" && "meal"}
-                                  {locationType == "store" && "product"}
-                                </>
-                              : "menu"}
-                              </div>
-                          </div>
-                          <FontAwesomeIcon icon={faCirclePlus} size="2x"/>
-                        </div>
-                  )}
-                </div>
+              <div style={{ margin: '0 auto', marginTop: 50 }}>
+                {menuInfo.list.length === 0 && (
+                  <>
+                    <div className="menu-start" onClick={() => setCreateoptionbox({ show: true, id: "", allow: "both" })}>Add to list</div>
+                    <div id="menu-start-div">Or</div>
+                  </>
+                )}
 
-                <div style={{ margin: '0 auto', marginTop: 100 }}>
-                  <div className="menu-start" onClick={() => setCreateoptionbox({ show: true, id: "", allow: "both" })}>
-                    Click to add menu/
-                    {(locationType == "hair" || locationType == "nail") && "service"}
-                    {locationType == "restaurant" && "meal"}
-                    {locationType == "store" && "product"}
-                  </div>
-                  <div id="menu-start-div">Or</div>
-                  <div className="menu-start" onClick={() => setUploadmenubox({ ...uploadMenubox, show: true, uri: '', name: '' })}>Upload menu photo</div>
-                </div>
-              </>
+                <div className="menu-start" onClick={() => setUploadmenubox({ ...uploadMenubox, show: true, uri: '', name: '' })}>Upload menu photo</div>
+              </div>
             )}
           </div>
 
@@ -583,7 +532,12 @@ export default function Menu(props) {
                     } else {
                       window.location = "/addproduct/" + (!createOptionbox.id ? "null" : createOptionbox.id) + "/null"
                     }
-                  }}>Add {(locationType === "hair" || locationType === "nail") ? "service" : "food"}</div>
+                  }}>
+                    Add{' '}
+                    {(locationType == "hair" || locationType == "nail") && "service"}
+                    {locationType == "restaurant" && "meal"}
+                    {locationType == "store" && "product"}
+                  </div>
                 </div>
               </div>
             </div>
@@ -607,21 +561,11 @@ export default function Menu(props) {
                     <FontAwesomeIcon icon={faTimesCircle} size="3x"/>
                   </div>
                   
-                  {!uploadMenubox.uri ? 
-                    <div id="upload-menu-camera">
-                      <Webcam
-                        audio={false}
-                        ref={r => {setCamcomp(r)}}
-                        screenshotFormat="image/jpeg"
-                        videoConstraints={{ facingMode: 'user', width: 640, height: 480 }}
-                        width={'100%'}
-                      />
-                    </div>
-                    :
+                  {uploadMenubox.uri && (
                     <div id="upload-menu-camera">
                       <img alt="" style={{ height: '100%', width: '100%' }} src={uploadMenubox.uri}/>
                     </div>
-                  }
+                  )}
 
                   {!uploadMenubox.uri ? 
                     <div id="upload-menu-camera-actions">
@@ -643,11 +587,13 @@ export default function Menu(props) {
           )}
           {menuPhotooption.show && (
             <div id="menu-photo-option-container">
-              {menuPhotooption.info.name && (
-                <div id="menu-photo-option-photo" style={resizePhoto(menuPhotooption.info, width * 0.35)}>
-                  <img alt="" style={{ height: '100%', width: '100%' }} src={logo_url + menuPhotooption.info.name}/>
-                </div>
-              )}
+              <div id="menu-photo-option-photo" style={resizePhoto(menuPhotooption.info, width * 0.35)}>
+                <img 
+                  alt="" 
+                  style={{ height: '100%', width: '100%' }} 
+                  src={menuPhotooption.info.name ? logo_url + menuPhotooption.info.name : "/noimage.jpeg"}
+                />
+              </div>
 
               {menuPhotooption.action === "delete" ? 
                 <div id="menu-photo-option-bottom-container">
@@ -672,11 +618,9 @@ export default function Menu(props) {
                 <div id="menu-info-box-header">Delete menu confirmation</div>
 
                 <div style={{ margin: '0 auto' }}>
-                  {removeMenuinfo.image.name && (
-                    <div id="menu-info-image-holder" style={resizePhoto(removeMenuinfo.image, width * 0.5)}>
-                      <img alt="" src={logo_url + removeMenuinfo.image.name}/>
-                    </div>
-                  )}
+                  <div id="menu-info-image-holder" style={resizePhoto(removeMenuinfo.image, width * 0.5)}>
+                    <img alt="" src={removeMenuinfo.image.name ? logo_url + removeMenuinfo.image.name : "/noimage.jpeg"}/>
+                  </div>
 
                   <div id="menu-info-name">{removeMenuinfo.name}</div>
                 </div>
@@ -695,11 +639,10 @@ export default function Menu(props) {
               <div id="product-info-box">
                 <div id="product-info-box-header">Delete product confirmation</div>
 
-                {removeProductinfo.image.name && (
-                  <div id="product-info-image-holder" style={resizePhoto(removeProductinfo.image, (width * 0.5))}>
-                    <img alt="" style={{ height: '100%', width: '100%' }} src={logo_url + removeProductinfo.image.name}/>
-                  </div>
-                )}
+                <div id="product-info-image-holder" style={resizePhoto(removeProductinfo.image, (width * 0.5))}>
+                  <img alt="" style={{ height: '100%', width: '100%' }} src={removeProductinfo.image.name ? logo_url + removeProductinfo.image.name : "/noimage.jpeg"}/>
+                </div>
+
                 <div id="product-info-name">{removeProductinfo.name}</div>
 
                 <div style={{ margin: '0 auto' }}>
@@ -744,11 +687,9 @@ export default function Menu(props) {
               <div id="service-info-box">
                 <div id="service-info-box-header">Delete service confirmation</div>
 
-                {removeServiceinfo.image.name && (
-                  <div id="service-info-image-holder" style={resizePhoto(removeServiceinfo.image, width * 0.5)}>
-                    <img alt="" style={{ height: '100%', width: '100%' }} src={logo_url + removeServiceinfo.image.name}/>
-                  </div>
-                )}
+                <div id="service-info-image-holder" style={resizePhoto(removeServiceinfo.image, width * 0.5)}>
+                  <img alt="" style={{ height: '100%', width: '100%' }} src={removeServiceinfo.image.name ? logo_url + removeServiceinfo.image.name : "/noimage.jpeg"}/>
+                </div>
 
                 <div id="service-info-name">{removeServiceinfo.name}</div>
                 <div id="service-info-price"><div style={{ fontWeight: 'bold' }}>Price: </div>$ {(removeServiceinfo.price).toFixed(2)}</div>

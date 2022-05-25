@@ -2,19 +2,19 @@ import axios from 'axios'
 import { url } from '../../businessInfo'
 
 export const verifyUser = cellnumber => {
-	return axios.get(`${url}/owners/verify/${cellnumber}`)
+	return axios.get(`${url}/owners/owner_verify/${cellnumber}`)
 }
 
 export const loginUser = data => {
 	return axios.post(
-		`${url}/owners/login`,
+		`${url}/owners/owner_login`,
 		data
 	)
 }
 
 export const registerUser = data => {
   return axios.post(
-    `${url}/owners/register`,
+    `${url}/owners/owner_register`,
     data
   )
 }

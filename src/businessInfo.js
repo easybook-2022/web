@@ -1,7 +1,5 @@
 import io from 'socket.io-client'
-
-const local_url = true
-const test_input = true
+import { local_url, test_input, useInput } from './info'
 
 const testStores = [
   { id: 0, storeName: "Hair salon", storeType: "hair", phonenumber: "(900) 000-0000", addressOne: "642 Gerrard St E", addressTwo: "", city: "Toronto", province: "ON", postalcode: "M4M1Y3", longitude: -79.3505832, latitude: 43.6660751 },
@@ -32,11 +30,9 @@ const testOwners = [
 const realOwner = { id: 0, username: 'kevin', cellnumber: "(647) 926-3868", password: "password" }
 const emptyOwner = { username: "", cellnumber: "", password: "" }
 
-const useInput = true
-
 const login = test_input ? testStores[0] : useInput ? realStores[0] : emptyStore
 const ownerLogin = test_input ? testOwners[0] : useInput ? realOwner : emptyOwner
-const register = test_input ? testStores[2] : useInput ? realStores[0] : emptyStore
+const register = test_input ? testStores[1] : useInput ? realStores[0] : emptyStore
 const ownerRegister = test_input ? testOwners[0] : useInput ? realOwner : emptyOwner
 
 const wifi_api_url = "http://192.168.0.172:5001/flask"

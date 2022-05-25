@@ -66,7 +66,7 @@ export default function List(props) {
 
               window.location = "/main"
             }}>
-              <div className="logo" style={resizePhoto(location.logo, 200)}>
+              <div className="location-image-holder" style={resizePhoto(location.logo, 200)}>
                 <img style={{ height: '100%', width: '100%' }} src={logo_url + location.logo.name}/>
               </div>
               <div className="column">

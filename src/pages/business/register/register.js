@@ -1,14 +1,14 @@
 import './register.scss';
 import React, { useState, useEffect } from 'react';
-import Webcam from "react-webcam";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons'
+import { getId, resizePhoto } from 'geottuse-tools';
 import { saveUserInfo } from '../../../apis/business/owners'
 import { getLocationProfile } from '../../../apis/business/locations'
 import { ownerRegisterInfo, registerInfo, timeControl } from '../../../businessInfo'
 
-// components
-import Loadingprogress from '../../../components/loadingprogress';
+// widgets
+import Loadingprogress from '../../../widgets/loadingprogress';
 
 const width = window.innerWidth
 const height = window.innerHeight
@@ -255,20 +255,10 @@ export default function Register(props) {
       "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
       "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
     ]
-    let photo_name_length = Math.floor(Math.random() * (15 - 10)) + 10
-    let char = ""
+    let char = getId()
 
     if (camComp) {
       let uri = camComp.getScreenshot({ height: (width * 0.3) - 130, width: width * 0.3 });
-
-      for (let k = 0; k <= photo_name_length - 1; k++) {
-        char += "" + (
-          k % 2 === 0 ? 
-            letters[Math.floor(Math.random() * letters.length)].toUpperCase()
-            :
-            Math.floor(Math.random() * 9) + 0
-        )
-      }
 
       setProfile({ uri, name: `${char}.jpg`, size: { height: (width * 0.3) - 130, width: width * 0.3 }})
       setLoading(false)
@@ -277,21 +267,7 @@ export default function Register(props) {
   const choosePhoto = e => {
     if (e.target.files && e.target.files[0]) {
       let reader = new FileReader()
-      let letters = [
-        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
-        "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
-      ]
-      let photo_name_length = Math.floor(Math.random() * (15 - 10)) + 10
-      let char = ""
-
-      for (let k = 0; k <= photo_name_length - 1; k++) {
-        char += "" + (
-          k % 2 === 0 ? 
-            letters[Math.floor(Math.random() * letters.length)].toUpperCase()
-            :
-            Math.floor(Math.random() * 9) + 0
-        )
-      }
+      let char = getId()
 
       reader.onload = e => {
         let imageReader = new Image()
@@ -376,7 +352,7 @@ export default function Register(props) {
               {profile.uri ? (
                 <>
                   <div id="camera">
-                    <img alt="" style={{ height: (width * 0.3) - 130, width: width * 0.3 }} src={profile.uri}/>
+                    <img alt="" style={resizePhoto(profile.size, width * 0.3)} src={profile.uri}/>
                   </div>
 
                   <div id="camera-actions">

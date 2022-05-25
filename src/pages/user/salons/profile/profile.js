@@ -10,8 +10,12 @@ import { getLocationProfile } from '../../../../apis/user/locations';
 import { getMenus } from '../../../../apis/user/menus';
 import { getNumCartItems } from '../../../../apis/user/carts';
 
+// components
 import Orders from '../../../../components/user/orders'
-import Userauth from '../../../../components/user/userauth'
+
+// widgets
+import Userauth from '../../../../widgets/user/userauth'
+import Menus from '../../../../widgets/user/menus'
 
 const width = window.innerWidth
 const height = window.innerHeight
@@ -25,12 +29,10 @@ export default function Profile(props) {
   const [address, setAddress] = useState('')
   const [phonenumber, setPhonenumber] = useState('')
   const [distance, setDistance] = useState(0)
-  const [showAuth, setShowauth] = useState(false)
+  const [showAuth, setShowauth] = useState({ show: false, action: "" })
   const [showInfo, setShowinfo] = useState({ show: false, workerHours: [] })
+  const [refetchMenu, setRefetchmenu] = useState(0)
   const [userId, setUserid] = useState(null)
-
-  const [serviceInfo, setServiceinfo] = useState('')
-  const [menuInfo, setMenuinfo] = useState({ list: [], photos: [], error: false })
 
   const [loaded, setLoaded] = useState(false)
 
@@ -80,24 +82,6 @@ export default function Profile(props) {
           setAddress(fullAddress)
           setPhonenumber(phonenumber)
           setDistance(distance)
-        }
-      })
-      .catch((err) => {
-        if (err.response && err.response.status === 400) {
-          const { errormsg, status } = err.response.data
-        }
-      })
-  }
-  const getAllMenus = () => {
-    getMenus(locationid)
-      .then((res) => {
-        if (res.status === 200) {
-          return res.data
-        }
-      })
-      .then((res) => {
-        if (res) {
-          setMenuinfo({ ...menuInfo, list: res.list, photos: res.photos })
           setLoaded(true)
         }
       })
@@ -110,70 +94,6 @@ export default function Profile(props) {
   const initialize = () => {
     getTheNumCartItems()
     getTheLocationProfile()
-    getAllMenus()
-  }
-  const displayList = info => {
-    let { id, image, name, list, left } = info
-    
-    return (
-      <div style={{ marginLeft: left }}>
-        {name ?
-          <div className="menu">
-            <div className="menu-row">
-              <div className="menu-image-holder">
-                {image.name && <img alt="" className="menu-image" style={resizePhoto(image, 50)} src={logo_url + image.name}/>}
-              </div>
-              <div className="menu-name">{name} (Menu)</div>
-            </div>
-            {list.length > 0 && list.map((info, index) => (
-              <div key={"list-" + index}>
-                {info.listType === "list" ? 
-                  displayList({ id: info.id, name: info.name, image: info.image, list: info.list, left: left + 10 })
-                  :
-                  <div className="item">
-                    <div className="item-image-holder">
-                      {info.image.name && <img alt="" className="item-image" style={resizePhoto(info.image, 100)} src={logo_url + info.image.name}/>}
-                    </div>
-                    <div className="column">
-                      <div className="item-header">{info.name}</div>
-                    </div>
-                    <div className="column">
-                      <div className="item-header">{info.price ? '$' + info.price : info.sizes.length + ' size(s)'}</div>
-                    </div>
-                    <div className="column">
-                      <div className="item-action" onClick={() => window.location = "/booktime/" + locationid + "/null/" + info.id + "/null"}>Book a time</div>
-                    </div>
-                  </div>
-                }
-              </div>
-            ))}
-          </div>
-          :
-          list.map((info, index) => (
-            <div key={"list-" + index}>
-              {info.listType === "list" ? 
-                displayList({ id: info.id, name: info.name, image: info.image, list: info.list, left: left + 10 })
-                :
-                <div className="item">
-                  <div className="item-image-holder">
-                    {info.image.name && <img alt="" className="item-image" style={resizePhoto(info.image, 100)} src={logo_url + info.image.name}/>}
-                  </div>
-                  <div className="column">
-                    <div className="item-header">{info.name}</div>
-                  </div>
-                  <div className="column">
-                    <div className="item-header">{info.price ? '$' + info.price : info.sizes.length + ' size(s)'}</div>
-                  </div>
-                  <div className="column">
-                    <div className="item-action" onClick={() => window.location = "/booktime/" + locationid + "/null/" + info.id + "/null"}>Book a time</div>
-                  </div>
-                </div>
-              }
-            </div>
-          ))
-        }
-      </div>
-    )
   }
   const getTheWorkersTime = () => {
     getWorkersTime(locationid)
@@ -209,7 +129,7 @@ export default function Profile(props) {
               <div className="header-action" onClick={() => getTheWorkersTime()}>View Salon<br/>Info</div>
             </div>
             <div className="column">
-              <div className="header-action" onClick={() => getAllMenus()}>Refresh<br/>Menu</div>
+              <div className="header-action" onClick={() => setRefetchmenu(!refetchMenu)}>Refresh<br/>Menu</div>
             </div>
             <div className="column">
               <div className="header-action" onClick={() => {}}>Call</div>
@@ -217,40 +137,11 @@ export default function Profile(props) {
           </div>
 
           <div id="body">
-            {(menuInfo.photos.length > 0 || menuInfo.list.length > 0) && (
-              <>
-                <div id="menu-input-box">
-                  <div id="menu-input-container">
-                    <input id="menu-input" type="text" placeholder="Enter service # or name" onChange={e => {
-                      setServiceinfo(e.target.value)
-                      setMenuinfo({ ...menuInfo, error: false })
-                    }}/>
-                  </div>
-                  <div id="menu-input-touch" onClick={() => {
-                    if (serviceInfo) {
-                      window.location = "/booktime/" + locationid + "/null/null/" + serviceInfo
-                    } else setMenuinfo({ ...menuInfo, error: true })
-                  }}>Book now</div>
-                </div>
-                {menuInfo.error && <div id="menu-input-error">Your request is empty</div>}
-              </>
-            )}
-
-            {menuInfo.photos.length > 0 && (
-              menuInfo.photos[0].row && (
-                menuInfo.photos.map(info => (
-                  info.row.map(item => (
-                    item.photo && (
-                      <div key={item.key} className="menu-photo" style={resizePhoto(item.photo, wsize(95))}>
-                        <img alt="" style={{ height: '100%', width: '100%' }} src={logo_url + item.photo.name}/>
-                      </div>
-                    )
-                  ))
-                ))
-              )
-            )}
-
-            {displayList({ id: "", name: "", image: "", list: menuInfo.list, left: 0 })}
+            <Menus
+              locationid={locationid}
+              refetchMenu={refetchMenu}
+              type="salon"
+            />
           </div>
 
           <div id="bottom-navs">
@@ -283,7 +174,7 @@ export default function Profile(props) {
                       setUserid(null)
                     })
                   } else {
-                    setShowauth(true)
+                    setShowauth({ ...showAuth, show: true })
                   }
                 }}>
                   {userId ? 'Log-Out' : 'Log-In'}
@@ -366,3 +257,14 @@ export default function Profile(props) {
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
+
+

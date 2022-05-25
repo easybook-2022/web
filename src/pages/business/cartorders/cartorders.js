@@ -8,7 +8,8 @@ import { resizePhoto } from 'geottuse-tools'
 import { getOrders } from '../../../apis/business/schedules'
 import { orderDone, setWaitTime } from '../../../apis/business/carts'
 
-import Loadingprogress from '../../../components/loadingprogress'
+// widgets
+import Loadingprogress from '../../../widgets/loadingprogress'
 
 const width = window.innerWidth
 const height = window.innerHeight
@@ -125,7 +126,11 @@ export default function Cartorders(props) {
           <div className="item" key={item.key}>
             <div className="item-row">
               <div className="item-image-holder">
-                {item.image.name && <img alt="" src={logo_url + item.image.name} style={resizePhoto(item.image, width * 0.1)} className="item-image"/>}
+                <img 
+                  alt="" 
+                  src={item.image.name ? logo_url + item.image.name : "/noimage.jpeg"} 
+                  style={resizePhoto(item.image, width * 0.1)} className="item-image"
+                />
               </div>
 
               <div className="item-infos">

@@ -331,11 +331,9 @@ export default function Notification(props) {
                         <div className="item-location-image-holder">
                           <img src={logo_url + item.locationimage.name} style={{ height: '100%', width: '100%' }}/>
                         </div>
-                        {item.serviceimage ? 
-                          <div className="item-service-image-holder">
-                            <img src={logo_url + item.serviceimage.name} style={{ height: '100%', width: '100%' }}/>
-                          </div>
-                        : null }
+                        <div className="item-service-image-holder">
+                          <img src={item.serviceimage.name ? logo_url + item.serviceimage.name : "/noimage.jpeg"} style={{ height: '100%', width: '100%' }}/>
+                        </div>
                       </div>
                       <div style={{ flexDirection: 'column', width: wsize(70) }}>
                         <div className="item-service-header">

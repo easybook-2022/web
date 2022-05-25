@@ -1,7 +1,5 @@
 import io from 'socket.io-client'
-
-const local_url = true
-const test_input = true
+import { local_url, test_input, useInput } from './info'
 
 const testUsers = [
   { id: 0, username: "robogram", cellnumber: "(000) 000-0000", password: "password", confirmPassword: "password" },
@@ -24,8 +22,6 @@ const realUsers = [
   { id: 0, username: "kevin", cellnumber: "(647) 926-3868", password: "password", confirmPassword: "password" }
 ]
 const emptyUser = { username: "", cellnumber: "", password: "", confirmPassword: "" }
-
-const useInput = true
 
 const login = test_input ? testUsers[0] : useInput ? realUsers[0] : emptyUser
 const register = test_input ? testUsers[0] : useInput ? realUsers[0] : emptyUser
