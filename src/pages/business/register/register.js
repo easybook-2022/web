@@ -5,7 +5,7 @@ import { faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons'
 import { getId, resizePhoto } from 'geottuse-tools';
 import { saveUserInfo } from '../../../apis/business/owners'
 import { getLocationProfile } from '../../../apis/business/locations'
-import { ownerRegisterInfo, registerInfo, timeControl } from '../../../businessInfo'
+import { ownerSigninInfo, timeControl } from '../../../businessInfo'
 
 // widgets
 import Loadingprogress from '../../../widgets/loadingprogress';
@@ -21,7 +21,7 @@ export default function Register(props) {
   const [camComp, setCamcomp] = useState(null)
   const [fileComp, setFilecomp] = useState(null)
   const [camType, setCamtype] = useState('front')
-  const [username, setUsername] = useState(ownerRegisterInfo.username)
+  const [username, setUsername] = useState(ownerSigninInfo.username)
   const [profile, setProfile] = useState({ uri: '', name: '', size: { width: 0, height: 0 }})
 
   const [type, setType] = useState('')
@@ -346,8 +346,7 @@ export default function Register(props) {
 
           {setupType === "profile" && (
             <div id="camera-container">
-              <div className="input-header">Provide a photo of yourself</div>
-              <div id="input-info">clients will be able to find and book you easily</div>
+              <div className="input-header">Upload a picture of your face for clients (optional)</div>
 
               {profile.uri ? (
                 <>
@@ -373,11 +372,9 @@ export default function Register(props) {
 
           {setupType === "hours" && (
             <>
-              <div className="input-header">Set your working days and hours</div>
-
               {!daysInfo.done ? 
                 <div style={{ width: '100%' }}>
-                  <div id="worker-day-header">Tap the days you work on</div>
+                  <div id="worker-day-header">What days do you work ?</div>
 
                   {daysArr.map((day, index) => (
                     <div key={index} className={
@@ -401,12 +398,12 @@ export default function Register(props) {
                 </div>
                 :
                 <div id="worker-hours">
-                  <div id="worker-hours-back" onClick={() => setDaysinfo({ working: ['', '', '', '', '', '', ''], done: false })}>Go Back</div>
+                  <div id="worker-hours-back" onClick={() => setDaysinfo({ ...daysInfo, done: false })}>Change days</div>
 
                   {workerHours.map((info, index) => (
                     info.working ?
                       <div key={index} className="worker-hour">
-                        <div className="worker-hour-header"><div style={{ fontWeight: '300' }}>Your working time for</div> {info.header}</div>
+                        <div className="worker-hour-header">Your hours on {info.header}</div>
 
                         <div className="time-selection-container">
                           <div className="time-selection">

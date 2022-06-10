@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { url } from '../../businessInfo'
+import { url } from '../../info'
 
 export const registerLocation = data => {
 	return axios.post(
@@ -80,7 +80,7 @@ export const fetchNumorders = id => {
 
 export const setLocationHours = data => {
 	return axios.post(
-		`${url}/locations/set_hours`,
+		`${url}/locations/set_location_hours`,
 		data
 	)
 }
@@ -92,11 +92,15 @@ export const setReceiveType = data => {
   )
 }
 
-export const getLocationHours = data => {
-	return axios.post(
-		`${url}/locations/get_hours`,
-		data
-	)
+export const getDayHours = data => {
+  return axios.post(
+    `${url}/locations/get_day_hours`,
+    data
+  )
+}
+
+export const getLocationHours = id => {
+	return axios.get(`${url}/locations/get_location_hours/${id}`)
 }
 
 export const getAllLocations = id => {

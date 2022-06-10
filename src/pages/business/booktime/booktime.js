@@ -4,11 +4,11 @@ import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleNotch, faArrowLeft, faArrowRight, faShoppingBasket, faHome } from '@fortawesome/fontawesome-free-solid'
 import { faGear } from '@fortawesome/free-solid-svg-icons'
-import { socket, url, logo_url } from '../../../businessInfo'
+import { socket, logo_url } from '../../../businessInfo'
 import { displayTime, resizePhoto } from 'geottuse-tools'
-import { getServiceInfo } from '../../../apis/business/services'
+
 import { getLocationHours } from '../../../apis/business/locations'
-import { getWorkers, getWorkerInfo, getAllWorkersTime } from '../../../apis/business/owners'
+import { getAllStylists, getStylistInfo, getAllWorkersTime, logoutUser } from '../../../apis/business/owners'
 import { getAppointmentInfo, salonChangeAppointment } from '../../../apis/business/schedules'
 
 const wsize = p => {return window.innerWidth * (p / 100)}
@@ -23,7 +23,7 @@ export default function Booktime(props) {
   const [clientInfo, setClientinfo] = useState({ id: -1, name: "" })
   const [name, setName] = useState()
   const [allWorkers, setAllworkers] = useState({})
-  const [scheduledTimes, setScheduledtimes] = useState([])
+  const [hoursInfo, setHoursinfo] = useState({})
   const [oldTime, setOldtime] = useState(0)
   const [openTime, setOpentime] = useState({ hour: 0, minute: 0 })
   const [closeTime, setClosetime] = useState({ hour: 0, minute: 0 })
@@ -70,7 +70,7 @@ export default function Booktime(props) {
   const getTheAppointmentInfo = () => {
     getAppointmentInfo(scheduleid)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })
@@ -78,17 +78,15 @@ export default function Booktime(props) {
         if (res) {
           const { client, locationId, name, time, worker } = res.appointmentInfo
 
-          const { day, month, date, year, hour, minute } = time
-          const unixtime = Date.parse(day + " " + month + " " + date + " " + year + " " + hour + ":" + minute)
-
           setClientinfo({ ...clientInfo, ...client })
           setName(name)
-          setOldtime(unixtime)
+          setOldtime(jsonDateToUnix(time))
           setSelectedworkerinfo(prev => ({ ...prev, worker }))
+          getTheLocationHours(jsonDateToUnix(time))
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status == 400) {
+        if (err.response && err.response.status === 400) {
           const { errormsg, status } = err.response.data
         }
       })
@@ -99,14 +97,15 @@ export default function Booktime(props) {
     let currTime = new Date(), currDate = 0, currDay = ''
     let datenow = Date.parse(days[currTime.getDay()] + " " + months[currTime.getMonth()] + " " + currTime.getDate() + " " + year)
     let firstDay = (new Date(year, month)).getDay(), numDays = 32 - new Date(year, month, 32).getDate(), daynum = 1
-    let data = calendar.data, datetime = 0
+    let data = calendar.data, datetime = 0, hourInfo, timeNow, hourNow = currTime.getHours(), minuteNow = currTime.getMinutes()
+    let current, now, newMonth, newYear
 
     data.forEach(function (info, rowindex) {
       info.row.forEach(function (day, dayindex) {
         day.num = 0
         day.noservice = false
 
-        if (rowindex == 0) {
+        if (rowindex === 0) {
           if (dayindex >= firstDay) {
             datetime = Date.parse(days[dayindex] + " " + months[month] + " " + daynum + " " + year)
 
@@ -134,9 +133,23 @@ export default function Booktime(props) {
           daynum++
         }
 
-        if (day.num > 0 && (!day.passed && !day.noservice) && currDate == 0) {
-          currDate = day.num
-          currDay = days[dayindex]
+        if (day.num > 0 && (!day.passed && !day.noservice) && currDate === 0) {
+          currDay = days[dayindex].substr(0, 3)
+
+          if (currDay in hoursInfo) {
+            hourInfo = hoursInfo[currDay]
+
+            current = Date.parse(days[dayindex] + " " + months[month] + ", " + day.num + " " + year + " " + hourInfo["closeHour"] + ":" + hourInfo["closeMinute"])
+            now = Date.now()
+
+            if (now < current) {
+              currDate = day.num
+            } else {
+              day.passed = true
+            }
+          } else {
+            day.noservice = true
+          }
         }
       })
     })
@@ -145,14 +158,14 @@ export default function Booktime(props) {
 
     return { currDate, currDay }
   }
-  const getTimes = () => {
-    const { month, day, date, year } = selectedDateinfo
+  const getTimes = (date, day) => {
+    const { month, year } = selectedDateinfo
     let start = day in allWorkers ? allWorkers[day][0]["start"] : openTime.hour + ":" + openTime.minute
     let end = day in allWorkers ? allWorkers[day][0]["end"] : closeTime.hour + ":" + closeTime.minute
     let openStr = month + " " + date + ", " + year + " " + start
     let closeStr = month + " " + date + ", " + year + " " + end
     let openDateStr = Date.parse(openStr), closeDateStr = Date.parse(closeStr), calcDateStr = openDateStr
-    let currenttime = Date.now(), newTimes = [], timesRow = [], timesNum = 0, firstTime = true
+    let currenttime = Date.now(), newTimes = [], timesRow = [], timesNum = 0
 
     while (calcDateStr < (closeDateStr - pushtime)) {
       calcDateStr += pushtime
@@ -164,7 +177,7 @@ export default function Booktime(props) {
 
       let timedisplay = (
         hour <= 12 ? 
-          (hour == 0 ? 12 : hour) 
+          (hour === 0 ? 12 : hour) 
           : 
           hour - 12
         ) 
@@ -172,7 +185,7 @@ export default function Booktime(props) {
         (minute < 10 ? '0' + minute : minute) + " " + period
 
       let timepassed = currenttime > calcDateStr
-      let timetaken = scheduledTimes.indexOf(calcDateStr) > -1
+      let timetaken = false
       let availableService = false, workerIds = []
 
       if (selectedWorkerinfo.worker != null && day.substr(0, 3) in selectedWorkerinfo.worker.days) {
@@ -208,14 +221,14 @@ export default function Booktime(props) {
         }
       }
 
-      if (!timepassed && !timetaken && availableService == true) {
+      if (!timepassed && !timetaken && availableService === true) {
         timesRow.push({
           key: timesNum.toString(), header: timedisplay, 
           time: calcDateStr, workerIds
         })
         timesNum++
 
-        if (timesRow.length == 3) {
+        if (timesRow.length === 3) {
           newTimes.push({ key: newTimes.length, row: timesRow })
           timesRow = []
         }
@@ -235,20 +248,20 @@ export default function Booktime(props) {
   const getTheLocationHours = async(time) => {
     const locationid = localStorage.getItem("locationid")
     const day = selectedDateinfo.day ? selectedDateinfo.day : new Date(Date.now()).toString().split(" ")[0]
-    const data = { locationid, day: day.substr(0, 3) }
 
-    getLocationHours(data)
+    getLocationHours(locationid)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })
       .then((res) => {
         if (res) {
-          const { openTime, closeTime, scheduled } = res
+          const { hours } = res
+          const timeInfo = hours[day.substr(0, 3)]
 
-          let openHour = openTime.hour, openMinute = openTime.minute, openPeriod = openTime.period
-          let closeHour = closeTime.hour, closeMinute = closeTime.minute, closePeriod = closeTime.period
+          let openHour = timeInfo["openHour"], openMinute = timeInfo["openMinute"], openPeriod = timeInfo["openPeriod"]
+          let closeHour = timeInfo["closeHour"], closeMinute = timeInfo["closeMinute"], closePeriod = timeInfo["closePeriod"]
 
           let selectedTime = new Date(time)
           let selectedDay = null, selectedDate = null, selectedMonth = null
@@ -259,24 +272,24 @@ export default function Booktime(props) {
 
           getCalendar(selectedTime.getMonth(), selectedTime.getFullYear())
           setSelecteddateinfo({ month: selectedMonth, year: selectedTime.getFullYear(), day: selectedDay.substr(0, 3), date: selectedDate, time })
-          setScheduledtimes(scheduled)
-          setOpentime({ hour: openHour, minute: openMinute })
-          setClosetime({ hour: closeHour, minute: closeMinute })
+          setHoursinfo(hours)
+          setOpentime({ ...openTime, hour: openHour, minute: openMinute })
+          setClosetime({ ...closeTime, hour: closeHour, minute: closeMinute })
           setLoaded(true)
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status == 400) {
+        if (err.response && err.response.status === 400) {
           const { errormsg, status } = err.response.data
         }
       })
   }
-  const getTheWorkers = () => {
+  const getAllTheStylists = () => {
     const locationid = localStorage.getItem("locationid")
 
-    getWorkers(locationid)
+    getAllStylists(locationid)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })
@@ -286,7 +299,7 @@ export default function Booktime(props) {
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status == 400) {
+        if (err.response && err.response.status === 400) {
           const { errormsg, status } = err.response.data
         }
       })
@@ -296,7 +309,7 @@ export default function Booktime(props) {
 
     getAllWorkersTime(locationid)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })
@@ -306,7 +319,7 @@ export default function Booktime(props) {
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status == 400) {
+        if (err.response && err.response.status === 400) {
           const { errormsg, status } = err.response.data
         }
       })
@@ -314,9 +327,9 @@ export default function Booktime(props) {
   const selectWorker = id => {
     setSelectedworkerinfo({ ...selectedWorkerinfo, loading: true })
 
-    getWorkerInfo(id)
+    getStylistInfo(id)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })
@@ -324,7 +337,7 @@ export default function Booktime(props) {
         if (res) {
           selectedWorkerinfo.workers.forEach(function (item) {
             item.row.forEach(function (worker) {
-              if (worker.id == id) {
+              if (worker.id === id) {
                 let workerinfo = {...worker, days: res.days }
 
                 setSelectedworkerinfo({ ...selectedWorkerinfo, show: false, worker: workerinfo, loading: false })
@@ -343,7 +356,7 @@ export default function Booktime(props) {
 
     let month = months.indexOf(selectedDateinfo.month), year = selectedDateinfo.year
 
-    month = dir == 'left' ? month - 1 : month + 1
+    month = dir === 'left' ? month - 1 : month + 1
 
     if (month < 0) {
       month = 11
@@ -365,12 +378,10 @@ export default function Booktime(props) {
     let closeStr = month + " " + date + ", " + year + " " + closeTime.hour + ":" + closeTime.minute
     let openDateStr = Date.parse(openStr), day = new Date(openDateStr).toString().split(" ")[0]
 
-    setSelecteddateinfo({ ...selectedDateinfo, date, day: day.substr(0, 3) })
-    getAllTheWorkersTime()
+    setStep(2)
+    getTimes(date, day.substr(0, 3))
   }
   const selectTime = (name, timeheader, time, workerIds) => {
-    const { month, date, year } = selectedDateinfo
-
     setSelecteddateinfo({ ...selectedDateinfo, name, time })
     setConfirm({ ...confirm, show: true, service: name ? name : serviceinfo, time, workerIds })
   }
@@ -400,13 +411,13 @@ export default function Booktime(props) {
 
     salonChangeAppointment(data)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })
       .then((res) => {
         if (res) {
-          data = { ...data, receiver: res.receiver, time: JSON.parse(selecteddate) }
+          data = { ...data, receiver: res.receiver, time }
           socket.emit("socket/salonChangeAppointment", data, () => {
             setConfirm({ ...confirm, requested: true, loading: false })
 
@@ -421,33 +432,42 @@ export default function Booktime(props) {
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status == 400) {
+        if (err.response && err.response.status === 400) {
           const { errormsg, status } = err.response.data
 
           setConfirm({ ...confirm, errorMsg: errormsg })
         }
       })
   }
+  const jsonDateToUnix = date => {
+    return Date.parse(date["day"] + " " + date["month"] + " " + date["date"] + " " + date["year"] + " " + date["hour"] + ":" + date["minute"])
+  }
 
   const logout = () => {
     const ownerid = localStorage.getItem("ownerid")
 
-    socket.emit("socket/business/logout", ownerid, () => {
-      localStorage.clear()
+    logoutUser(ownerid)
+      .then((res) => {
+        if (res.status === 200) {
+          return res.data
+        }
+      })
+      .then((res) => {
+        if (res) {
+          socket.emit("socket/business/logout", ownerid, () => {
+            localStorage.clear()
 
-      window.location = "/auth"
-    })
+            window.location = "/auth"
+          })
+        }
+      })
   }
 
   useEffect(() => {
-    getTheWorkers()
+    getAllTheStylists()
     getAllTheWorkersTime()
     getTheAppointmentInfo()
   }, [])
-
-  useEffect(() => {
-    getTheLocationHours(oldTime)
-  }, [selectedWorkerinfo.worker != null])
 
   return (
     <div id="business-booktime">
@@ -472,7 +492,11 @@ export default function Booktime(props) {
                         info.id ? 
                           <div key={info.key} className="worker" style={{ backgroundColor: (selectedWorkerinfo.worker && selectedWorkerinfo.worker.id === info.id) ? 'rgba(0, 0, 0, 0.3)' : null }} disabled={selectedWorkerinfo.loading} onClick={() => selectWorker(info.id)}>
                             <div className="worker-profile">
-                              {info.profile.name && <img alt="" src={logo_url + info.profile.name} style={resizePhoto(info.profile, 70)}/>}
+                              <img 
+                                alt="" 
+                                src={info.profile.name ? logo_url + info.profile.name : "/profilepicture.jpg"} 
+                                style={resizePhoto(info.profile, 70)}
+                              />
                             </div>
                             <div className="worker-header">{info.username}</div>
                           </div>
@@ -482,15 +506,6 @@ export default function Booktime(props) {
                     </div>
                   ))}
                 </div>
-
-                {selectedWorkerinfo.worker !== null && (
-                  <div id="choose-worker-actions">
-                    <div className="choose-worker-action" onClick={() => {
-                      setSelectedworkerinfo({ ...selectedWorkerinfo, worker: null })
-                      getAllTheWorkersTime()
-                    }}>Cancel</div>
-                  </div>
-                )}
               </div>
             )}
             
@@ -526,25 +541,9 @@ export default function Booktime(props) {
                                   <div key={day.key} disabled={true} className="day-touch" style={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}>{day.num}</div>
                                 :
                                 selectedDateinfo.date === day.num ? 
-                                  <div key={day.key} className="day-touch" style={{ backgroundColor: 'black', color: 'white' }} onClick={() => {
-                                    if (selectedWorkerinfo.worker !== null) {
-                                      selectWorker(selectedWorkerinfo.worker.id)
-                                    } else {
-                                      getAllTheWorkersTime()
-                                    }
-
-                                    selectDate(day.num)
-                                  }}>{day.num}</div>
+                                  <div key={day.key} className="day-touch" style={{ backgroundColor: 'black', color: 'white' }} onClick={() => selectDate(day.num)}>{day.num}</div>
                                   :
-                                  <div key={day.key} className="day-touch" onClick={() => {
-                                    if (selectedWorkerinfo.worker !== null) {
-                                      selectWorker(selectedWorkerinfo.worker.id)
-                                    } else {
-                                      getAllTheWorkersTime()
-                                    }
-
-                                    selectDate(day.num)
-                                  }}>{day.num}</div>
+                                  <div key={day.key} className="day-touch" onClick={() => selectDate(day.num)}>{day.num}</div>
                               :
                               <div key={"calendar-header-" + rowindex + "-" + dayindex} className="day-touch-disabled"></div>
                           ))}
@@ -579,44 +578,27 @@ export default function Booktime(props) {
             )}
 
             <div id="actions">
-              {step > 0 && (
+              <div className="action" onClick={() => {
+                switch (step) {
+                  case 0:
+                    window.location = "/main"
+
+                    break;
+                  case 1:
+                    setSelectedworkerinfo({ ...selectedWorkerinfo, worker: null })
+
+                    break;
+                  default:
+                }
+
+                setStep(step - 1)
+              }}>Back</div>
+
+              {step === 0 && (
                 <div className="action" onClick={() => {
-                  if (selectedWorkerinfo.worker !== null) {
-                    selectWorker(selectedWorkerinfo.worker.id)
-                  } else {
-                    getAllTheWorkersTime()
-                  }
-
-                  setStep(step - 1)
-                }}>Back</div>
-              )}
-
-              {step < 2 && (
-                <div className="action" onClick={() => {
-                  switch (step) {
-                    case 0:
-                      if (selectedWorkerinfo.worker !== null) {
-                        selectWorker(selectedWorkerinfo.worker.id)
-                      }
-
-                      getTheLocationHours(oldTime)
-
-                      setStep(1)
-
-                      break
-                    case 1:
-                      if (selectedDateinfo.date > 0) {
-                        setStep(2)
-                        getTimes()
-                      } else {
-                        setCalendar({ ...calendar, errorMsg: "Please tap on a day" })
-                      }
-
-                      break;
-                    default:
-                      setStep(step + 1)
-                  }
-                }}>Next</div>
+                  getTheLocationHours(oldTime)
+                  setStep(1)
+                }}>Skip</div>
               )}
             </div>
           </>

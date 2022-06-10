@@ -2,11 +2,11 @@ import './userauth.scss';
 import React, { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimesCircle, faCircleNotch } from '@fortawesome/fontawesome-free-solid'
-import { loginInfo, registerInfo } from '../../../userInfo'
+import { userSigninInfo } from '../../../userInfo'
 import { displayPhonenumber } from 'geottuse-tools'
 import { getCode, verifyUser, resetPassword, registerUser, loginUser } from '../../../apis/user/users'
 
-const { username, cellnumber, password, confirmPassword } = loginInfo
+const { username, cellnumber, password, confirmPassword } = userSigninInfo
 
 const wsize = p => {return window.innerWidth * (p / 100)}
 

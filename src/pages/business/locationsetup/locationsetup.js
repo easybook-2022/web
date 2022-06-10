@@ -5,7 +5,7 @@ import GoogleMapReact from 'google-map-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faLocationPin, faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons'
 import { setupLocation } from '../../../apis/business/locations'
-import { registerInfo, googleApikey, timeControl } from '../../../businessInfo'
+import { registerLocationInfo, googleApikey, timeControl } from '../../../businessInfo'
 import { getId, displayPhonenumber, resizePhoto } from 'geottuse-tools'
 
 // widgets
@@ -16,7 +16,6 @@ const width = window.innerWidth
 const wsize = p => {return window.innerWidth * (p / 100)}
 const steps = ['type', 'name', 'location', 'phonenumber', 'logo', 'hours']
 const daysArr = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-const libraries = ["places"]
 
 Geocode.setApiKey(googleApikey);
 Geocode.setLanguage("en");
@@ -33,17 +32,17 @@ export default function Locationsetup({ navigation }) {
   const [fileComp, setFilecomp] = useState(null)
   const [locationCoords, setLocationcoords] = useState({ longitude: null, latitude: null })
 
-  const [storeName, setStorename] = useState(registerInfo.storeName)
-  const [addressOne, setAddressone] = useState(registerInfo.addressOne)
-  const [addressTwo, setAddresstwo] = useState(registerInfo.addressTwo)
-  const [city, setCity] = useState(registerInfo.city)
-  const [province, setProvince] = useState(registerInfo.province)
-  const [postalcode, setPostalcode] = useState(registerInfo.postalcode)
+  const [storeName, setStorename] = useState(registerLocationInfo.storeName)
+  const [addressOne, setAddressone] = useState(registerLocationInfo.addressOne)
+  const [addressTwo, setAddresstwo] = useState(registerLocationInfo.addressTwo)
+  const [city, setCity] = useState(registerLocationInfo.city)
+  const [province, setProvince] = useState(registerLocationInfo.province)
+  const [postalcode, setPostalcode] = useState(registerLocationInfo.postalcode)
   const [address, setAddress] = useState('')
   
-  const [phonenumber, setPhonenumber] = useState(registerInfo.phonenumber)
+  const [phonenumber, setPhonenumber] = useState(registerLocationInfo.phonenumber)
 
-  const [type, setType] = useState(registerInfo.storeType)
+  const [type, setType] = useState(registerLocationInfo.storeType)
 
   const [logo, setLogo] = useState({ uri: '', name: '', size: { width: 0, height: 0 }})
 
@@ -58,17 +57,14 @@ export default function Locationsetup({ navigation }) {
 
     const ownerid = localStorage.getItem("ownerid")
     const hours = {}
-    let { longitude, latitude } = locationCoords, invalid = false
+    let longitude, latitude, invalid = false
 
-    if ((storeName && phonenumber && addressOne && city && province && postalcode) || (longitude && latitude)) {
+    if (storeName && phonenumber && addressOne && city && province && postalcode) {
       days.forEach(function (day) {
         let { opentime, closetime, close } = day
         let newOpentime = {...opentime}, newClosetime = {...closetime}
         let openhour = parseInt(newOpentime.hour), closehour = parseInt(newClosetime.hour)
         let openperiod = newOpentime.period, closeperiod = newClosetime.period
-
-        delete newOpentime.period
-        delete newClosetime.period
 
         if (close === false || close === true) {
           if (openperiod === "PM") {
@@ -112,16 +108,25 @@ export default function Locationsetup({ navigation }) {
           newOpentime.hour = openhour
           newClosetime.hour = closehour
 
+          delete newOpentime.period
+          delete newClosetime.period
+
           hours[day.header.substr(0, 3)] = { opentime: newOpentime, closetime: newClosetime, close }
         } else {
           invalid = true
         }
       })
 
-      if (locationInfo !== "destination") {
+      if (locationInfo === "destination") {
+        longitude = locationCoords.longitude
+        latitude = locationCoords.latitude
+      } else {
         if (!locationPermission) {
-          longitude = registerInfo.longitude
-          latitude = registerInfo.latitude
+          longitude = registerLocationInfo.longitude
+          latitude = registerLocationInfo.latitude
+        } else {
+          longitude = locationCoords.longitude
+          latitude = locationCoords.latitude
         }
       }
 
@@ -139,7 +144,7 @@ export default function Locationsetup({ navigation }) {
           })
           .then((res) => {
             if (res) {
-              const { id } = res
+              const { id, ownerProfile } = res
 
               localStorage.setItem("locationid", id.toString())
               localStorage.setItem("locationtype", type)
@@ -148,14 +153,11 @@ export default function Locationsetup({ navigation }) {
 
               if (type === "restaurant" || type === "store") {
                 localStorage.setItem("phase", "main")
-
-                if (newBusiness !== "true") {
-                  localStorage.setItem("firstTime", "true")
-                }
+                localStorage.setItem("firstTime", !newBusiness ? "true" : "false")
 
                 window.location = "/main"
               } else {
-                if (newBusiness) {
+                if (ownerProfile["name"] !== undefined) {
                   localStorage.setItem("phase", "main")
 
                   window.location = "/main"
@@ -172,9 +174,8 @@ export default function Locationsetup({ navigation }) {
               const { errormsg, status } = err.response.data
 
               setErrormsg(errormsg)
+              setLoading(false)
             }
-
-            setLoading(false)
           })
       } else {
         setLoading(false)
@@ -365,6 +366,8 @@ export default function Locationsetup({ navigation }) {
   useEffect(() => {
     setNewbusiness(localStorage.getItem("newBusiness"))
   }, [])
+
+  const header = type == 'hair' || type == 'nail' ? type + ' salon' : type
     
   return (
     <div id="locationsetup" style={{ opacity: loading ? 0.5 : 1 }}>
@@ -433,7 +436,7 @@ export default function Locationsetup({ navigation }) {
 
               {setupType === "name" && (
                 <div className="input-container">
-                  <div className="input-header">Enter {(type == 'hair' || type == 'nail') ? type + ' salon' : type} name:</div>
+                  <div className="input-header">Enter {header} name:</div>
                   <input className="input" onChange={(e) => setStorename(e.target.value)} value={storeName}/>
                 </div>
               )}
@@ -442,7 +445,7 @@ export default function Locationsetup({ navigation }) {
                 <div id="location-container">
                   {locationInfo === '' && (
                     <div id="location-container-center">
-                      <div className="location-header">If you are at the {(type == 'hair' || type == 'nail') ? type + ' salon' : type} right now,</div>
+                      <div className="location-header">If you are at the {header} right now,</div>
 
                       <div className="location-action-option" disabled={loading} onClick={() => {
                         setLocationinfo('destination')
@@ -467,7 +470,7 @@ export default function Locationsetup({ navigation }) {
 
                   {locationInfo === 'destination' && (
                     <div id="location-container-center">
-                      <div className="location-header">Your {(type == 'hair' || type == 'nail') ? type + ' salon' : type} is located at</div>
+                      <div className="location-header">Your {header} is located at</div>
                       
                       <div style={{ height: 500, margin: '0 auto', width: 500 }}>
                         {(locationCoords.longitude !== null && locationCoords.latitude !== null) ? 
@@ -503,7 +506,7 @@ export default function Locationsetup({ navigation }) {
                     <div id="location-container-center">
                       <div id="location-infos">
                         <div style={{ marginTop: 50 }}>
-                          <div className="location-header">If you are at the {(type == 'hair' || type == 'nail') ? type + ' salon' : type} right now,</div>
+                          <div className="location-header">If you are at the {header} right now,</div>
                           <div className="location-action-option" disabled={loading} onClick={() => {
                             setLocationinfo('destination')
 
@@ -519,14 +522,14 @@ export default function Locationsetup({ navigation }) {
 
                         <div className="location-div">Or</div>
 
-                        <div className="location-header">Enter your {(type == 'hair' || type == 'nail') ? type + ' salon' : type} information</div>
+                        <div className="location-header">Enter your {header} information</div>
 
                         <div className="input-container">
-                          <div className="input-header">Enter {(type == 'hair' || type == 'nail') ? type + ' salon' : type} address #1:</div>
+                          <div className="input-header">Enter {header} address #1:</div>
                           <input className="input" onChange={(e) => setAddressone(e.target.value)} value={addressOne}/>
                         </div>
                         <div className="input-container">
-                          <div className="input-header">Enter {(type == 'hair' || type == 'nail') ? type + ' salon' : type} address #2: (Optional)</div>
+                          <div className="input-header">Enter {header} address #2: (Optional)</div>
                           <input className="input" onChange={(e) => setAddresstwo(e.target.value)} value={addressTwo}/>
                         </div>
                         <div className="input-container">
@@ -549,14 +552,14 @@ export default function Locationsetup({ navigation }) {
 
               {setupType === "phonenumber" && (
                 <div className="input-container">
-                  <div className="input-header">Enter {(type == 'hair' || type == 'nail') ? type + ' salon' : type}'s phone number:</div>
+                  <div className="input-header">Enter {header}'s phone number:</div>
                   <input className="input" onChange={(e) => setPhonenumber(displayPhonenumber(phonenumber, e.target.value, () => {}))} value={phonenumber} type="text"/>
                 </div>
               )}
 
               {setupType === "logo" && (
                 <div id="camera-container">
-                  <div id="camera-header">Provide a photo for {(type == 'hair' || type == 'nail') ? type + ' salon' : type}</div>
+                  <div id="camera-header">Upload a picture of your {header}</div>
                   
                   {logo.uri ? (
                     <>
@@ -620,12 +623,10 @@ export default function Locationsetup({ navigation }) {
             <div className="header"><div className="box-header">Setup</div></div>
 
             <div id="days">
-              <div className="input-header" style={{ marginBottom: 20, textAlign: 'center' }}>Set the {(type == 'hair' || type == 'nail') ? type + ' salon' : type}'s opening hours</div>
+              <div className="input-header" style={{ marginBottom: 20, textAlign: 'center' }}>What days are you open ?</div>
 
               {!daysInfo.done ?
                 <div style={{ marginBottom: 50, width: '100%' }}>
-                  <div id="opening-day-header">Click on the days {(type == 'hair' || type == 'nail') ? type + ' salon' : type} open ?</div>
-
                   {daysArr.map((day, index) => (
                     <div key={index} className={daysInfo.working.indexOf(day) > -1 ? "opening-day-touch-selected" : "opening-day-touch"} onClick={() => {
                       const newWorking = [...daysInfo.working]
@@ -642,12 +643,12 @@ export default function Locationsetup({ navigation }) {
                 </div>
                 :
                 <div style={{ marginBottom: 200, opacity: loading ? 0.5 : 1 }}>
-                  <div id="days-back" disabled={loading} onClick={() => setDaysinfo({ working: ['', '', '', '', '', '', ''], done: false, step: 0 })}>Go Back</div>
+                  <div id="days-back" disabled={loading} onClick={() => setDaysinfo({ ...daysInfo, done: false, step: 0 })}>Change days</div>
 
                   {days.map((info, index) => (
                     !info.close ?
                       <div key={index} className="day">
-                        <div className="day-header"><div style={{ fontWeight: '300' }}>Opening time for</div> {info.header}</div>
+                        <div className="day-header">Set hours for {info.header}</div>
 
                         <div className="time-selection-container">
                           <div className="time-selection">

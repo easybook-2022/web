@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { url } from '../../businessInfo'
+import { url } from '../../info'
 
 export const getAppointmentInfo = id => {
 	return axios.get(`${url}/schedules/get_appointment_info/${id}`)
@@ -36,6 +36,20 @@ export const getCartOrderers = id => {
 
 export const getCartOrders = id => {
 	return axios.get(`${url}/schedules/get_cart_orders/${id}`)
+}
+
+export const bookWalkIn = data => {
+  return axios.post(
+    `${url}/schedules/book_walk_in`,
+    data
+  )
+}
+
+export const removeBooking = data => {
+  return axios.post(
+    `${url}/schedules/remove_booking`,
+    data
+  )
 }
 
 export const getOrders = data => {

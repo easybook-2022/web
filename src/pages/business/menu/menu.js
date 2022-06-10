@@ -2,7 +2,7 @@ import './menu.scss';
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHome, faGear, faTimesCircle, faCirclePlus, faCircleNotch } from '@fortawesome/free-solid-svg-icons'
+import { faHome, faTimesCircle, faCirclePlus, faCircleNotch } from '@fortawesome/free-solid-svg-icons'
 import { logo_url } from '../../../businessInfo'
 import { getId, resizePhoto } from 'geottuse-tools'
 import { getLocationProfile } from '../../../apis/business/locations'
@@ -493,10 +493,6 @@ export default function Menu(props) {
 
           <div id="bottom-navs">
             <div id="bottom-navs-row">
-              <div className="bottom-nav" onClick={() => window.location = "/settings"}>
-                <FontAwesomeIcon icon={faGear}/>
-              </div>
-
               <div className="bottom-nav" onClick={() => window.location = "/main"}>
                 <FontAwesomeIcon icon={faHome}/>
               </div>

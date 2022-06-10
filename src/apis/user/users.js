@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { url } from '../../userInfo'
+import { url } from '../../info'
 
 export const verifyUser = cellnumber => {
 	return axios.get(`${url}/users/user_verify/${cellnumber}`)

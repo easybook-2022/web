@@ -22,32 +22,44 @@
       text-align: center;
     }
 
-    #box-options {
+    #inputs-box {
+      display: flex;
+      flex-direction: column;
+      height: 50%;
+      justify-content: space-around;
       margin: 0 auto;
-      width: 50vw;
-      
-      .box-option { 
-        display: flex;
-        flex-direction: row;
-        font-size: calc(100vw * 0.02);
-        font-weight: bold;
-        justify-content: space-around;
-        margin-bottom: 20px;
+      width: 50%;
 
-        .box-option-touch { 
-          border-radius: 5px;
-          border-style: solid;
-          border-width: 2;
-          font-size: calc(100vw * 0.01);
-          margin: 5px;
-          padding: 10px;
-          text-align: center;
-          width: 30%;
+      .input-container {
+        margin: 0 auto 30px auto;
+        width: 50%;
 
-          &:hover {
-            background-color: rgba(0, 0, 0, 0.2);
-          }
+        .input-header {
+          font-size: calc(100vw * 0.02);
         }
+
+        .input {
+          background-color: white;
+          border-radius: 3px;
+          border-style: solid;
+          border-width: 2px;
+          font-size: calc(100vw * 0.02);
+          padding: 5px;
+          width: 100%;
+        }
+      }
+
+      #submit {
+        background-color: white;
+        border-radius: 3px;
+        border-style: solid;
+        border-width: 2px;
+        font-size: 20px;
+        font-weight: bold;
+        margin: 5px auto;
+        padding: 10px;
+        text-align: center;
+        width: 200px;
       }
     }
   }

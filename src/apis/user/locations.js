@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { url } from '../../userInfo'
+import { url } from '../../info'
 
 export const getLocations = data => {
 	return axios.post(
@@ -29,9 +29,6 @@ export const makeReservation = data => {
 	)
 }
 
-export const getLocationHours = data => {
-	return axios.post(
-		`${url}/locations/get_hours`,
-		data
-	)
+export const getLocationHours = id => {
+	return axios.get(`${url}/locations/get_location_hours/${id}`)
 }

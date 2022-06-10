@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { url } from '../../userInfo'
+import { url } from '../../info'
 
 export const getNumCartItems = id => {
 	return axios.get(`${url}/carts/get_num_items/${id}`)

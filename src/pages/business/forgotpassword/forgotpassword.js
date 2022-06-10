@@ -1,13 +1,13 @@
 import './forgotpassword.scss';
 import React, { useState } from 'react';
 import { getCode } from '../../../apis/business/owners'
-import { loginInfo } from '../../../businessInfo'
+import { ownerSigninInfo } from '../../../businessInfo'
 import { displayPhonenumber } from 'geottuse-tools'
 
 const wsize = p => {return window.innerWidth * (p / 100)}
 
 export default function Forgotpassword({ navigation }) {
-  const [info, setInfo] = useState({ cellnumber: loginInfo.cellnumber, resetcode: '111111', sent: false })
+  const [info, setInfo] = useState({ cellnumber: ownerSigninInfo.cellnumber, resetcode: '111111', sent: false })
   const [code, setCode] = useState('')
   const [errorMsg, setErrormsg] = useState('')
   

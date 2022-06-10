@@ -24,11 +24,9 @@ import Orders from './components/user/orders'
 
 // business pages
 import Auth from './pages/business/auth'
-import Login from './pages/business/login'
 import Register from './pages/business/register'
 import Forgotpassword from './pages/business/forgotpassword'
 import Resetpassword from './pages/business/resetpassword'
-import Verifyowner from './pages/business/verifyowner'
 import List from './pages/business/list'
 import Locationsetup from './pages/business/locationsetup'
 
@@ -42,7 +40,6 @@ import Addproduct from './components/business/addproduct'
 import Addservice from './components/business/addservice'
 
 import Menu from './pages/business/menu'
-import Settings from './pages/business/settings'
 
 export default function App() {
   const [route, setRoute] = useState(null)
@@ -87,11 +84,9 @@ export default function App() {
           <Route path="/privacy" element={<Privacy/>}/>
 
           <Route path="/auth" element={<Auth/>}/>
-          <Route path="/login" element={<Login/>}/>
           <Route path="/register" element={<Register/>}/>
           <Route path="/forgotpassword" element={<Forgotpassword/>}/>
           <Route path="/resetpassword/:cellnumber" element={<Resetpassword/>}/>
-          <Route path="/verifyowner" element={<Verifyowner/>}/>
           <Route path="/list" element={<List/>}/>
           <Route path="/locationsetup" element={<Locationsetup/>}/>
           <Route path="/main" element={<Businessmain/>}/>
@@ -101,7 +96,6 @@ export default function App() {
           <Route path="/addproduct/:parentMenuid/:productid" element={<Addproduct/>}/>
           <Route path="/addservice/:parentMenuid/:serviceid" element={<Addservice/>}/>
           <Route path="/menu" element={<Menu/>}/>
-          <Route path="/settings" element={<Settings/>}/>
         </Routes>
       </BrowserRouter>
   );

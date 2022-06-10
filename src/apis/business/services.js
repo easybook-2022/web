@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { url } from '../../businessInfo'
+import { url } from '../../info'
 
 export const getServices = data => {
 	return axios.post(
