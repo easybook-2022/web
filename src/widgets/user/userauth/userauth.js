@@ -314,7 +314,7 @@ export default function Userauth(props) {
             authInfo.type === 'register' || 
             authInfo.type === 'login'
           ) ? 
-            <div id="submit" style={{ opacity: authInfo.loading ? 0.5 : 1 }} disabled={authInfo.loading} onClick={() => {
+            <div id="submit" style={{ opacity: authInfo.loading ? 0.5 : 1, pointerEvents: authInfo.loading ? "none" : "" }} onClick={() => {
               if (authInfo.type === 'forgotpassword') {
                 if (authInfo.codesent) {
                   done()

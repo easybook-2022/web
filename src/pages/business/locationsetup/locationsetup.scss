@@ -129,7 +129,7 @@
 
             .location-div {
               font-size: calc(100vw * 0.02);
-              margin: 50px 0;
+              margin: 20px 0;
               text-align: center;
             }
 
@@ -283,10 +283,10 @@
       border-radius: 10px;
       margin: 30px auto;
       padding: 10px 0;
-      width: 40%;
+      width: 50%;
 
       .day-header {
-        font-size: calc(100vw * 0.015);
+        font-size: calc(100vw * 0.02);
         font-weight: bold;
         text-align: center;
       }
@@ -307,13 +307,13 @@
           width: 45%;
 
           .selection {
-            font-size: calc(100vw * 0.02);
+            font-size: calc(100vw * 0.03);
             margin: 5px;
             text-align: center;
 
             .selection-header {
               border-width: 0px;
-              font-size: calc(100vw * 0.02);
+              font-size: calc(100vw * 0.03);
               outline: none;
               text-align: center;
               width: 90%;
@@ -321,14 +321,14 @@
           }
 
           .selection-div {
-            font-size: calc(100vw * 0.02);
+            font-size: calc(100vw * 0.03);
           }
         }
 
         .time-selection-header {
           display: flex;
           flex-direction: column;
-          font-size: calc(100vw * 0.02);
+          font-size: calc(100vw * 0.03);
           font-weight: bold;
           justify-content: space-around;
           text-align: center;

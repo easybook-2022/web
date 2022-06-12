@@ -18,7 +18,7 @@ export default function List(props) {
 
     getAllLocations(ownerid)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })

@@ -490,7 +490,7 @@ export default function Booktime(props) {
                     <div key={item.key} className="workers-row">
                       {item.row.map(info => (
                         info.id ? 
-                          <div key={info.key} className="worker" style={{ backgroundColor: (selectedWorkerinfo.worker && selectedWorkerinfo.worker.id === info.id) ? 'rgba(0, 0, 0, 0.3)' : null }} disabled={selectedWorkerinfo.loading} onClick={() => selectWorker(info.id)}>
+                          <div key={info.key} className="worker" style={{ backgroundColor: (selectedWorkerinfo.worker && selectedWorkerinfo.worker.id === info.id) ? 'rgba(0, 0, 0, 0.3)' : null, pointerEvents: selectedWorkerinfo.loading ? "none" : "" }} onClick={() => selectWorker(info.id)}>
                             <div className="worker-profile">
                               <img 
                                 alt="" 
@@ -536,9 +536,9 @@ export default function Booktime(props) {
                             day.num > 0 ? 
                               day.passed || day.noservice ? 
                                 day.passed ? 
-                                  <div key={day.key} disabled={true} className="day-touch" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>{day.num}</div>
+                                  <div key={day.key} className="day-touch" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', pointerEvents: "none" }}>{day.num}</div>
                                   :
-                                  <div key={day.key} disabled={true} className="day-touch" style={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}>{day.num}</div>
+                                  <div key={day.key} className="day-touch" style={{ backgroundColor: 'rgba(0, 0, 0, 0.1)', pointerEvents: "none" }}>{day.num}</div>
                                 :
                                 selectedDateinfo.date === day.num ? 
                                   <div key={day.key} className="day-touch" style={{ backgroundColor: 'black', color: 'white' }} onClick={() => selectDate(day.num)}>{day.num}</div>
@@ -649,8 +649,8 @@ export default function Booktime(props) {
 
                   <div style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
                     <div id="confirm-options">
-                      <div className="confirm-option" style={{ opacity: confirm.loading ? 0.3 : 1 }} disabled={confirm.loading} onClick={() => setConfirm({ ...confirm, show: false, service: "", time: 0, note: "", requested: false, errormsg: "" })}>No</div>
-                      <div className="confirm-option" style={{ opacity: confirm.loading ? 0.3 : 1 }} disabled={confirm.loading} onClick={() => salonChangeTheAppointment()}>Yes</div>
+                      <div className="confirm-option" style={{ opacity: confirm.loading ? 0.3 : 1, pointerEvents: confirm.loading ? "none" : "" }} onClick={() => setConfirm({ ...confirm, show: false, service: "", time: 0, note: "", requested: false, errormsg: "" })}>No</div>
+                      <div className="confirm-option" style={{ opacity: confirm.loading ? 0.3 : 1, pointerEvents: confirm.loading ? "none" : "" }} onClick={() => salonChangeTheAppointment()}>Yes</div>
                     </div>
                   </div>
 

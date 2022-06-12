@@ -587,7 +587,7 @@
 
 	      .location-div {
 	        font-size: calc(100vw * 0.02);
-	        margin: 50px 0;
+	        margin: 20px 0;
 	        text-align: center;
 	      }
 
@@ -827,13 +827,6 @@
 		        width: 48px;
 		      }
 
-		      .location-header {
-		        font-size: calc(100vw * 0.01);
-		        font-weight: bold;
-		        margin: 20px 0;
-		        text-align: center;
-		      }
-
 		      .location-action-option {
 		        border-radius: 5px;
 		        border-style: solid;
@@ -843,12 +836,6 @@
 		        padding: 10px;
 		        text-align: center;
 		        width: 200px;
-		      }
-
-		      .location-div {
-		        font-size: calc(100vw * 0.02);
-		        margin: 50px 0;
-		        text-align: center;
 		      }
 
 		      .header {
@@ -898,9 +885,6 @@
 		        }
 
 		        .account {
-		          display: flex;
-		          flex-direction: row;
-		          justify-content: space-around;
 		          margin: 10px auto;
 
 		          .account-header {
@@ -919,23 +903,30 @@
 		            padding: 0 10px;
 		            width: 90%;
 
+		            .account-edit-profile {
+		            	border-radius: 50px;
+		            	height: 100px;
+		            	overflow: hidden;
+		            	width: 100px;
+		            }
+
 		            .account-edit-header {
-		              font-size: calc(100vw * 0.01);
+		              font-size: calc(100vw * 0.03);
 		              padding: 8px 0;
 		              text-align: center;
 		            }
-
-		            .account-edit-touch {
-		              border-radius: 2px;
-		              border-style: solid;
-		              border-width: 2px;
-		              font-size: calc(100vw * 0.01);
-		              margin: 5px;
-		              padding: 5px;
-		              text-align: center;
-		              width: 200px;
-		            }
 		          }
+
+		          .account-edit-touch {
+	              border-radius: 2px;
+	              border-style: solid;
+	              border-width: 2px;
+	              font-size: calc(100vw * 0.01);
+	              margin: 5px auto;
+	              padding: 5px;
+	              text-align: center;
+	              width: 200px;
+	            }
 		        }
 		      }
 
@@ -998,18 +989,21 @@
 			#bookwalkin-box {
 				background-color: white;
 				height: 70%;
+				margin: 0 auto;
 				padding-top: 20px;
 				width: 70%;
 
 				#bookwalkin-header {
-					font-size: calc(100vw * 0.06);
+					font-size: calc(100vw * 0.03);
 					font-weight: bold;
 					text-align: center;
 				}
 
-				#bookwalkin-input {
+				.bookwalkin-input {
 					border-radius: 5px;
 					border-style: solid;
+					font-size: calc(100vw * 0.03);
+					margin: 10px 0;
 					text-align: center;
 				}
 
@@ -1023,9 +1017,10 @@
 						border-radius: 5px;
 						border-style: solid;
 						border-width: 2px;
+						font-size: calc(100vw * 0.04);
 						padding: 5px;
 						text-align: center;
-						width: 40%;
+						width: 20%;
 					}
 				}
 			}
@@ -1111,7 +1106,7 @@
 
 	.row {
 		display: flex;
-		flex-direction: column;
+		flex-direction: row;
 		justify-content: space-around;
 	}
 

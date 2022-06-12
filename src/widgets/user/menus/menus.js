@@ -117,7 +117,7 @@ export default function Menus(props) {
                   id="menu-input" type="text" 
                   placeholder={
                     "Enter " + 
-                    (type == "restaurant" && "meal" || type == "store" && "product" || type == "salon" && "service") 
+                    (type === "restaurant" && "meal" || type === "store" && "product" || type === "salon" && "service") 
                     + " # or name"
                   } 
                   onChange={e => setRequestinfo({ ...requestInfo, search: e.target.value, error: false })}

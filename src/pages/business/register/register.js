@@ -33,7 +33,7 @@ export default function Register(props) {
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrormsg] = useState('')
 
-  const getInfo = async() => {
+  const getTheLocationProfile = async() => {
     const locationid = localStorage.getItem("locationid")
     const locationtype = localStorage.getItem("locationtype")
     const data = { locationid }
@@ -228,12 +228,6 @@ export default function Register(props) {
         }
 
         break
-      case 1:
-        if (!profile.uri) {
-          msg = "Please provide a profile you like"
-        }
-
-        break
       default:
     }
 
@@ -326,7 +320,7 @@ export default function Register(props) {
   }
 
   useEffect(() => {
-    getInfo()
+    getTheLocationProfile()
   }, [])
 
   return (
@@ -340,13 +334,13 @@ export default function Register(props) {
           {setupType === "nickname" && (
             <div id="input-container">
               <div className="input-header">Enter your name:</div>
-              <input id="input" onChange={(e) => setUsername(e.target.value)} value={username}/>
+              <input id="input" style={{ fontSize: wsize(3) }} onChange={(e) => setUsername(e.target.value)} value={username}/>
             </div>
           )}
 
           {setupType === "profile" && (
             <div id="camera-container">
-              <div className="input-header">Upload a picture of your face for clients (optional)</div>
+              <div className="input-header" style={{ textAlign: 'center' }}>Upload a picture of your face for clients (optional)</div>
 
               {profile.uri ? (
                 <>
@@ -361,7 +355,7 @@ export default function Register(props) {
               ) : (
                 <>
                   <div id="camera-actions">
-                    <div className="camera-action" style={{ opacity: loading ? 0.5 : 1 }} disabled={loading} onClick={() => fileComp.click()}>Choose<br/>from phone</div>
+                    <div className="camera-action" style={{ opacity: loading ? 0.5 : 1, pointerEvents: loading ? "none" : "" }} onClick={() => fileComp.click()}>Choose<br/>from phone</div>
                   </div>
 
                   <input type="file" ref={r => {setFilecomp(r)}} onChange={choosePhoto} style={{ display: 'none' }}/>
@@ -403,13 +397,13 @@ export default function Register(props) {
                   {workerHours.map((info, index) => (
                     info.working ?
                       <div key={index} className="worker-hour">
-                        <div className="worker-hour-header">Your hours on {info.header}</div>
+                        <div className="worker-hour-header">Your working hours on {info.header}</div>
 
                         <div className="time-selection-container">
                           <div className="time-selection">
                             <div className="selection">
                               <div onClick={() => updateWorkingHour(index, "hour", "up", true)}>
-                                <FontAwesomeIcon icon={faArrowUp}/>
+                                <FontAwesomeIcon icon={faArrowUp} size="2x"/>
                               </div>
                               <input className="selection-header" onChange={(e) => {
                                 const newWorkerhours = [...workerHours]
@@ -419,7 +413,7 @@ export default function Register(props) {
                                 setWorkerhours(newWorkerhours)
                               }} type="text" maxLength={2} value={info.opentime.hour}/>
                               <div onClick={() => updateWorkingHour(index, "hour", "down", true)}>
-                                <FontAwesomeIcon icon={faArrowDown}/>
+                                <FontAwesomeIcon icon={faArrowDown} size="2x"/>
                               </div>
                             </div>
                             <div className="column">
@@ -427,7 +421,7 @@ export default function Register(props) {
                             </div>
                             <div className="selection">
                               <div onClick={() => updateWorkingHour(index, "minute", "up", true)}>
-                                <FontAwesomeIcon icon={faArrowUp}/>
+                                <FontAwesomeIcon icon={faArrowUp} size="2x"/>
                               </div>
                               <input className="selection-header" onChange={(e) => {
                                 const newWorkerhours = [...workerHours]
@@ -437,16 +431,16 @@ export default function Register(props) {
                                 setWorkerhours(newWorkerhours)
                               }} type="text" maxLength={2} value={info.opentime.minute}/>
                               <div onClick={() => updateWorkingHour(index, "minute", "down", true)}>
-                                <FontAwesomeIcon icon={faArrowDown}/>
+                                <FontAwesomeIcon icon={faArrowDown} size="2x"/>
                               </div>
                             </div>
                             <div className="selection">
                               <div onClick={() => updateWorkingHour(index, "period", "up", true)}>
-                                <FontAwesomeIcon icon={faArrowUp}/>
+                                <FontAwesomeIcon icon={faArrowUp} size="2x"/>
                               </div>
                               <div className="selection-header">{info.opentime.period}</div>
                               <div onClick={() => updateWorkingHour(index, "period", "down", true)}>
-                                <FontAwesomeIcon icon={faArrowDown}/>
+                                <FontAwesomeIcon icon={faArrowDown} size="2x"/>
                               </div>
                             </div>
                           </div>
@@ -456,7 +450,7 @@ export default function Register(props) {
                           <div className="time-selection">
                             <div className="selection">
                               <div onClick={() => updateWorkingHour(index, "hour", "up", false)}>
-                                <FontAwesomeIcon icon={faArrowUp}/>
+                                <FontAwesomeIcon icon={faArrowUp} size="2x"/>
                               </div>
                               <input className="selection-header" onChange={(e) => {
                                 const newWorkerhours = [...workerHours]
@@ -466,7 +460,7 @@ export default function Register(props) {
                                 setWorkerhours(newWorkerhours)
                               }} type="text" maxLength={2} value={info.closetime.hour}/>
                               <div onClick={() => updateWorkingHour(index, "hour", "down", false)}>
-                                <FontAwesomeIcon icon={faArrowDown}/>
+                                <FontAwesomeIcon icon={faArrowDown} size="2x"/>
                               </div>
                             </div>
                             <div className="column">
@@ -474,7 +468,7 @@ export default function Register(props) {
                             </div>
                             <div className="selection">
                               <div onClick={() => updateWorkingHour(index, "minute", "up", false)}>
-                                <FontAwesomeIcon icon={faArrowUp}/>
+                                <FontAwesomeIcon icon={faArrowUp} size="2x"/>
                               </div>
                               <input className="selection-header" onChange={(e) => {
                                 const newWorkerhours = [...workerHours]
@@ -484,16 +478,16 @@ export default function Register(props) {
                                 setWorkerhours(newWorkerhours)
                               }} type="text" maxLength={2} value={info.closetime.minute}/>
                               <div onClick={() => updateWorkingHour(index, "minute", "down", false)}>
-                                <FontAwesomeIcon icon={faArrowDown}/>
+                                <FontAwesomeIcon icon={faArrowDown} size="2x"/>
                               </div>
                             </div>
                             <div className="selection">
                               <div onClick={() => updateWorkingHour(index, "period", "up", false)}>
-                                <FontAwesomeIcon icon={faArrowUp}/>
+                                <FontAwesomeIcon icon={faArrowUp} size="2x"/>
                               </div>
                               <div className="selection-header">{info.closetime.period}</div>
                               <div onClick={() => updateWorkingHour(index, "period", "down", false)}>
-                                <FontAwesomeIcon icon={faArrowDown}/>
+                                <FontAwesomeIcon icon={faArrowDown} size="2x"/>
                               </div>
                             </div>
                           </div>
@@ -519,8 +513,8 @@ export default function Register(props) {
               }}>Back</div>
             )}
 
-            <div className="action" style={{ opacity: loading ? 0.3 : 1 }} disabled={loading} onClick={() => {
-              if (setupType == "hours") {
+            <div className="action" style={{ opacity: loading ? 0.3 : 1, pointerEvents: loading ? "none" : "" }} onClick={() => {
+              if (setupType === "hours") {
                 if (!daysInfo.done) {
                   setTime()
                 } else {
@@ -530,7 +524,7 @@ export default function Register(props) {
                 saveInfo()
               }
             }}>{
-              setupType == "hours" ? 
+              setupType === "hours" ? 
                 !daysInfo.done ? 
                   "Next"
                   :

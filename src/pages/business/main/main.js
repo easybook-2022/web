@@ -61,7 +61,7 @@ export default function Main(props) {
     username: '', editUsername: false,
     cellnumber: '', verified: false, verifyCode: '', codeInput: '', editCellnumber: false,
     currentPassword: '', newPassword: '', confirmPassword: '', editPassword: false,
-    profile: { uri: '', name: '', size: { width: 0, height: 0 }}, editProfile: false, camType: 'front',
+    profile: { uri: '', name: '', size: { width: 0, height: 0 }}, editProfile: false,
     workerHours: [], editHours: false,
     loading: false,
     errorMsg: ''
@@ -97,8 +97,6 @@ export default function Main(props) {
   const [accountHolders, setAccountholders] = useState([])
   const [cameraPermission, setCamerapermission] = useState(null);
   const [pickingPermission, setPickingpermission] = useState(null);
-  const [camComp, setCamcomp] = useState(null)
-  const [camType, setCamtype] = useState('back')
   const [choosing, setChoosing] = useState(false)
   const [timeRange, setTimerange] = useState([
     { key: "0", header: "Sunday", opentime: { hour: "06", minute: "00", period: "AM" }, closetime: { hour: "09", minute: "00", period: "PM" }, working: true, takeShift: "" },
@@ -138,11 +136,11 @@ export default function Main(props) {
 
               openMinute = parseInt(openInfo.minute)
               openHour = parseInt(openInfo.hour)
-              openHour = openInfo.period == "PM" ? openHour + 12 : openHour
+              openHour = openInfo.period === "PM" ? openHour + 12 : openHour
 
               closeMinute = parseInt(closeInfo.minute)
               closeHour = parseInt(closeInfo.hour)
-              closeHour = closeInfo.period == "PM" ? closeHour + 12 : closeHour
+              closeHour = closeInfo.period === "PM" ? closeHour + 12 : closeHour
 
               currDate = new Date()
               calcDate = new Date(currDate.setDate(currDate.getDate() - currDate.getDay() + k)).toUTCString();
@@ -180,7 +178,7 @@ export default function Main(props) {
             setDays(hours)
             setTimerange(hours)
 
-            if (type == 'store' || type == 'restaurant') {
+            if (type === 'store' || type === 'restaurant') {
               getAllCartOrderers()
             } else {
               getListAppointments()
@@ -199,7 +197,7 @@ export default function Main(props) {
 
     getLocationHours(locationid)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         } 
       })
@@ -211,7 +209,7 @@ export default function Main(props) {
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status == 400) {
+        if (err.response && err.response.status === 400) {
           const { errormsg, status } = err.response.data
 
 
@@ -223,7 +221,7 @@ export default function Main(props) {
 
     getOwnerInfo(ownerid)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })
@@ -233,7 +231,7 @@ export default function Main(props) {
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status == 400) {
+        if (err.response && err.response.status === 400) {
           const { errormsg, status } = err.response.data
         }
       })
@@ -243,13 +241,62 @@ export default function Main(props) {
 
     getWorkersTime(locationid)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })
       .then((res) => {
         if (res) {
           setShowinfo({ ...showInfo, show: true, workersHours: res.workers })
+        }
+      })
+      .catch((err) => {
+        if (err.response && err.response.status === 400) {
+          const { errormsg, status } = err.response.data
+        }
+      })
+  }
+  const getTheWorkersHour = () => {
+    const locationid = localStorage.getItem("locationid")
+    const data = { locationid, ownerid: null }
+
+    getWorkersHour(data)
+      .then((res) => {
+        if (res.status === 200) {
+          return res.data
+        }
+      })
+      .then((res) => {
+        if (res) {
+          const { workersHour } = res
+
+          const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+          const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
+          let date = new Date(Date.now())
+          let jsonDate = {"day":days[date.getDay()].substr(0, 3),"month":months[date.getMonth()],"date":date.getDate(),"year":date.getFullYear()}
+
+          for (let worker in workersHour) {
+            for (let day in workersHour[worker]) {
+              if (day != "scheduled" && day != "profileInfo") {
+                let { open, close } = workersHour[worker][day]
+
+                workersHour[worker][day]["open"] = jsonDateToUnix({ ...jsonDate, "hour": open["hour"], "minute": open["minute"] })
+                workersHour[worker][day]["close"] = jsonDateToUnix({ ...jsonDate, "hour": close["hour"], "minute": close["minute"] })
+              } else if (day == "scheduled") {
+                let scheduled = workersHour[worker][day]
+                let newScheduled = {}
+
+                for (let info in scheduled) {
+                  newScheduled[jsonDateToUnix(JSON.parse(info))] = scheduled[info]
+                }
+
+                workersHour[worker][day] = newScheduled
+              }
+            }
+          }
+
+          setChartinfo({ ...chartInfo, workersHour })
         }
       })
       .catch((err) => {
@@ -289,127 +336,107 @@ export default function Main(props) {
 
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-    const locationid = localStorage.getItem("locationid"), today = new Date(), pushtime = 1000 * (60 * 15)
+    const locationid = localStorage.getItem("locationid"), today = new Date(), pushtime = 1000 * (60 * 15), newWorkershour = {...chartInfo.workersHour}
     let chart, date = new Date(today.getTime())
 
     date.setDate(today.getDate() + dayDir)
 
     let jsonDate, newWorkersTime = {}, hourInfo = hoursInfo[days[date.getDay()].substr(0, 3)]
-    let current = Date.parse(days[today.getDay()] + " " + months[today.getMonth()] + ", " + today.getDate() + " " + today.getFullYear() + " " + hourInfo["closeHour"] + ":" + hourInfo["closeMinute"])
+    let closedtime = Date.parse(days[date.getDay()] + " " + months[date.getMonth()] + ", " + date.getDate() + " " + date.getFullYear() + " " + hourInfo["closeHour"] + ":" + hourInfo["closeMinute"])
     let now = Date.parse(days[today.getDay()] + " " + months[today.getMonth()] + ", " + today.getDate() + " " + today.getFullYear() + " " + today.getHours() + ":" + today.getMinutes())
+    let day = days[date.getDay()].substr(0, 3), working = false
 
-    if (now > current && dir == null) {
+    for (let worker in newWorkershour) {
+      for (let info in newWorkershour[worker]) {
+        if (info == day && newWorkershour[worker][info]["working"] == true && working == false) {
+          working = true
+        } else if (info != "scheduled" && info != "profileInfo") {
+          let dayHourInfo = hoursInfo[day]
+
+          newWorkershour[worker][day]["open"] = jsonDateToUnix({
+            "day":days[date.getDay()].substr(0, 3),"month":months[date.getMonth()],
+            "date":date.getDate(),"year":date.getFullYear(), 
+            "hour": dayHourInfo["openHour"], "minute": dayHourInfo["openMinute"]
+          })
+          newWorkershour[worker][day]["close"] = jsonDateToUnix({
+            "day":days[date.getDay()].substr(0, 3),"month":months[date.getMonth()],
+            "date":date.getDate(),"year":date.getFullYear(), 
+            "hour": dayHourInfo["closeHour"], "minute": dayHourInfo["closeMinute"]
+          })
+        }
+      }
+    }
+
+    if (dir == null && (now > closedtime || working == false)) {
       getAppointmentsChart(dayDir + 1)
     } else {
       if (dayDir != 0) date.setDate(today.getDate() + dayDir)
 
       jsonDate = {"day":days[date.getDay()].substr(0, 3),"month":months[date.getMonth()],"date":date.getDate(),"year":date.getFullYear()}
 
-      let data = { locationid, ownerid: null }
+      const data = { locationid, jsonDate }
 
-      getWorkersHour(data)
+      getDayHours(data)
         .then((res) => {
-          if (res.status == 200) {
+          if (res.status === 200) {
             return res.data
           }
         })
         .then((res) => {
           if (res) {
-            let { workersHour } = res
+            const { opentime, closetime, workers } = res
+            let times = [], chart = {}, openhour = parseInt(opentime["hour"]), openminute = parseInt(opentime["minute"])
+            let closehour = parseInt(closetime["hour"]), closeminute = parseInt(closetime["minute"])
+            let openStr = jsonDate["month"] + " " + jsonDate["date"] + ", " + jsonDate["year"] + " " + openhour + ":" + openminute
+            let closeStr = jsonDate["month"] + " " + jsonDate["date"] + ", " + jsonDate["year"] + " " + closehour + ":" + closeminute
+            let openTimeStr = Date.parse(openStr), closeTimeStr = Date.parse(closeStr), calcTimeStr = openTimeStr
+            let currenttime = Date.now(), key = 0
 
-            for (let worker in workersHour) {
-              for (let day in workersHour[worker]) {
-                if (day != "scheduled" && day != "profileInfo") {
-                  let { open, close } = workersHour[worker][day]
+            while (calcTimeStr < closeTimeStr - pushtime) {
+              calcTimeStr += pushtime
 
-                  workersHour[worker][day]["open"] = jsonDateToUnix({ ...jsonDate, "hour": open["hour"], "minute": open["minute"] })
-                  workersHour[worker][day]["close"] = jsonDateToUnix({ ...jsonDate, "hour": close["hour"], "minute": close["minute"] })
-                } else if (day == "scheduled") {
-                  let scheduled = workersHour[worker][day]
-                  let newScheduled = {}
+              let timestr = new Date(calcTimeStr)
+              let hour = timestr.getHours()
+              let minute = timestr.getMinutes()
+              let period = hour < 12 ? "AM" : "PM"
+              let timeDisplay = (
+                hour <= 12 ? 
+                  hour === 0 ? 12 : hour
+                  :
+                  hour - 12
+                )
+                + ":" + 
+                (minute < 10 ? '0' + minute : minute) + " " + period
+              let timepassed = currenttime > calcTimeStr
 
-                  for (let info in scheduled) {
-                    newScheduled[jsonDateToUnix(JSON.parse(info))] = scheduled[info]
-                  }
+              jsonDate = { ...jsonDate, day: days[date.getDay()], hour, minute }
 
-                  workersHour[worker][day] = newScheduled
-                }
-              }
+              times.push({
+                key: "time-" + key + "-" + dayDir,
+                timeDisplay, time: calcTimeStr, jsonDate,
+                timepassed
+              })
+
+              key += 1
             }
 
-            delete jsonDate["hour"]
-            delete jsonDate["minute"]
+            chart = { 
+              "key": dayDir.toString(), 
+              "times": times, 
+              "dateHeader": days[date.getDay()] + ", " + jsonDate["month"] + " " + jsonDate["date"] + ", " + jsonDate["year"]
+            }
 
-            data = { locationid, jsonDate }
-
-            getDayHours(data)
-              .then((res) => {
-                if (res.status == 200) {
-                  return res.data
-                }
-              })
-              .then((res) => {
-                if (res) {
-                  const { opentime, closetime, workers } = res
-                  let times = [], chart = {}, openhour = parseInt(opentime["hour"]), openminute = parseInt(opentime["minute"])
-                  let closehour = parseInt(closetime["hour"]), closeminute = parseInt(closetime["minute"])
-                  let openStr = jsonDate["month"] + " " + jsonDate["date"] + ", " + jsonDate["year"] + " " + openhour + ":" + openminute
-                  let closeStr = jsonDate["month"] + " " + jsonDate["date"] + ", " + jsonDate["year"] + " " + closehour + ":" + closeminute
-                  let openTimeStr = Date.parse(openStr), closeTimeStr = Date.parse(closeStr), calcTimeStr = openTimeStr
-                  let currenttime = Date.now(), key = 0
-
-                  while (calcTimeStr < closeTimeStr - pushtime) {
-                    calcTimeStr += pushtime
-
-                    let timestr = new Date(calcTimeStr)
-                    let hour = timestr.getHours()
-                    let minute = timestr.getMinutes()
-                    let period = hour < 12 ? "AM" : "PM"
-                    let timeDisplay = (
-                      hour <= 12 ? 
-                        hour == 0 ? 12 : hour
-                        :
-                        hour - 12
-                      )
-                      + ":" + 
-                      (minute < 10 ? '0' + minute : minute) + " " + period
-                    let timepassed = currenttime > calcTimeStr
-
-                    jsonDate = { ...jsonDate, day: days[date.getDay()], hour, minute }
-
-                    times.push({
-                      key: "time-" + key + "-" + dayDir,
-                      timeDisplay, time: calcTimeStr, jsonDate,
-                      timepassed
-                    })
-
-                    key += 1
-                  }
-
-                  chart = { 
-                    "key": dayDir.toString(), 
-                    "times": times, 
-                    "dateHeader": days[date.getDay()] + ", " + jsonDate["month"] + " " + jsonDate["date"] + ", " + jsonDate["year"]
-                  }
-
-                  setChartinfo({ 
-                    ...chartInfo, chart, 
-                    workersHour, workers, 
-                    dayDir, date: jsonDate, 
-                    loading: false 
-                  })
-                  setLoaded(true)
-                }
-              })
-              .catch((err) => {
-                if (err.response && err.response.status == 400) {
-                  const { errormsg, status } = err.response.data
-                }
-              })
+            setChartinfo({ 
+              ...chartInfo, chart, workers,
+              workersHour: newWorkershour, 
+              dayDir, date: jsonDate, 
+              loading: false 
+            })
+            setLoaded(true)
           }
         })
         .catch((err) => {
-          if (err.response && err.response.status == 400) {
+          if (err.response && err.response.status === 400) {
             const { errormsg, status } = err.response.data
           }
         })
@@ -419,7 +446,7 @@ export default function Main(props) {
     if (!removeBookingconfirm.show) {
       getAppointmentInfo(id)
         .then((res) => {
-          if (res.status == 200) {
+          if (res.status === 200) {
             return res.data
           }
         })
@@ -446,7 +473,7 @@ export default function Main(props) {
 
       removeBooking(data)
         .then((res) => {
-          if (res.status == 200) {
+          if (res.status === 200) {
             return res.data
           }
         })
@@ -465,13 +492,13 @@ export default function Main(props) {
           }
         })
         .catch((err) => {
-          if (err.response && err.response.status == 400) {
+          if (err.response && err.response.status === 400) {
             const { errormsg, status } = err.response.data
           }
         })
     }
   }
-  const bookTheWalkIn = async(worker, jsonDate) => {
+  const bookTheWalkIn = (worker, jsonDate) => {
     if (!bookWalkinconfirm.show) {
       setBookwalkinconfirm({ ...bookWalkinconfirm, show: true, worker, jsonDate })
     } else {
@@ -489,7 +516,7 @@ export default function Main(props) {
 
         bookWalkIn(data)
           .then((res) => {
-            if (res.status == 200) {
+            if (res.status === 200) {
               return res.data
             }
           })
@@ -506,7 +533,7 @@ export default function Main(props) {
             }
           })
           .catch((err) => {
-            if (err.response && err.response.status == 400) {
+            if (err.response && err.response.status === 400) {
               const { errormsg, status } = err.response.data
 
             }
@@ -545,7 +572,8 @@ export default function Main(props) {
       })
   }
   const cancelTheSchedule = (index, requestType) => {
-    let id, type, item = index != null ? appointments[index] : appointments[cancelInfo.index]
+    const { list } = {...appointments}
+    let id, type, item = index != null ? list[index] : list[cancelInfo.index]
 
     id = item.id
     type = item.type
@@ -558,7 +586,7 @@ export default function Main(props) {
 
       cancelSchedule(data)
         .then((res) => {
-          if (res.status === 200) {
+          if (res.status == 200) {
             return res.data
           }
         })
@@ -568,11 +596,11 @@ export default function Main(props) {
             socket.emit("socket/business/cancelSchedule", data, () => {
               switch (requestType) {
                 case "appointment":
-                  const newAppointments = [...appointments]
+                  const { list } = {...appointments}
 
-                  newAppointments.splice(index, 1)
+                  list.splice(index, 1)
 
-                  setAppointments(newAppointments)
+                  setAppointments({ ...appointments, list })
 
                   break
                 default:
@@ -583,7 +611,7 @@ export default function Main(props) {
           }
         })
         .catch((err) => {
-          if (err.response && err.response.status === 400) {
+          if (err.response && err.response.status == 400) {
             const { errormsg, status } = err.response.data
           }
         })
@@ -593,24 +621,24 @@ export default function Main(props) {
   const doneTheService = (index, id) => {
     doneService(id)
       .then((res) => {
-        if (res.status === 200) {
+        if (res.status == 200) {
           return res.data
         }
       })
       .then((res) => {
         if (res) {
-          const newAppointments = [...appointments]
+          const { list } = {...appointments}
           let data = { id, type: "doneService", receiver: res.receiver }
 
-          newAppointments.splice(index, 1)
+          list.splice(index, 1)
 
           socket.emit("socket/doneService", data, () => {
-            setAppointments(newAppointments)
+            setAppointments({ ...appointments, list })
           })
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status === 400) {
+        if (err.response && err.response.status == 400) {
           const { errormsg, status } = err.response.data
         }
       })
@@ -679,7 +707,7 @@ export default function Main(props) {
             }
           }
 
-          if (data.type == "makeAppointment" || data.type == "remakeAppointment") {
+          if (data.type === "makeAppointment" || data.type === "remakeAppointment") {
             workersHour[workerId]["scheduled"][unix] = parseInt(scheduleid)
           }
 
@@ -707,6 +735,7 @@ export default function Main(props) {
     getTheLocationProfile()
     getTheLocationHours()
     getTheOwnerInfo()
+    getTheWorkersHour()
   }
 
   const verify = () => {
@@ -716,7 +745,7 @@ export default function Main(props) {
 
     verifyUser(cellnumber)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })
@@ -728,19 +757,19 @@ export default function Main(props) {
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status == 400) {
+        if (err.response && err.response.status === 400) {
           const { errormsg } = err.response.data
 
           setAccountform({ ...accountForm, errorMsg: errormsg, loading: false })
         }
       })
   }
-  const getAllAccounts = async() => {
+  const getAllAccounts = () => {
     const locationid = localStorage.getItem("locationid")
 
     getAccounts(locationid)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })
@@ -750,7 +779,7 @@ export default function Main(props) {
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status == 400) {
+        if (err.response && err.response.status === 400) {
           const { errormsg, status } = err.response.data
         }
       })
@@ -776,7 +805,7 @@ export default function Main(props) {
 
         updateLocation(data)
           .then((res) => {
-            if (res.status == 200) {
+            if (res.status === 200) {
               return res.data
             }
           })
@@ -789,7 +818,7 @@ export default function Main(props) {
             }
           })
           .catch((err) => {
-            if (err.response && err.response.status == 400) {
+            if (err.response && err.response.status === 400) {
               const { errormsg, status } = err.response.data
 
               setEditinfo({ ...editInfo, errorMsg: errormsg, loading: false })
@@ -920,17 +949,17 @@ export default function Main(props) {
 
     const { status } = await Location.getForegroundPermissionsAsync()
 
-    if (status == 'granted') {
+    if (status === 'granted') {
       getGeocoding()
     } else {
       const { status } = await Location.requestForegroundPermissionsAsync()
 
-      if (status == 'granted') {
+      if (status === 'granted') {
         getGeocoding()
       }
     }
   }
-  const addNewOwner = async() => {
+  const addNewOwner = () => {
     setAccountform({ ...accountForm, loading: true, errorMsg: "" })
 
     const hours = {}
@@ -941,7 +970,7 @@ export default function Main(props) {
       let openhour = parseInt(newOpentime.hour), closehour = parseInt(newClosetime.hour)
       let openperiod = newOpentime.period, closeperiod = newClosetime.period
 
-      if (openperiod == "PM") {
+      if (openperiod === "PM") {
         if (openhour < 12) {
           openhour += 12
         }
@@ -951,7 +980,7 @@ export default function Main(props) {
           :
           openhour.toString()
       } else {
-        if (openhour == 12) {
+        if (openhour === 12) {
           openhour = "00"
         } else if (openhour < 10) {
           openhour = "0" + openhour
@@ -960,7 +989,7 @@ export default function Main(props) {
         }
       }
 
-      if (closeperiod == "PM") {
+      if (closeperiod === "PM") {
         if (closehour < 12) {
           closehour += 12
         }
@@ -970,7 +999,7 @@ export default function Main(props) {
           :
           closehour.toString()
       } else {
-        if (closehour == 12) {
+        if (closehour === 12) {
           closehour = "00"
         } else if (closehour < 10) {
           closehour = "0" + closehour
@@ -998,7 +1027,7 @@ export default function Main(props) {
 
     addOwner(data)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
 
@@ -1020,7 +1049,7 @@ export default function Main(props) {
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status == 400) {
+        if (err.response && err.response.status === 400) {
           const { errormsg, status } = err.response.data
 
           setAccountform({ ...accountForm, errormsg })
@@ -1091,7 +1120,7 @@ export default function Main(props) {
 
     setAccountform({ ...accountForm, workerHours: newWorkerhours })
   }
-  const updateTheOwner = async() => {
+  const updateTheOwner = () => {
     setAccountform({ ...accountForm, loading: true, errorMsg: "" })
 
     const { cellnumber, username, profile, currentPassword, newPassword, confirmPassword } = accountForm
@@ -1123,7 +1152,7 @@ export default function Main(props) {
           let openhour = parseInt(newOpentime.hour), closehour = parseInt(newClosetime.hour)
           let openperiod = newOpentime.period, closeperiod = newClosetime.period
 
-          if (openperiod == "PM") {
+          if (openperiod === "PM") {
             if (openhour < 12) {
               openhour += 12
             }
@@ -1133,7 +1162,7 @@ export default function Main(props) {
               :
               openhour.toString()
           } else {
-            if (openhour == 12) {
+            if (openhour === 12) {
               openhour = "00"
             } else if (openhour < 10) {
               openhour = "0" + openhour
@@ -1142,7 +1171,7 @@ export default function Main(props) {
             }
           }
 
-          if (closeperiod == "PM") {
+          if (closeperiod === "PM") {
             if (closehour < 12) {
               closehour += 12
             }
@@ -1152,7 +1181,7 @@ export default function Main(props) {
               :
               closehour.toString()
           } else {
-            if (closehour == 12) {
+            if (closehour === 12) {
               closehour = "00"
             } else if (closehour < 10) {
               closehour = "0" + closehour
@@ -1182,7 +1211,7 @@ export default function Main(props) {
 
     updateOwner(data)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })
@@ -1203,7 +1232,7 @@ export default function Main(props) {
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status == 400) {
+        if (err.response && err.response.status === 400) {
           const { errormsg, status } = err.response.data
 
           setAccountform({ ...accountForm, errorMsg: errormsg })
@@ -1214,7 +1243,7 @@ export default function Main(props) {
     if (!deleteOwnerbox.show) {
       getStylistInfo(id)
         .then((res) => {
-          if (res.status == 200) {
+          if (res.status === 200) {
             return res.data
           }
         })
@@ -1233,7 +1262,7 @@ export default function Main(props) {
           }
         })
         .catch((err) => {
-          if (err.response && err.response.status == 400) {
+          if (err.response && err.response.status === 400) {
             const { errormsg, status } = err.response.data
           }
         })
@@ -1242,7 +1271,7 @@ export default function Main(props) {
 
       deleteOwner(id)
         .then((res) => {
-          if (res.status == 200) {
+          if (res.status === 200) {
             return res.data
           }
         })
@@ -1251,7 +1280,7 @@ export default function Main(props) {
             const newAccountholders = [...accountHolders]
 
             newAccountholders.forEach(function (info, index) {
-              if (info.id == id) {
+              if (info.id === id) {
                 newAccountholders.splice(index, 1)
               }
             })
@@ -1261,30 +1290,30 @@ export default function Main(props) {
           }
         })
         .catch((err) => {
-          if (err.response && err.response.status == 400) {
+          if (err.response && err.response.status === 400) {
             const { errormsg, status } = err.response.data
           }
         })
     }
   }
-  const cancelTheShift = async(day) => {
+  const cancelTheShift = day => {
     const newWorkerhours = [...accountForm.workerHours]
 
     newWorkerhours.forEach(function (info) {
-      if (info.header.substr(0, 3) == day) {
+      if (info.header.substr(0, 3) === day) {
         info.takeShift = ""
       }
     })
 
     setAccountform({...accountForm, workerHours: newWorkerhours })
   }
-  const getTheOtherWorkers = async(day) => {
+  const getTheOtherWorkers = day => {
     const locationid = localStorage.getItem("locationid")
     const data = { ownerid: accountForm.id, locationid, day }
 
     getOtherWorkers(data)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })
@@ -1299,7 +1328,7 @@ export default function Main(props) {
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status == 400) {
+        if (err.response && err.response.status === 400) {
           const { errormsg, status } = err.response.data
         }
       })
@@ -1310,7 +1339,7 @@ export default function Main(props) {
     const newWorkerhours = [...accountForm.workerHours]
 
     newWorkerhours.forEach(function (info) {
-      if (info.header.substr(0, 3) == day) {
+      if (info.header.substr(0, 3) === day) {
         info.takeShift = id.toString()
       }
     })
@@ -1330,7 +1359,7 @@ export default function Main(props) {
       let openhour = parseInt(newOpentime.hour), closehour = parseInt(newClosetime.hour)
       let openperiod = newOpentime.period, closeperiod = newClosetime.period
 
-      if (openperiod == "PM") {
+      if (openperiod === "PM") {
         if (openhour < 12) {
           openhour += 12
         }
@@ -1340,7 +1369,7 @@ export default function Main(props) {
           :
           openhour.toString()
       } else {
-        if (openhour == 12) {
+        if (openhour === 12) {
           openhour = "00"
         } else if (openhour < 10) {
           openhour = "0" + openhour
@@ -1349,7 +1378,7 @@ export default function Main(props) {
         }
       }
 
-      if (closeperiod == "PM") {
+      if (closeperiod === "PM") {
         if (closehour < 12) {
           closehour += 12
         }
@@ -1359,7 +1388,7 @@ export default function Main(props) {
           :
           closehour.toString()
       } else {
-        if (closehour == 12) {
+        if (closehour === 12) {
           closehour = "00"
         } else if (closehour < 10) {
           closehour = "0" + closehour
@@ -1381,7 +1410,7 @@ export default function Main(props) {
 
     setLocationHours(data)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })
@@ -1392,20 +1421,20 @@ export default function Main(props) {
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status == 400) {
+        if (err.response && err.response.status === 400) {
           const { errormsg, status } = err.response.data
 
           setEditinfo({ ...editInfo, loading: false })
         }
       })
   }
-  const setTheReceiveType = async(type) => {
+  const setTheReceiveType = type => {
     const locationid = localStorage.getItem("locationid")
     const data = { locationid, type }
 
     setReceiveType(data)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })
@@ -1415,7 +1444,7 @@ export default function Main(props) {
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status == 400) {
+        if (err.response && err.response.status === 400) {
           const { errormsg, status } = err.response.data
         }
       })
@@ -1423,7 +1452,7 @@ export default function Main(props) {
   const jsonDateToUnix = date => {
     return Date.parse(date["month"] + " " + date["date"] + ", " + date["year"] + " " + date["hour"] + ":" + date["minute"])
   }
-  
+
   useEffect(() => initialize(), [])
 
   useEffect(() => {
@@ -1435,9 +1464,9 @@ export default function Main(props) {
     }
   }, [viewType, chartInfo.workersHour, appointments.list.length, cartOrderers.length])
 
-  const header = (locationType == "hair" || locationType == "nail") && " Salon " || 
-                  locationType == "restaurant" && " Restaurant " || 
-                  locationType == "store" && " Store "
+  const header = (locationType === "hair" || locationType === "nail") && " Salon " || 
+                  locationType === "restaurant" && " Restaurant " || 
+                  locationType === "store" && " Store "
   const currenttime = Date.now()
   const { date, workersHour, workers } = chartInfo
   let currDay = date.day ? date.day.substr(0, 3) : ""
@@ -1452,7 +1481,7 @@ export default function Main(props) {
             </div>
             
             <div style={{ flexDirection: 'row', height: '5%', justifyContent: 'space-around', width: '100%' }}>
-              {(locationType === "hair" || locationType == "nail") && (
+              {(locationType === "hair" || locationType === "nail") && (
                 <div id="view-types">
                   <div className="view-type" onClick={() => getListAppointments()}>See{'\n'}Your(s)</div>
                   <div className="view-type" onClick={() => getAppointmentsChart(0)}>See{'\n'}All Stylist(s)</div>
@@ -1484,7 +1513,7 @@ export default function Main(props) {
                           <div className="schedule-action" onClick={() => cancelTheSchedule(index, "appointment")}>Cancel</div>
                         </div>
                         <div className="column">
-                          <div className="schedule-action" onClick={() => window.location = "booktime/" + item.id + "/" + (item.serviceid == "" ? null : item.serviceid) + "/" + item.name}>Pick another time for client</div>
+                          <div className="schedule-action" onClick={() => window.location = "booktime/" + item.id + "/" + (item.serviceid === "" ? null : item.serviceid) + "/" + item.name}>Pick another time for client</div>
                         </div>
                         <div className="column">
                           <div className="schedule-action" onClick={() => doneTheService(index, item.id)}>Done</div>
@@ -1535,13 +1564,6 @@ export default function Main(props) {
                         <div className="chart-row">
                           {chartInfo.workers.map(worker => (
                             <div
-                              disabled={!(
-                                item.time >= workersHour[worker.id][currDay]["open"] && item.time < workersHour[worker.id][currDay]["close"] // working times
-                                &&
-                                workersHour[worker.id][currDay]["workking"]
-                                &&
-                                !item.timepassed
-                              )}
                               key={worker.key}
                               className="chart-worker"
                               style={{
@@ -1549,11 +1571,18 @@ export default function Main(props) {
                                 opacity: (
                                   item.time >= workersHour[worker.id][currDay]["open"] && item.time < workersHour[worker.id][currDay]["close"]
                                   &&
-                                  workersHour[worker.id][currDay]["working"]
+                                  workersHour[worker.id][currDay]["working"] == true
                                   &&
                                   !item.timepassed
                                 ) ? 1 : 0.3,
-                                width: workers.length < 5 ? (width / workers.length) : 200
+                                width: workers.length < 5 ? (width / workers.length) : 200,
+                                pointerEvents: (
+                                  item.time >= workersHour[worker.id][currDay]["open"] && item.time < workersHour[worker.id][currDay]["close"] // working times
+                                  &&
+                                  workersHour[worker.id][currDay]["working"] == true
+                                  &&
+                                  !item.timepassed
+                                ) ? "" : "none"
                               }}
                               onClick={() => {
                                 if (item.time in workersHour[worker.id]["scheduled"]) {
@@ -1686,26 +1715,28 @@ export default function Main(props) {
                 <div id="show-info-header">{header.substr(1, header.length - 2)}'s hour(s)</div>
 
                 <div className="row">
-                  {showInfo.locationHours.map(info => (
-                    !info.close && (
-                      <div className="worker-time-container" key={info.key}>
-                        <div className="day-header">{info.header}: </div>
-                        <div className="time-headers">
-                          <div className="time-header">{info.opentime.hour}</div>
-                          <div className="column">:</div>
-                          <div className="time-header">{info.opentime.minute}</div>
-                          <div className="time-header">{info.opentime.period}</div>
+                  <div>
+                    {showInfo.locationHours.map(info => (
+                      !info.close && (
+                        <div className="worker-time-container" key={info.key}>
+                          <div className="day-header">{info.header}: </div>
+                          <div className="time-headers">
+                            <div className="time-header">{info.opentime.hour}</div>
+                            <div className="column">:</div>
+                            <div className="time-header">{info.opentime.minute}</div>
+                            <div className="time-header">{info.opentime.period}</div>
+                          </div>
+                          <div className="column"> - </div>
+                          <div className="time-headers">
+                            <div className="time-header">{info.closetime.hour}</div>
+                            <div className="column">:</div>
+                            <div className="time-header">{info.closetime.minute}</div>
+                            <div className="time-header">{info.closetime.period}</div>
+                          </div>
                         </div>
-                        <div className="column"> - </div>
-                        <div className="time-headers">
-                          <div className="time-header">{info.closetime.hour}</div>
-                          <div className="column">:</div>
-                          <div className="time-header">{info.closetime.minute}</div>
-                          <div className="time-header">{info.closetime.period}</div>
-                        </div>
-                      </div>
-                    )
-                  ))}
+                      )
+                    ))}
+                  </div>
                 </div>
 
                 <div id="worker-info-list">
@@ -1795,11 +1826,11 @@ export default function Main(props) {
                           setShowmoreoptions({ ...showMoreoptions, show: false })
 
                           window.location = "/list"
-                        }}>Switch Business</div>
+                        }}>More Business(es)</div>
 
                         {(locationType === "hair" || locationType === "nail") && (
                           <div id="receive-types-box">
-                            <div id="receive-types-header">Get appointments</div>
+                            <div id="receive-types-header">Get appointments by</div>
 
                             <div id="receive-types">
                               <div className="receive-type" 
@@ -1807,14 +1838,14 @@ export default function Main(props) {
                                   backgroundColor: locationReceivetype === 'stylist' ? 'black' : 'transparent', 
                                   color: locationReceivetype === 'stylist' ? 'white' : 'black'
                                 }} onClick={() => setTheReceiveType('stylist')}
-                              >By stylist(s)</div>
+                              >Stylist(s)</div>
 
                               <div className="receive-type" 
                                 style={{ 
                                   backgroundColor: locationReceivetype === 'owner' ? 'black' : 'transparent', 
                                   color: locationReceivetype === 'owner' ? 'white' : 'black'
                                 }} onClick={() => setTheReceiveType('owner')}
-                              >By owner</div>
+                              >Owner</div>
                             </div>
                           </div>
                         )}
@@ -1835,11 +1866,11 @@ export default function Main(props) {
                             <>
                               {locationInfo === "" && (
                                 <>
-                                  <div className="location-action-option" disabled={editInfo.loading} onClick={() => markLocation()}>Mark your location</div>
+                                  <div className="location-action-option" style={{ pointerEvents: editInfo.loading ? "none" : "" }} onClick={() => markLocation()}>Mark your location</div>
 
                                   <div className="location-div">Or</div>
 
-                                  <div className="location-action-option" disabled={editInfo.loading} onClick={() => {
+                                  <div className="location-action-option" style={{ pointerEvents: editInfo.loading ? "none" : "" }} onClick={() => {
                                     setLocationinfo('away')
                                     setEditinfo({ ...editInfo, errorMsg: '' })
                                   }}>Enter address instead</div>
@@ -1848,7 +1879,7 @@ export default function Main(props) {
 
                               {locationInfo === "away" && (
                                 <>
-                                  <div className="location-action-option" disabled={editInfo.loading} onClick={() => markLocation()}>Mark your location</div>
+                                  <div className="location-action-option" style={{ pointerEvents: editInfo.loading ? "none" : "" }} onClick={() => markLocation()}>Mark your location</div>
 
                                   <div className="location-div">Or</div>
 
@@ -1938,14 +1969,14 @@ export default function Main(props) {
                                   </>
                                 ) : (
                                   <div id="camera-actions">
-                                    <div className="camera-action" style={{ opacity: logo.loading ? 0.5 : 1 }} disabled={logo.loading} onClick={() => fileComp.click()}>Choose from computer</div>
+                                    <div className="camera-action" style={{ opacity: logo.loading ? 0.5 : 1, pointerEvents: logo.loading ? "none" : "" }} onClick={() => fileComp.click()}>Choose from computer</div>
 
                                     <input type="file" ref={r => {setFilecomp(r)}} onChange={choosePhoto} style={{ display: 'none' }}/>
                                   </div>
                                 )}  
                               </div>
 
-                              <div className="update-button" disabled={editInfo.loading} onClick={() => updateYourLocation()}>Save</div>
+                              <div className="update-button" style={{ pointerEvents: editInfo.loading ? "none" : "" }} onClick={() => updateYourLocation()}>Save</div>
                             </>
                           )}
 
@@ -2078,11 +2109,11 @@ export default function Main(props) {
                               ))}
 
                               <div id="update-buttons">
-                                <div className="update-button" disabled={editInfo.loading} onClick={() => {
+                                <div className="update-button" style={{ pointerEvents: editInfo.loading ? "none" : "" }} onClick={() => {
                                   setShowmoreoptions({ ...showMoreoptions, infoType: '' })
                                   setEditinfo({ ...editInfo, show: false, type: '' })
                                 }}>Cancel</div>
-                                <div className="update-button" disabled={editInfo.loading} onClick={() => updateLocationHours()}>Save</div>
+                                <div className="update-button" style={{ pointerEvents: editInfo.loading ? "none" : "" }} onClick={() => updateLocationHours()}>Save</div>
                               </div>
                             </>
                           )}
@@ -2109,43 +2140,24 @@ export default function Main(props) {
                               )}
 
                               {accountHolders.map((info, index) => (
-                                <div className="row">
-                                  <div key={info.key} className="account">
+                                <div key={info.key} className="account">
+                                  <div className="row">
                                     <div className="column">
                                       <div className="account-header">#{index + 1}:</div>
                                     </div>
 
                                     <div className="account-edit">
                                       <div className="column">
-                                        <div className="account-edit-header">{info.username}</div>
+                                        <div className="account-edit-profile">
+                                          <img 
+                                            alt=""
+                                            src={info.profile.name ? logo_url + info.profile.name : "/profilepicture.jpeg"}
+                                            style={resizePhoto(info.profile, 100)}
+                                          />
+                                        </div>
                                       </div>
                                       <div className="column">
-                                        <div className="account-edit-touch" onClick={() => {
-                                          if (info.id === ownerId) {
-                                            const { name, height, width } = info.profile
-                                            const size = { height, width }
-
-                                            setAccountform({
-                                              ...accountForm,
-                                              show: true, type: 'edit', 
-                                              id: info.id,
-                                              username: info.username,
-                                              cellnumber: info.cellnumber,
-                                              password: '',
-                                              confirmPassword: '',
-                                              profile: { uri: logo_url + name, name: "", size },
-                                              workerHours: info.hours
-                                            })
-                                          } else { // others can only edit other's hours
-                                            setAccountform({ 
-                                              ...accountForm, 
-                                              show: true, type: 'edit', editType: 'hours', 
-                                              id: info.id, workerHours: info.hours
-                                            })
-                                          }
-
-                                          setEditinfo({ ...editInfo, show: false })
-                                        }}>Change {ownerId === info.id ? " Info (your)" : " hours"}</div>
+                                        <div className="account-edit-header">{info.username}</div>
                                       </div>
                                       {isOwner === true && (
                                         <div className="column">
@@ -2155,6 +2167,38 @@ export default function Main(props) {
                                         </div>
                                       )}
                                     </div>
+                                  </div>
+
+                                  <div className="column">
+                                    <div className="account-edit-touch" onClick={() => {
+                                      if (info.id === ownerId) {
+                                        const { height, width } = info.profile
+                                        const size = { height, width }
+
+                                        setAccountform({
+                                          ...accountForm,
+                                          show: true, type: 'edit', 
+                                          id: info.id,
+                                          username: info.username,
+                                          cellnumber: info.cellnumber,
+                                          password: '',
+                                          confirmPassword: '',
+                                          profile: { 
+                                            uri: info.profile.name ? logo_url + info.profile.name : "", 
+                                            name: info.profile.name ? info.profile.name : "", size 
+                                          },
+                                          workerHours: info.hours
+                                        })
+                                      } else { // others can only edit other's hours
+                                        setAccountform({ 
+                                          ...accountForm, 
+                                          show: true, type: 'edit', editType: 'hours', 
+                                          id: info.id, workerHours: info.hours
+                                        })
+                                      }
+
+                                      setEditinfo({ ...editInfo, show: false })
+                                    }}>Change {ownerId === info.id ? " Info (your)" : " hours"}</div>
                                   </div>
                                 </div>
                               ))}
@@ -2335,8 +2379,8 @@ export default function Main(props) {
                                   ))}
 
                                   <div id="account-form-actions">
-                                    <div className="account-form-action" style={{ opacity: accountForm.loading ? 0.3 : 1 }} disabled={accountForm.loading} onClick={() => setAccountform({ ...accountForm, show: false, type: 'edit', editType: '', id: -1, editHours: false })}>Cancel</div>
-                                    <div className="account-form-action" style={{ opacity: accountForm.loading ? 0.3 : 1 }} disabled={accountForm.loading} onClick={() => {
+                                    <div className="account-form-action" style={{ opacity: accountForm.loading ? 0.3 : 1, pointerEvents: accountForm.loading ? "none" : "" }} onClick={() => setAccountform({ ...accountForm, show: false, type: 'edit', editType: '', id: -1, editHours: false })}>Cancel</div>
+                                    <div className="account-form-action" style={{ opacity: accountForm.loading ? 0.3 : 1, pointerEvents: accountForm.loading ? "none" : "" }} onClick={() => {
                                       if (accountForm.type === 'add') {
                                         addNewOwner()
                                       } else {
@@ -2412,7 +2456,7 @@ export default function Main(props) {
                                       </>
                                       :
                                       <div id="camera-actions">
-                                        <div className="camera-action" style={{ opacity: accountForm.loading ? 0.5 : 1 }} disabled={accountForm.loading} onClick={() => fileComp.click()}>Choose from phone</div>
+                                        <div className="camera-action" style={{ opacity: accountForm.loading ? 0.5 : 1, pointerEvents: accountForm.loading ? "none" : "" }} onClick={() => fileComp.click()}>Choose from phone</div>
 
                                         <input type="file" ref={r => {setFilecomp(r)}} onChange={chooseProfile} style={{ display: 'none' }}/>
                                       </div>
@@ -2581,7 +2625,7 @@ export default function Main(props) {
 
                                 {!accountForm.verifyCode && (
                                   <div id="account-form-actions">
-                                    <div className="account-form-action" style={{ opacity: accountForm.loading ? 0.3 : 1 }} disabled={accountForm.loading} onClick={() => {
+                                    <div className="account-form-action" style={{ opacity: accountForm.loading ? 0.3 : 1, pointerEvents: accountForm.loading ? "none" : "" }} onClick={() => {
                                       setAccountform({ 
                                         ...accountForm, 
                                         show: false,
@@ -2595,21 +2639,21 @@ export default function Main(props) {
                                       })
                                       setEditinfo({ ...editInfo, show: true })
                                     }}>Cancel</div>
-                                    <div className="account-form-action" style={{ opacity: accountForm.loading ? 0.3 : 1 }} disabled={accountForm.loading} onClick={() => {
-                                      if (accountForm.addStep == 4) {
+                                    <div className="account-form-action" style={{ opacity: accountForm.loading ? 0.3 : 1, pointerEvents: accountForm.loading ? "none" : "" }} onClick={() => {
+                                      if (accountForm.addStep === 4) {
                                         addNewOwner()
-                                      } else if (accountForm.addStep == 0 && !accountForm.verified) {
+                                      } else if (accountForm.addStep === 0 && !accountForm.verified) {
                                         verify()
                                       } else {
                                         setAccountform({ ...accountForm, addStep: accountForm.addStep + 1 })
                                       }
                                     }}>
                                       <div id="account-form-submit-header">
-                                        {accountForm.addStep == 2 ? 
+                                        {accountForm.addStep === 2 ? 
                                           accountForm.profile.uri ? "Next" : "Skip"
                                           :
-                                          accountForm.addStep == 4 ? 
-                                            (accountForm.type == 'add' ? 'Add' : 'Save') + ' Account'
+                                          accountForm.addStep === 4 ? 
+                                            (accountForm.type === 'add' ? 'Add' : 'Save') + ' Account'
                                             :
                                             'Next'
                                         }
@@ -2653,7 +2697,9 @@ export default function Main(props) {
                                       </>
                                       :
                                       <div id="camera-actions">
-                                        <div className="camera-action" style={{ opacity: accountForm.loading ? 0.5 : 1 }} disabled={accountForm.loading} onClick={() => chooseProfile()}>Choose from phone</div>
+                                        <div className="camera-action" style={{ opacity: accountForm.loading ? 0.5 : 1, pointerEvents: accountForm.loading ? "none" : "" }} onClick={() => fileComp.click()}>Choose from phone</div>
+
+                                        <input type="file" ref={r => {setFilecomp(r)}} onChange={chooseProfile} style={{ display: 'none' }}/>
                                       </div>
                                     } 
                                   </div>
@@ -2852,7 +2898,7 @@ export default function Main(props) {
                                 {accountForm.errorMsg ? <div className="errormsg">{accountForm.errorMsg}</div> : null}
 
                                 <div id="account-form-actions">
-                                  <div className="account-form-action" style={{ opacity: accountForm.loading ? 0.3 : 1 }} disabled={accountForm.loading} onClick={() => {
+                                  <div className="account-form-action" style={{ opacity: accountForm.loading ? 0.3 : 1, pointerEvents: accountForm.loading ? "none" : "" }} onClick={() => {
                                     accountHolders.forEach(function (info) {
                                       if (info.id === accountForm.id) {
                                         const { name, height, width } = info.profile
@@ -2870,7 +2916,7 @@ export default function Main(props) {
                                       }
                                     })
                                   }}>Cancel</div>
-                                  <div className="account-form-action" style={{ opacity: accountForm.loading ? 0.3 : 1 }} disabled={accountForm.loading} onClick={() => {
+                                  <div className="account-form-action" style={{ opacity: accountForm.loading ? 0.3 : 1, pointerEvents: accountForm.loading ? "none" : "" }} onClick={() => {
                                     if (accountForm.type === 'add') {
                                       addNewOwner()
                                     } else {
@@ -2952,14 +2998,26 @@ export default function Main(props) {
                       {displayTime(bookWalkinconfirm.jsonDate)}
                     </div>
 
-                    <input 
-                      id="bookwalkin-input" placeholder="Enter client's number" type="text" 
-                      onChange={(e) => setBookwalkinconfirm({
-                        ...bookWalkinconfirm,
-                        client: {...bookWalkinconfirm.client, cellnumber: displayPhonenumber(bookWalkinconfirm.client.cellnumber, e.target.value, () => {})},
-                        errorMsg: ""
-                      })} value={bookWalkinconfirm.client.cellnumber}/>
-                    />
+                    <div className="row">
+                      <input 
+                        className="bookwalkin-input" placeholder="Enter client name" 
+                        onChange={e => setBookwalkinconfirm({ 
+                          ...bookWalkinconfirm, 
+                          client: {...bookWalkinconfirm.client, name: e.target.value }, 
+                          errorMsg: ""
+                        })} value={bookWalkinconfirm.client.name}
+                      />
+                    </div>
+                    <div className="row">
+                      <input 
+                        className="bookwalkin-input" placeholder="Enter client's number" type="text" 
+                        onChange={(e) => setBookwalkinconfirm({
+                          ...bookWalkinconfirm,
+                          client: {...bookWalkinconfirm.client, cellnumber: displayPhonenumber(bookWalkinconfirm.client.cellnumber, e.target.value, () => {})},
+                          errorMsg: ""
+                        })} value={bookWalkinconfirm.client.cellnumber}
+                      />
+                    </div>
 
                     <div className="errormsg">{bookWalkinconfirm.errorMsg}</div>
 

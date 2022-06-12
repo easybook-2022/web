@@ -110,7 +110,7 @@ export default function Auth() {
   }
 
   useEffect(() => {
-    if (password == confirmPassword) register()
+    if (password === confirmPassword) register()
   }, [confirmPassword.length])
 
   return (
@@ -159,7 +159,7 @@ export default function Auth() {
                     }
                   }} type="text" value={codeInput}/>
                 </div>
-                <div id="submit" style={{ opacity: loading ? 0.3 : 1 }} disabled={loading} onClick={() => {
+                <div id="submit" style={{ opacity: loading ? 0.3 : 1, pointerEvents: loading ? "none" : "" }} onClick={() => {
                   setVerifycode('')
                   setVerified(false)
                   setNoaccount(false)

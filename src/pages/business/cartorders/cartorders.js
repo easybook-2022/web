@@ -175,8 +175,8 @@ export default function Cartorders(props) {
         ))}
 
         <div id="actions">
-          <div className="action" disabled={loading} onClick={() => setShowsetwaittime({ ...showSetwaittime, show: true, waitTime: '' })}>Set wait time</div>
-          <div className="action" disabled={loading} onClick={() => orderIsDone()}>Done</div>
+          <div className="action" style={{ pointerEvents: loading ? "none" : "" }} onClick={() => setShowsetwaittime({ ...showSetwaittime, show: true, waitTime: '' })}>Set wait time</div>
+          <div className="action" style={{ pointerEvents: loading ? "none" : "" }} onClick={() => orderIsDone()}>Done</div>
         </div>
       </div>
 

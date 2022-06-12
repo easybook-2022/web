@@ -1,6 +1,6 @@
-const local_url = false
-const test_input = false
-const useInput = false
+const local_url = true
+const test_input = true
+const useInput = true
 
 const wifi_api_url = "http://192.168.0.172:5001/flask"
 const wifi_socket_url = "http://192.168.0.172:5002"

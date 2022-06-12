@@ -75,7 +75,7 @@ export default function Menu(props) {
 
     getOwnerInfo(ownerid)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })
@@ -85,7 +85,7 @@ export default function Menu(props) {
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status == 400) {
+        if (err.response && err.response.status === 400) {
           const { errormsg, status } = err.response.data
         }
       })
@@ -114,10 +114,10 @@ export default function Menu(props) {
       })
   }
   const displayList = info => {
-    let { id, name, image, list, left } = info
+    let { id, name, image, list } = info
 
     return (
-      <div style={{ marginLeft: left }}>
+      <div>
         {name ? 
           <div className="menu">
             <div className="menu-row">
@@ -149,9 +149,9 @@ export default function Menu(props) {
                   <div className="column">
                     <div className="item-add-header">
                       Add{' '}
-                      {(locationType == "hair" || locationType == "nail") && "service"}
-                      {locationType == "restaurant" && "meal"}
-                      {locationType == "store" && "product"}
+                      {(locationType === "hair" || locationType === "nail") && "service"}
+                      {locationType === "restaurant" && "meal"}
+                      {locationType === "store" && "product"}
                     </div>
                   </div>
                   <FontAwesomeIcon icon={faCirclePlus} size="2x"/>
@@ -159,9 +159,9 @@ export default function Menu(props) {
               </div>
               :
               list.map((info, index) => (
-                <div key={"list-" + index} style={{ backgroundColor: 'white', marginLeft: left + 50 }}>
+                <div key={"list-" + index} style={{ backgroundColor: 'white' }}>
                   {info.listType === "list" ? 
-                    displayList({ id: info.id, name: info.name, image: info.image, list: info.list, left: left == 0 ? left : left + 10 })
+                    displayList({ id: info.id, name: info.name, image: info.image, list: info.list })
                     :
                     <div className="item">
                       <div className="item-row">
@@ -196,9 +196,9 @@ export default function Menu(props) {
                         <div className="column">
                           <div className="item-add-header">
                             Add {' '}
-                            {(locationType == "hair" || locationType == "nail") && "service"}
-                            {locationType == "restaurant" && "meal"}
-                            {locationType == "store" && "product"}
+                            {(locationType === "hair" || locationType === "nail") && "service"}
+                            {locationType === "restaurant" && "meal"}
+                            {locationType === "store" && "product"}
                           </div>
                         </div>
                         <FontAwesomeIcon icon={faCirclePlus} size="2x"/>
@@ -211,9 +211,9 @@ export default function Menu(props) {
           </div>
           :
           list.map((info, index) => (
-            <div key={"list-" + index} style={{ marginLeft: left + 100 }}>
+            <div key={"list-" + index}>
               {info.listType === "list" ? 
-                displayList({ id: info.id, name: info.name, image: info.image, list: info.list, left: left + 10 })
+                displayList({ id: info.id, name: info.name, image: info.image, list: info.list })
                 :
                 <div className="item">
                   <div className="item-row">
@@ -443,11 +443,12 @@ export default function Menu(props) {
         <div id="box">
           <div style={{ height: '90%', overflowY: 'scroll', width: '100%' }}>
             <div style={{ padding: '10px 0' }}>
+              <div className="menus-header">Photo(s)</div>
               {menuInfo.photos.length > 0 && (
                 menuInfo.photos[0].row && (
                   <div style={{ width: '100%' }}>
                     {menuInfo.photos.map(info => (
-                      <div key={info.key} className="menu-photo-row">
+                      <div key={info.key} className="menu-row">
                         {info.row.map(item => (
                           <div key={item.key} className="menu-item">
                             {item.photo && (
@@ -469,26 +470,25 @@ export default function Menu(props) {
                   </div>
                 )
               )}
+              {isOwner === true && (
+                <div style={{ margin: '0 auto' }}>
+                  <div className="menu-start" onClick={() => setUploadmenubox({ ...uploadMenubox, show: true, uri: '', name: '' })}>Upload photo</div>
+                  <div style={{ textAlign: 'center' }}>(Easier for you)</div>
+                </div>
+              )}
 
-              {menuInfo.list.length > 0 && menuInfo.list[0].listType === "list" ? 
-                displayList({ id: "", name: "", image: "", list: menuInfo.list, left: 0 })
-                :
-                <div id="menu-other">{displayList({ id: "", name: "", image: "", list: menuInfo.list })}</div>
-              }
-            </div>
-            
-            {isOwner === true && (
-              <div style={{ margin: '0 auto', marginTop: 50 }}>
-                {menuInfo.list.length === 0 && (
-                  <>
-                    <div className="menu-start" onClick={() => setCreateoptionbox({ show: true, id: "", allow: "both" })}>Add to list</div>
-                    <div id="menu-start-div">Or</div>
-                  </>
+              <div style={{ marginTop: 200 }}>
+                <div className="menus-header">List(s)</div>
+                {displayList({ id: "", name: "", image: "", list: menuInfo.list })}
+
+                {isOwner === true && (
+                  <div style={{ margin: 'auto 0' }}>
+                    <div className="menu-start" onClick={() => setCreateoptionbox({ show: true, id: "", allow: "both" })}>Create manually</div>
+                    <div style={{ textAlign: 'center' }}>(Easier for {locationType === "nail" || locationType === "hair" ? "clients to book" : "customers to order"})</div>
+                  </div>
                 )}
-
-                <div className="menu-start" onClick={() => setUploadmenubox({ ...uploadMenubox, show: true, uri: '', name: '' })}>Upload menu photo</div>
               </div>
-            )}
+            </div>
           </div>
 
           <div id="bottom-navs">
@@ -530,9 +530,9 @@ export default function Menu(props) {
                     }
                   }}>
                     Add{' '}
-                    {(locationType == "hair" || locationType == "nail") && "service"}
-                    {locationType == "restaurant" && "meal"}
-                    {locationType == "store" && "product"}
+                    {(locationType === "hair" || locationType === "nail") && "service"}
+                    {locationType === "restaurant" && "meal"}
+                    {locationType === "store" && "product"}
                   </div>
                 </div>
               </div>
@@ -565,8 +565,8 @@ export default function Menu(props) {
 
                   {!uploadMenubox.uri ? 
                     <div id="upload-menu-camera-actions">
-                      <div className="upload-menu-camera-action" style={{ opacity: uploadMenubox.loading ? 0.5 : 1 }} disabled={uploadMenubox.loading} onClick={() => setUploadmenubox({ ...uploadMenubox, action: '' })}>Cancel</div>
-                      <div className="upload-menu-camera-action" style={{ opacity: uploadMenubox.loading ? 0.5 : 1 }} disabled={uploadMenubox.loading} onClick={() => fileComp.click()}>Choose instead</div>
+                      <div className="upload-menu-camera-action" style={{ opacity: uploadMenubox.loading ? 0.5 : 1, pointerEvents: uploadMenubox.loading ? "none" : "" }} onClick={() => setUploadmenubox({ ...uploadMenubox, action: '' })}>Cancel</div>
+                      <div className="upload-menu-camera-action" style={{ opacity: uploadMenubox.loading ? 0.5 : 1, pointerEvents: uploadMenubox.loading ? "none" : "" }} onClick={() => fileComp.click()}>Choose instead</div>
                       
                       <input type="file" ref={r => {setFilecomp(r)}} onChange={choosePhoto} style={{ display: 'none' }}/>
                     </div>

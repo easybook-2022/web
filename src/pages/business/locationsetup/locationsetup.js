@@ -28,7 +28,6 @@ export default function Locationsetup({ navigation }) {
   const [newBusiness, setNewbusiness] = useState(null)
 
   const [locationInfo, setLocationinfo] = useState('')
-  const [camComp, setCamcomp] = useState(null)
   const [fileComp, setFilecomp] = useState(null)
   const [locationCoords, setLocationcoords] = useState({ longitude: null, latitude: null })
 
@@ -234,7 +233,7 @@ export default function Locationsetup({ navigation }) {
         break
       case 1:
         if (!storeName) {
-          msg = "Please enter the name of your " + ((type == 'hair' || type == 'nail') ? type + ' salon' : type)
+          msg = "Please enter the name of your " + ((type === 'hair' || type === 'nail') ? type + ' salon' : type)
         }
 
         break
@@ -258,13 +257,13 @@ export default function Locationsetup({ navigation }) {
         break
       case 3:
         if (!phonenumber) {
-          msg = "Please provide the " + ((type == 'hair' || type == 'nail') ? type + ' salon' : type) + " phone number"
+          msg = "Please provide the " + ((type === 'hair' || type === 'nail') ? type + ' salon' : type) + " phone number"
         }
 
         break
       case 4:
         if (!logo.uri) {
-          msg = "Please provide a photo of the " + ((type == 'hair' || type == 'nail') ? type + ' salon' : type)
+          msg = "Please provide a photo of the " + ((type === 'hair' || type === 'nail') ? type + ' salon' : type)
         }
 
         break
@@ -367,7 +366,7 @@ export default function Locationsetup({ navigation }) {
     setNewbusiness(localStorage.getItem("newBusiness"))
   }, [])
 
-  const header = type == 'hair' || type == 'nail' ? type + ' salon' : type
+  const header = type === 'hair' || type === 'nail' ? type + ' salon' : type
     
   return (
     <div id="locationsetup" style={{ opacity: loading ? 0.5 : 1 }}>
@@ -447,7 +446,7 @@ export default function Locationsetup({ navigation }) {
                     <div id="location-container-center">
                       <div className="location-header">If you are at the {header} right now,</div>
 
-                      <div className="location-action-option" disabled={loading} onClick={() => {
+                      <div className="location-action-option" style={{ pointerEvents: loading ? "none" : "" }} onClick={() => {
                         setLocationinfo('destination')
 
                         navigator.geolocation.getCurrentPosition(function (position) {
@@ -461,7 +460,7 @@ export default function Locationsetup({ navigation }) {
 
                       <div className="location-div">Or</div>
 
-                      <div className="location-action-option" disabled={loading} onClick={() => {
+                      <div className="location-action-option" style={{ pointerEvents: loading ? "none" : "" }} onClick={() => {
                         setLocationinfo('away')
                         setErrormsg()
                       }}>Enter address instead</div>
@@ -507,7 +506,7 @@ export default function Locationsetup({ navigation }) {
                       <div id="location-infos">
                         <div style={{ marginTop: 50 }}>
                           <div className="location-header">If you are at the {header} right now,</div>
-                          <div className="location-action-option" disabled={loading} onClick={() => {
+                          <div className="location-action-option" style={{ pointerEvents: loading ? "none" : "" }} onClick={() => {
                             setLocationinfo('destination')
 
                             navigator.geolocation.getCurrentPosition(function (position) {
@@ -573,7 +572,7 @@ export default function Locationsetup({ navigation }) {
                     </>
                   ) : (
                     <div id="camera-actions">
-                      <div className="camera-action" style={{ opacity: loading ? 0.3 : 1 }} disabled={loading} onClick={() => fileComp.click()}>Choose<br/>from computer</div>
+                      <div className="camera-action" style={{ opacity: loading ? 0.3 : 1, pointerEvents: loading ? "none" : "" }} onClick={() => fileComp.click()}>Choose<br/>from computer</div>
 
                       <input type="file" ref={r => {setFilecomp(r)}} onChange={choosePhoto} style={{ display: 'none' }}/>
                     </div>
@@ -596,7 +595,7 @@ export default function Locationsetup({ navigation }) {
                   }}>Back</div>
                 )}
                   
-                <div className="action" disabled={loading} onClick={() => setupType === "hours" && daysInfo.step === 1 ? setupYourLocation() : saveInfo()}>{setupType === "" ? "Let's go" : "Next"}</div>
+                <div className="action" style={{ pointerEvents: loading ? "none" : "" }} onClick={() => setupType === "hours" && daysInfo.step === 1 ? setupYourLocation() : saveInfo()}>{setupType === "" ? "Let's go" : "Next"}</div>
               </div>
             </div>
           </div>
@@ -643,12 +642,12 @@ export default function Locationsetup({ navigation }) {
                 </div>
                 :
                 <div style={{ marginBottom: 200, opacity: loading ? 0.5 : 1 }}>
-                  <div id="days-back" disabled={loading} onClick={() => setDaysinfo({ ...daysInfo, done: false, step: 0 })}>Change days</div>
+                  <div id="days-back" style={{ pointerEvents: loading ? "none" : "" }} onClick={() => setDaysinfo({ ...daysInfo, done: false, step: 0 })}>Change days</div>
 
                   {days.map((info, index) => (
                     !info.close ?
                       <div key={index} className="day">
-                        <div className="day-header">Set hours for {info.header}</div>
+                        <div className="day-header">Set open and close hours for {info.header}</div>
 
                         <div className="time-selection-container">
                           <div className="time-selection">
@@ -762,7 +761,7 @@ export default function Locationsetup({ navigation }) {
                   }}>Back</div>
                 )}
                   
-                <div className="action" disabled={loading} onClick={() => setupType === "hours" && daysInfo.step === 1 ? setupYourLocation() : saveInfo()}>{setupType === "" ? "Let's go" : "Next"}</div>
+                <div className="action" style={{ pointerEvents: loading ? "none" : "" }} onClick={() => setupType === "hours" && daysInfo.step === 1 ? setupYourLocation() : saveInfo()}>{setupType === "" ? "Let's go" : "Next"}</div>
               </div>
             </div>
           </div>
