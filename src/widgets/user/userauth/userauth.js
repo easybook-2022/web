@@ -1,17 +1,19 @@
 import './userauth.scss';
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimesCircle, faCircleNotch } from '@fortawesome/fontawesome-free-solid'
-import { userSigninInfo } from '../../../userInfo'
+import { signinInfo } from '../../../userInfo'
 import { displayPhonenumber } from 'geottuse-tools'
 import { getCode, verifyUser, resetPassword, registerUser, loginUser } from '../../../apis/user/users'
 
-const { username, cellnumber, password, confirmPassword } = userSigninInfo
+const { username, cellnumber, password, confirmPassword } = signinInfo
 
+const height = window.innerHeight;
+const width = window.innerWidth;
 const wsize = p => {return window.innerWidth * (p / 100)}
 
 export default function Userauth(props) {
-  const [authInfo, setAuthinfo] = useState({ type: '', info: { username, cellnumber, password, confirmPassword, usercode: '' }, loading: false, verifycode: null, codesent: false, errormsg: "" })
+  const [authInfo, setAuthinfo] = useState({ info: { username, cellnumber, password, confirmPassword }, loading: false, verifycode: null, verified: false, codesent: false, noAccount: false, errormsg: "" })
 
   const login = () => {
     const { info } = authInfo
@@ -175,200 +177,89 @@ export default function Userauth(props) {
       })
   }
 
+  useEffect(() => {
+    const { password, confirmPassword } = authInfo.info
+
+    if (password.length === confirmPassword.length) {
+      if (password === confirmPassword) {
+        register()
+      } else {
+        setAuthinfo({ ...authInfo, info: {...authInfo.info, confirmPassword: "" }, errormsg: "Password is incorrect" })
+      }
+    }
+  }, [authInfo.info.confirmPassword])
+
   return (
     <div id="userauth">
       <div id="auth-box">
         <FontAwesomeIcon icon={faTimesCircle} size="3x" onClick={() => props.close()}/>
 
-        <div id="auth-box-header">
-          {authInfo.type === 'login' && 'Log-In'}
-          {(authInfo.type === 'verifyuser' || authInfo.type === 'register') && 'Sign-Up'}
-          {authInfo.type === 'forgotpassword' && 'Forgot Password'}
-          {authInfo.type === 'resetpassword' && 'Reset Password'}
-        </div>
+        <div id="welcome-box">
+          <div className="box-header">Welcome to EasyGO (User)</div>
+          <div className="box-header">We show you the nearest services</div>
 
-        {authInfo.type === 'login' && (
-          <div style={{ alignItems: 'center', width: '100%' }}>
-            <div className="auth-input-container">
-              <div className="auth-input-header">Cell number:</div>
-              <input className="auth-input" onChange={e => setAuthinfo({
-                ...authInfo,
-                info: {
-                  ...authInfo.info,
-                  cellnumber: displayPhonenumber(authInfo.info.cellnumber, e.target.value)
-                }
-              })} value={authInfo.info.cellnumber}/>
-            </div>
-            <div className="auth-input-container">
-              <div className="auth-input-header">Password:</div>
-              <input className="auth-input" type="password" onChange={e => setAuthinfo({ ...authInfo, info: {...authInfo.info, password: e.target.value }})} value={authInfo.info.password}/>
-            </div>
-          </div>
-        )}
-
-        {authInfo.type === 'register' && (
-          <div style={{ width: '100%' }}>
-            <div className="auth-input-container">
-              <div className="auth-input-header">Enter your name:</div>
-              <input className="auth-input" onChange={e => setAuthinfo({ ...authInfo, info: { ...authInfo.info, username: e.target.value }})} value={authInfo.info.username}/>
-            </div>
-            <div className="auth-input-container">
-              <div className="auth-input-header">Password:</div>
-              <input className="auth-input" type="password" onChange={e => setAuthinfo({ ...authInfo, info: {...authInfo.info, password: e.target.value }})} value={authInfo.info.password}/>
-            </div>
-            <div className="auth-input-container">
-              <div className="auth-input-header">Confirm Password:</div>
-              <input className="auth-input" type="password" onChange={e => setAuthinfo({ ...authInfo, info: {...authInfo.info, confirmPassword: e.target.value }})} value={authInfo.info.confirmPassword}/>
-            </div>
-          </div>
-        )}
-
-        {authInfo.type === 'verifyuser' && (
-          authInfo.verifycode ? 
-            <div className="auth-input-container">
-              <div className="auth-input-header">Please enter verify code from your message:</div>
-              <input className="auth-input" onChange={e => {
-                let usercode = e.target.value
-
-                if (usercode.length === 6) {
-                  if (usercode === '111111' || usercode === authInfo.verifycode) {
-                    setAuthinfo({ ...authInfo, type: 'register', errormsg: "" })
-                  } else {
-                    setAuthinfo({ ...authInfo, errormsg: "Code is incorrect" })
+          {!authInfo.noAccount ? 
+            <div style={{ alignItems: 'center', width: '100%' }}>
+              <div className="auth-input-container">
+                <div className="auth-input-header">Cell number:</div>
+                <input className="auth-input" onChange={e => setAuthinfo({
+                  ...authInfo,
+                  info: {
+                    ...authInfo.info,
+                    cellnumber: displayPhonenumber(authInfo.info.cellnumber, e.target.value)
                   }
-                }
-              }}/>
-            </div>
-            :
-            <div className="auth-input-container">
-              <div className="auth-input-header">Cell number:</div>
-              <input className="auth-input" onChange={e => setAuthinfo({
-                ...authInfo,
-                info: {
-                  ...authInfo.info,
-                  cellnumber: displayPhonenumber(authInfo.info.cellnumber, e.target.value)
-                }
-              })} value={authInfo.info.cellnumber}/>
-            </div>
-        )}
-
-        {authInfo.type === "resetpassword" && (
-          !authInfo.codesent ? 
-            <div className="auth-input-container">
-              <div className="auth-input-header">Cell number:</div>
-              <input className="auth-input" onChange={e => setAuthinfo({
-                ...authInfo,
-                info: {
-                  ...authInfo.info,
-                  cellnumber: displayPhonenumber(authInfo.info.cellnumber, e.target.value)
-                }
-              })} value={authInfo.info.cellnumber}/>
-            </div>
-            :
-            <div className="auth-input-container">
-              <div className="user-code-header">Please enter the reset code from your message</div>
-
-              <div className="auth-input-header">Resetcode:</div>
-              <input className="auth-input" onChange={e => setAuthinfo({ ...authInfo, info: {...authInfo.info, usercode: e.target.value }})} value={authInfo.info.usercode}/>
-
-              <div style={{ alignItems: 'center' }}>
-                <div id="resend" onClick={() => getTheCode()}>Resend</div>
+                })} value={authInfo.info.cellnumber}/>
+              </div>
+              <div className="auth-input-container">
+                <div className="auth-input-header">Password:</div>
+                <input className="auth-input" type="password" onChange={e => setAuthinfo({ ...authInfo, info: {...authInfo.info, password: e.target.value }})} value={authInfo.info.password}/>
               </div>
             </div>
-        )}
-
-        {authInfo.type === "forgotpassword" && (
-          !authInfo.codesent ? 
-            <div className="auth-input-container">
-              <div className="auth-input-header">Cell number:</div>
-              <input className="auth-input" onChange={(e) => setAuthinfo({
-                ...authInfo,
-                info: {
-                  ...authInfo.info,
-                  cellnumber: displayPhonenumber(authInfo.info.cellnumber, e.target.value)
-                }
-              })} value={authInfo.info.cellnumber} type="number"/>
-            </div>
             :
-            <div className="auth-input-container">
-              <div className="user-code-header">Please enter the reset code from your message</div>
+            !authInfo.verified ? 
+              <div className="auth-input-container">
+                <div className="auth-input-header">Please enter verify code from your message:</div>
+                <input className="auth-input" onChange={e => {
+                  let usercode = e.target.value
 
-              <div className="auth-input-header">Reset Code:</div>
-              <input 
-                className="auth-input" 
-                onChange={(usercode) => setAuthinfo({ ...authInfo, info: {...authInfo.info, usercode }})} 
-                type="number" value={authInfo.info.usercode}
-              />
-
-              <div id="resend" onClick={() => getTheCode()}>Resend</div>
-            </div>
-        )}
+                  if (usercode.length === 6) {
+                    if (usercode === '111111' || usercode === authInfo.verifycode) {
+                      setAuthinfo({ ...authInfo, type: 'register', errormsg: "" })
+                    } else {
+                      setAuthinfo({ ...authInfo, errormsg: "Code is incorrect" })
+                    }
+                  }
+                }}/>
+              </div>
+              :
+              <div style={{ width: '100%' }}>
+                <div className="auth-input-container">
+                  <div className="auth-input-header">Enter your name:</div>
+                  <input className="auth-input" onChange={e => setAuthinfo({ ...authInfo, info: { ...authInfo.info, username: e.target.value }})} value={authInfo.info.username}/>
+                </div>
+                <div className="auth-input-container">
+                  <div className="auth-input-header">Confirm Password:</div>
+                  <input className="auth-input" type="password" onChange={e => setAuthinfo({ ...authInfo, info: {...authInfo.info, confirmPassword: e.target.value }})} value={authInfo.info.confirmPassword}/>
+                </div>
+              </div>
+          }
+        </div>
 
         <div className="errormsg">{authInfo.errormsg}</div>
 
-        {authInfo.type ? 
-          (
-            authInfo.type === 'forgotpassword' || 
-            (authInfo.type === 'verifyuser' && !authInfo.verifycode) || 
-            authInfo.type === 'resetpassword' || 
-            authInfo.type === 'register' || 
-            authInfo.type === 'login'
-          ) ? 
+        {!authInfo.noAccount ? 
+          !authInfo.verified && (
             <div id="submit" style={{ opacity: authInfo.loading ? 0.5 : 1, pointerEvents: authInfo.loading ? "none" : "" }} onClick={() => {
-              if (authInfo.type === 'forgotpassword') {
-                if (authInfo.codesent) {
-                  done()
-                } else {
-                  getTheCode()
-                }
-              } else if (authInfo.type === 'resetpassword') {
-                reset()
-              } else if (authInfo.type === 'login') {
+              if (!authInfo.noAccount) {
                 login()
-              } else if (authInfo.type === 'verifyuser') {
-                verify()
-              } else if (authInfo.type === 'register') {
+              } else if (authInfo.verified) {
                 register()
               }
-            }}>
-              {authInfo.type === 'forgotpassword' && (authInfo.codesent ? 'Done' : 'Get Code')}
-              {authInfo.type === 'verifyuser' && (!authInfo.verifycode && 'Register')}
-              {authInfo.type === 'resetpassword' && 'Done'}
-              {authInfo.type === 'register' && 'Register'}
-              {authInfo.type === 'login' && 'Sign-In'}
-            </div>
-            :
-            null
+            }}>Sign in</div>
+          )
           :
-          <div id="welcome-box">
-            <div className="box-header">Welcome to EasyGO (User)</div>
-            <div className="box-header">We hope our service will get you the best service</div>
-
-            <div id="box-options">
-              <div style={{ marginBottom: 50 }}>
-                <div className="box-option">
-                  <div className="column"><div className="box-option-header">Are you new ?</div></div>
-                  <div className="box-option-touch" onClick={() => setAuthinfo({ ...authInfo, type: 'verifyuser' })}>Click to{'\n'}Register</div>
-                </div>
-                <div style={{ fontWeight: 'bold', marginTop: -5, textAlign: 'center' }}>Register to re-book easily (30 seconds)</div>
-              </div>
-              <div className="box-option">
-                <div className="column"><div className="box-option-header">Already registered ?</div></div>
-                <div className="box-option-touch" onClick={() => setAuthinfo({ ...authInfo, type: 'login' })}>Click to{'\n'}Login</div>
-              </div>
-            </div>
-          </div>
+          <div id="submit" style={{ opacity: authInfo.loading ? 0.5 : 1, pointerEvents: authInfo.loading ? "none" : "" }} onClick={() => setAuthinfo({ ...authInfo, noAccount: false, verified: false })}>Back</div>
         }
-        {authInfo.loading && authInfo.type ? <div className="loading"><FontAwesomeIcon icon={faCircleNotch} size="3x"/></div> : null}
-        {authInfo.type ? 
-          <div style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-            <div id="options">
-              <div className="option-header" onClick={() => setAuthinfo({ ...authInfo, type: 'verifyuser', errormsg: '' })}>Sign-Up instead</div>
-              <div className="option-header" onClick={() => setAuthinfo({ ...authInfo, type: 'login', errormsg: '' })}>Log-In instead</div>
-              <div className="option-header" onClick={() => setAuthinfo({ ...authInfo, type: 'forgotpassword', errormsg: '' })}>Forgot your password ? Reset here</div>
-            </div>
-          </div>
-        : null }
       </div>
     </div>
   )

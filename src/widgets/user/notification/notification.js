@@ -15,7 +15,6 @@ export default function Notification(props) {
   const [userId, setUserid] = useState(null)
   const [items, setItems] = useState([])
   const [loaded, setLoaded] = useState(false)
-  const [numUnreaded, setNumunreaded] = useState(0)
   const [confirm, setConfirm] = useState({ show: false, type: "", index: 0, name: "", price: "", quantity: 0 })
   const [cancelSchedule, setCancelschedule] = useState({ show: false, id: -1, location: "", type: "", service: "", time: 0, index: -1 })
   const [showDisabledScreen, setShowdisabledscreen] = useState(false)
@@ -155,7 +154,6 @@ export default function Notification(props) {
             setUserid(userid)
             setItems(res.notifications)
             setLoaded(true)
-            setNumunreaded(0)
           })
         }
       })
@@ -189,14 +187,13 @@ export default function Notification(props) {
         })
 
         setItems(newItems)
-      } else if (data.type === "rescheduleAppointment") {
+      } else if (data.type == "salonChangeAppointment") {
         const newItems = [...items]
-        const { appointmentid, time, worker } = data
+        const { id, time, worker } = data
 
         newItems.forEach(function (item) {
-          if (item.id === appointmentid) {
-            item.action = "rebook"
-            item.nextTime = parseInt(time)
+          if (item.id == id) {
+            item.time = time
             item.worker = worker
           }
         })
@@ -226,17 +223,6 @@ export default function Notification(props) {
         })
 
         setItems(newItems)
-      } else if (data.type === "orderReady") {
-        const newItems = [...items]
-        const { ordernumber } = data
-
-        newItems.forEach(function (item) {
-          if (item.orderNumber === ordernumber) {
-            item.status = "ready"
-          }
-        })
-
-        setItems(newItems)
       } else if (data.type === "orderDone") {
         const newItems = [...items]
         const numItems = newItems.length
@@ -261,8 +247,6 @@ export default function Notification(props) {
         })
 
         setItems(newItems)
-      } else {
-        setNumunreaded(numUnreaded + 1)
       }
     })
     socket.io.on("open", () => {
@@ -297,7 +281,7 @@ export default function Notification(props) {
 
               <div id="box-header">{items.length} Notification(s)</div>
 
-              <div id="refresh" onClick={() => getTheNotifications()}>Refresh {numUnreaded > 0 ? <div style={{ fontWeight: 'bold' }}>({numUnreaded})</div> : null}</div>
+              <div id="refresh" onClick={() => getTheNotifications()}>Reload</div>
             </div>
           </div>
 

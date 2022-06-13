@@ -692,28 +692,28 @@ export default function Main(props) {
         data.type === "cancelRequest" || 
         data.type === "remakeAppointment"
       ) {
+        const newChartinfo = {...chartInfo}
+        const { workersHour } = newChartinfo
+        const { scheduleid, time, worker } = data.speak
+        const workerId = worker.id.toString(), unix = jsonDateToUnix(time)
+        const scheduled = workersHour[workerId]["scheduled"]
+
+        for (let time in scheduled) {
+          if (scheduled[time] == scheduleid) {
+            delete workersHour[workerId]["scheduled"][time]
+          }
+        }
+
+        if (data.type === "makeAppointment" || data.type === "remakeAppointment") {
+          workersHour[workerId]["scheduled"][unix] = parseInt(scheduleid)
+        }
+
+        newChartinfo.workersHour = workersHour
+
+        setChartinfo(newChartinfo)
+
         if (viewType === "appointments_list") {
           getListAppointments()
-        } else if (viewType === "appointments_chart") {
-          const newChartinfo = {...chartInfo}
-          const { workersHour } = newChartinfo
-          const { scheduleid, time, worker } = data.speak
-          const workerId = worker.id.toString(), unix = jsonDateToUnix(time)
-          const scheduled = workersHour[workerId]["scheduled"]
-
-          for (let time in scheduled) {
-            if (scheduled[time] == scheduleid) {
-              delete workersHour[workerId]["scheduled"][time]
-            }
-          }
-
-          if (data.type === "makeAppointment" || data.type === "remakeAppointment") {
-            workersHour[workerId]["scheduled"][unix] = parseInt(scheduleid)
-          }
-
-          newChartinfo.workersHour = workersHour
-
-          setChartinfo(newChartinfo)
         }
       }
     })
@@ -1229,6 +1229,7 @@ export default function Main(props) {
           })
           setEditinfo({ ...editInfo, show: true })
           getAllAccounts()
+          getTheWorkersHour()
         }
       })
       .catch((err) => {
@@ -1418,6 +1419,8 @@ export default function Main(props) {
         if (res) {
           setShowmoreoptions({ ...showMoreoptions, infoType: '' })
           setEditinfo({ ...editInfo, show: false, type: '', loading: false })
+          getTheLocationProfile()
+          getTheLocationHours()
         }
       })
       .catch((err) => {
@@ -1664,7 +1667,7 @@ export default function Main(props) {
         :
         <div id="loading"><Loadingprogress/></div>
       }
-      
+
       {(cancelInfo.show || showMenurequired || showInfo.show || showMoreoptions.show || bookWalkinconfirm.show || removeBookingconfirm.show || showDisabledscreen) && (
         <div id="hidden-box">
           {cancelInfo.show && (

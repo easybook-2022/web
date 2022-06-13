@@ -36,7 +36,7 @@ export default function Main(props) {
   const [openNotifications, setOpennotifications] = useState(false)
   const [numNotifications, setNumnotifications] = useState(0)
   const [userId, setUserid] = useState(null)
-
+  
   const [openOrders, setOpenorders] = useState(false)
   const [numCartItems, setNumcartitems] = useState(0)
   const [showAuth, setShowauth] = useState(false)

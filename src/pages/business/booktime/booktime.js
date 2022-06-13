@@ -8,7 +8,7 @@ import { socket, logo_url } from '../../../businessInfo'
 import { displayTime, resizePhoto } from 'geottuse-tools'
 
 import { getLocationHours } from '../../../apis/business/locations'
-import { getAllStylists, getStylistInfo, getAllWorkersTime, logoutUser } from '../../../apis/business/owners'
+import { getAllStylists, getStylistInfo, getAllWorkersTime, getWorkersHour, logoutUser } from '../../../apis/business/owners'
 import { getAppointmentInfo, salonChangeAppointment } from '../../../apis/business/schedules'
 
 const wsize = p => {return window.innerWidth * (p / 100)}
@@ -24,6 +24,7 @@ export default function Booktime(props) {
   const [name, setName] = useState()
   const [allWorkers, setAllworkers] = useState({})
   const [hoursInfo, setHoursinfo] = useState({})
+  const [scheduled, setScheduled] = useState({})
   const [oldTime, setOldtime] = useState(0)
   const [openTime, setOpentime] = useState({ hour: 0, minute: 0 })
   const [closeTime, setClosetime] = useState({ hour: 0, minute: 0 })
@@ -76,7 +77,7 @@ export default function Booktime(props) {
       })
       .then((res) => {
         if (res) {
-          const { client, locationId, name, time, worker } = res.appointmentInfo
+          const { client, locationId, name, time, worker } = res
 
           setClientinfo({ ...clientInfo, ...client })
           setName(name)
@@ -94,11 +95,9 @@ export default function Booktime(props) {
   const getCalendar = (month, year) => {
     setCalendar({ ...calendar, loading: true })
 
-    let currTime = new Date(), currDate = 0, currDay = ''
-    let datenow = Date.parse(days[currTime.getDay()] + " " + months[currTime.getMonth()] + " " + currTime.getDate() + " " + year)
+    let currDate = 0, currDay = ''
     let firstDay = (new Date(year, month)).getDay(), numDays = 32 - new Date(year, month, 32).getDate(), daynum = 1
-    let data = calendar.data, datetime = 0, hourInfo, timeNow, hourNow = currTime.getHours(), minuteNow = currTime.getMinutes()
-    let current, now, newMonth, newYear
+    let data = calendar.data, datetime = 0, hourInfo, current, now, datenow, newMonth, newYear
 
     data.forEach(function (info, rowindex) {
       info.row.forEach(function (day, dayindex) {
@@ -245,7 +244,7 @@ export default function Booktime(props) {
 
     setTimes(newTimes)
   }
-  const getTheLocationHours = async(time) => {
+  const getTheLocationHours = time => {
     const locationid = localStorage.getItem("locationid")
     const day = selectedDateinfo.day ? selectedDateinfo.day : new Date(Date.now()).toString().split(" ")[0]
 
@@ -260,18 +259,38 @@ export default function Booktime(props) {
           const { hours } = res
           const timeInfo = hours[day.substr(0, 3)]
 
-          let openHour = timeInfo["openHour"], openMinute = timeInfo["openMinute"], openPeriod = timeInfo["openPeriod"]
-          let closeHour = timeInfo["closeHour"], closeMinute = timeInfo["closeMinute"], closePeriod = timeInfo["closePeriod"]
+          let openHour = timeInfo["openHour"], openMinute = timeInfo["openMinute"]
+          let closeHour = timeInfo["closeHour"], closeMinute = timeInfo["closeMinute"]
+
+          const now = Date.now()
+          const currTime = new Date(now)
+          const currMonth = months[currTime.getMonth()]
+          const currDay = days[currTime.getDay()]
+          let currDate = currTime.getDate()
 
           let selectedTime = new Date(time)
-          let selectedDay = null, selectedDate = null, selectedMonth = null
+          let selectedDay = null, selectedDate = null, selectedMonth = null, selectedYear = null
+          let closedtime
 
           selectedDay = days[selectedTime.getDay()]
           selectedDate = selectedTime.getDate()
           selectedMonth = months[selectedTime.getMonth()]
+          selectedYear = selectedTime.getFullYear()
+          closedtime = Date.parse(selectedDay + " " + selectedMonth + ", " + selectedDate + " " + selectedYear + " " + closeHour + ":" + closeMinute)
 
-          getCalendar(selectedTime.getMonth(), selectedTime.getFullYear())
-          setSelecteddateinfo({ month: selectedMonth, year: selectedTime.getFullYear(), day: selectedDay.substr(0, 3), date: selectedDate, time })
+          if (now > closedtime) {
+            getCalendar(selectedTime.getMonth(), selectedTime.getFullYear())
+            setSelecteddateinfo({ ...selectedDateinfo, month: currMonth, year: currTime.getFullYear(), day: currDay.substr(0, 3), date: currDate, time: 0 })
+          } else {
+            let { currDate, currDay } = getCalendar(selectedTime.getMonth(), selectedYear)
+
+            setSelecteddateinfo({
+              month: selectedMonth, year: selectedYear, day: selectedDay.substr(0, 3),
+              date: selectedDate,
+              time: 0
+            })
+          }
+
           setHoursinfo(hours)
           setOpentime({ ...openTime, hour: openHour, minute: openMinute })
           setClosetime({ ...closeTime, hour: closeHour, minute: closeMinute })
@@ -324,6 +343,38 @@ export default function Booktime(props) {
         }
       })
   }
+  const getTheWorkersHour = () => {
+    const locationid = localStorage.getItem("locationid")
+    const data = { locationid, ownerid: null }
+
+    getWorkersHour(data)
+      .then((res) => {
+        if (res.status == 200) {
+          return res.data
+        }
+      })
+      .then((res) => {
+        if (res) {
+          const { workersHour } = res
+
+          for (let worker in workersHour) {
+            for (let info in workersHour[worker]) {
+              if (info == "scheduled") {
+                const newScheduled = {}
+
+                for (let time in workersHour[worker]["scheduled"]) {
+                  newScheduled[jsonDateToUnix(JSON.parse(time))] = workersHour[worker]["scheduled"][time]
+                }
+
+                workersHour[worker]["scheduled"] = newScheduled
+              }
+            }
+          }
+
+          setScheduled(workersHour)
+        }
+      })
+  }
   const selectWorker = id => {
     setSelectedworkerinfo({ ...selectedWorkerinfo, loading: true })
 
@@ -344,6 +395,9 @@ export default function Booktime(props) {
               }
             })
           })
+
+          setStep(1)
+          getTheLocationHours(oldTime)
         }
       })
   }
@@ -386,10 +440,9 @@ export default function Booktime(props) {
     setConfirm({ ...confirm, show: true, service: name ? name : serviceinfo, time, workerIds })
   }
   const salonChangeTheAppointment = () => {
-    const locationid = localStorage.getItem("locationid")
-
     setConfirm({ ...confirm, loading: true })
 
+    const locationid = localStorage.getItem("locationid")
     const { time } = selectedDateinfo
     const { worker } = selectedWorkerinfo
     const { note, workerIds } = confirm
@@ -417,7 +470,7 @@ export default function Booktime(props) {
       })
       .then((res) => {
         if (res) {
-          data = { ...data, receiver: res.receiver, time }
+          data = { ...data, receiver: res.receiver, time, worker: res.worker }
           socket.emit("socket/salonChangeAppointment", data, () => {
             setConfirm({ ...confirm, requested: true, loading: false })
 
@@ -466,6 +519,7 @@ export default function Booktime(props) {
   useEffect(() => {
     getAllTheStylists()
     getAllTheWorkersTime()
+    getTheWorkersHour()
     getTheAppointmentInfo()
   }, [])
 
@@ -584,10 +638,6 @@ export default function Booktime(props) {
                     window.location = "/main"
 
                     break;
-                  case 1:
-                    setSelectedworkerinfo({ ...selectedWorkerinfo, worker: null })
-
-                    break;
                   default:
                 }
 
@@ -609,13 +659,8 @@ export default function Booktime(props) {
         <div id="bottom-navs">
           <div id="bottom-navs-row">
             <div className="column">
-              <div className="bottom-nav" onClick={() => window.location = "/settings"}>
-                <FontAwesomeIcon icon={faGear}/>
-              </div>
+              <div className="bottom-nav" onClick={() => window.location = "/main"}><FontAwesomeIcon icon={faHome}/></div>
             </div>
-
-            <div className="bottom-nav" onClick={() => window.location = "/menu"}>Edit Menu</div>
-
             <div className="column">
               <div className="bottom-nav" onClick={() => logout()}>Log-Out</div>
             </div>
@@ -630,11 +675,10 @@ export default function Booktime(props) {
               {!confirm.requested ? 
                 <>
                   <div id="confirm-header">
-                    Change appointment for<br/>
-                    {'Service: ' + confirm.service}<br/><br/>
-                    {displayTime(oldTime)}
-                    <br/>to<br/>
-                    {displayTime(confirm.time)}<br/>
+                    Change appointment<br/><br/>
+                    {clientInfo.name + '\n' + confirm.service}<br/>
+                    to<br/>
+                    {displayTime(confirm.time)}
                   </div>
 
                   <div id="note">
@@ -658,7 +702,7 @@ export default function Booktime(props) {
                 </>
                 :
                 <div id="requested-headers">
-                  <div id="requested-header">Appointment made for<br/></div>
+                  <div id="requested-header">Appointment changed for<br/></div>
                   <div id="requested-header-info">
                     {confirm.service}
                     <br/>

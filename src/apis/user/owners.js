@@ -1,16 +1,23 @@
 import axios from 'axios'
 import { url } from '../../info'
 
-export const getWorkers = locationid => {
-	return axios.get(`${url}/owners/get_workers/${locationid}`)
+export const getAllStylists = id => {
+  return axios.get(`${url}/owners/get_all_stylists/${id}`)
 }
 
-export const getWorkerInfo = id => {
-	return axios.get(`${url}/owners/get_worker_info/${id}`)
+export const getStylistInfo = id => {
+  return axios.get(`${url}/owners/get_stylist_info/${id}`)
 }
 
 export const getAllWorkersTime = id => {
   return axios.get(`${url}/owners/get_all_workers_time/${id}`)
+}
+
+export const getWorkersHour = data => {
+  return axios.post(
+    `${url}/owners/get_workers_hour`,
+    data
+  )
 }
 
 export const searchWorkers = data => {
