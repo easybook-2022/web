@@ -2,8 +2,9 @@ const local_url = true
 const test_input = true
 const useInput = true
 
-const wifi_api_url = "http://192.168.0.172:5001/flask"
-const wifi_socket_url = "http://192.168.0.172:5002"
+const host = "10.0.0.60"
+const wifi_api_url = "http://" + host + ":5001/flask"
+const wifi_socket_url = "http://" + host + ":5002"
 const server_api_url = "https://www.easygo.tk/flask"
 const server_socket_url = "wss://www.easygo.tk"
 
