@@ -389,7 +389,10 @@ export default function Locationsetup({ navigation }) {
                   <div id="type-header">What business are you ?</div>
                   
                   <div id="type-selections">
-                    <div className="type-selection" style={{ backgroundColor: type === 'hair' ? 'rgba(0, 0, 0, 0.5)' : null }} onClick={() => setType('hair')}>
+                    <div className="type-selection" style={{ backgroundColor: type === 'hair' ? 'rgba(0, 0, 0, 0.5)' : null }} onClick={() => {
+                      setType('hair')
+                      saveInfo()
+                    }}>
                       <div className="type-selection-row">
                         <div className="column">
                           <div className="type-selection-header">Hair<br/>Salon</div>
@@ -399,7 +402,10 @@ export default function Locationsetup({ navigation }) {
                         </div>
                       </div>
                     </div>
-                    <div className="type-selection" style={{ backgroundColor: type === 'nail' ? 'rgba(0, 0, 0, 0.5)' : null }} onClick={() => setType('nail')}>
+                    <div className="type-selection" style={{ backgroundColor: type === 'nail' ? 'rgba(0, 0, 0, 0.5)' : null }} onClick={() => {
+                      setType('nail')
+                      saveInfo()
+                    }}>
                       <div className="type-selection-row">
                         <div className="column">
                           <div className="type-selection-header">Nail<br/>Salon</div>
@@ -409,7 +415,10 @@ export default function Locationsetup({ navigation }) {
                         </div>
                       </div>
                     </div>
-                    <div className="type-selection" style={{ backgroundColor: type === 'restaurant' ? 'rgba(0, 0, 0, 0.5)' : null }} onClick={() => setType('restaurant')}>
+                    <div className="type-selection" style={{ backgroundColor: type === 'restaurant' ? 'rgba(0, 0, 0, 0.5)' : null }} onClick={() => {
+                      setType('restaurant')
+                      saveInfo()
+                    }}>
                       <div className="type-selection-row">
                         <div className="column">
                           <div className="type-selection-header">Restaurant</div>
@@ -419,7 +428,10 @@ export default function Locationsetup({ navigation }) {
                         </div>
                       </div>
                     </div>
-                    <div className="type-selection" style={{ backgroundColor: type === 'store' ? 'rgba(0, 0, 0, 0.5)' : null }} onClick={() => setType('store')}>
+                    <div className="type-selection" style={{ backgroundColor: type === 'store' ? 'rgba(0, 0, 0, 0.5)' : null }} onClick={() => {
+                      setType('store')
+                      saveInfo()
+                    }}>
                       <div className="type-selection-row">
                         <div className="column">
                           <div className="type-selection-header">Store</div>

@@ -34,10 +34,10 @@ export default function Menus(props) {
       })
   }
   const displayList = info => {
-    let { id, image, name, list, left } = info
-
+    let { id, image, name, list } = info
+    
     return (
-      <div style={{ marginLeft: left }}>
+      <div>
         {name ?
           <div className="menu">
             <div className="menu-row">
@@ -49,7 +49,7 @@ export default function Menus(props) {
             {list.length > 0 && list.map((info, index) => (
               <div key={"list-" + index}>
                 {info.listType === "list" ? 
-                  displayList({ id: info.id, name: info.name, image: info.image, list: info.list, left: left + 10 })
+                  displayList({ id: info.id, name: info.name, image: info.image, list: info.list })
                   :
                   <div className="item">
                     <div className="item-image-holder">
@@ -78,7 +78,7 @@ export default function Menus(props) {
           list.map((info, index) => (
             <div key={"list-" + index}>
               {info.listType === "list" ? 
-                displayList({ id: info.id, name: info.name, image: info.image, list: info.list, left: left + 10 })
+                displayList({ id: info.id, name: info.name, image: info.image, list: info.list })
                 :
                 <div className="item">
                   <div className="item-image-holder">
@@ -151,7 +151,7 @@ export default function Menus(props) {
           )
         )}
 
-        {displayList({ id: "", name: "", image: "", list: menuInfo.list, left: 0 })}
+        {displayList({ id: "", name: "", image: "", list: menuInfo.list })}
       </div>
     :
     <Loadingprogress/>

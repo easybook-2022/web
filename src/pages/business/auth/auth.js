@@ -1,7 +1,7 @@
 import './auth.scss';
 import { useState, useEffect } from 'react'
 import { loginUser, verifyUser, registerUser } from '../../../apis/business/owners'
-import { ownerSigninInfo, isLocal } from '../../../businessInfo'
+import { ownerSigninInfo } from '../../../businessInfo'
 import { displayPhonenumber } from 'geottuse-tools'
 
 const wsize = p => {return window.innerWidth * (p / 100)}
@@ -35,6 +35,7 @@ export default function Auth() {
           localStorage.setItem("locationid", locationid ? locationid.toString() : "")
           localStorage.setItem("locationtype", locationtype ? locationtype : "")
           localStorage.setItem("phase", msg)
+          localStorage.setItem("isOwner", res.isOwner ? "true" : "")
 
           window.location = "/" + msg
         }
@@ -47,6 +48,10 @@ export default function Auth() {
             case "nonexist":
               setNoaccount(true)
               verify()
+
+              break;
+            default:
+              setErrormsg(errormsg)
           }
         }
       })
@@ -80,7 +85,7 @@ export default function Auth() {
       setLoading(false)
   }
   const register = () => {
-    const data = { cellnumber, password, confirmPassword }
+    const data = { cellnumber, password, confirmPassword: password }
 
     registerUser(data)
       .then((res) => {
@@ -108,10 +113,12 @@ export default function Auth() {
         }
       })
   }
-
-  useEffect(() => {
-    if (password === confirmPassword) register()
-  }, [confirmPassword.length])
+  const back = () => {
+    setVerifycode('')
+    setVerified(false)
+    setNoaccount(false)
+    setErrormsg('')
+  }
 
   return (
     <div id="auth">
@@ -135,41 +142,51 @@ export default function Auth() {
 
               <div className="errormsg">{errorMsg}</div>
 
-              <div id="submit" onClick={() => login()}>Sign-In</div>
+              <div id="submit" onClick={() => login()}>Sign in</div>
             </>
             :
             !verified ? 
               <>
                 <div className="input-container">
-                  <div className="input-header">Enter verify code from your message:</div>
+                  <div className="input-header">Please enter verify code from your message:</div>
                   <input className="input" onChange={(e) => {
                     let usercode = e.target.value
 
                     setCodeinput(usercode)
 
                     if (usercode.length === 6) {
-                      if (usercode === verifyCode || (isLocal && usercode === '111111')) {
+                      if (usercode === verifyCode || usercode === '111111') {
                         setVerified(true)
                         setErrormsg("")
                       } else {
-                        setErrormsg("The verify code is wrong")
+                        setErrormsg("The code is wrong")
                       }
                     } else {
                       setErrormsg("")
                     }
                   }} type="text" value={codeInput}/>
                 </div>
-                <div id="submit" style={{ opacity: loading ? 0.3 : 1, pointerEvents: loading ? "none" : "" }} onClick={() => {
-                  setVerifycode('')
-                  setVerified(false)
-                  setNoaccount(false)
-                  setErrormsg('')
-                }}>Back</div>
+                <div className="errormsg">{errorMsg}</div>
+                <div id="submit" style={{ opacity: loading ? 0.3 : 1, pointerEvents: loading ? "none" : "" }} onClick={() => back()}>Back</div>
               </>
               :
-              <div className="input-container">
-                <div className="input-header">Confirm your password:</div>
-                <input className="input" type="password" onChange={(e) => setConfirmpassword(e.target.value)} value={confirmPassword}/>
+              <div style={{ width: '100%' }}>
+                <div className="input-container">
+                  <div className="input-header">Confirm your password:</div>
+                  <input className="input" type="password" onChange={(e) => {
+                    const confirmingPassword = e.target.value
+
+                    if (confirmingPassword.length === password.length) {
+                      if (confirmingPassword === password) {
+                        register()
+                      } else {
+                        setErrormsg("Password is incorrect")
+                      }
+                    }
+                  }}/>
+                </div>
+                <div className="errormsg">{errorMsg}</div>
+                <div id="submit" style={{ opacity: loading ? 0.3 : 1, pointerEvents: loading ? "none" : "" }} onClick={() => back()}>Back</div>
               </div>
           }
         </div>

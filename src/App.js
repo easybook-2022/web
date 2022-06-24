@@ -28,6 +28,9 @@ import Register from './pages/business/register'
 import Forgotpassword from './pages/business/forgotpassword'
 import Resetpassword from './pages/business/resetpassword'
 import List from './pages/business/list'
+import Authoption from './pages/business/authoption'
+import Walkin from './pages/business/walkin'
+
 import Locationsetup from './pages/business/locationsetup'
 
 import Businessmain from './pages/business/main'
@@ -88,6 +91,8 @@ export default function App() {
           <Route path="/forgotpassword" element={<Forgotpassword/>}/>
           <Route path="/resetpassword/:cellnumber" element={<Resetpassword/>}/>
           <Route path="/list" element={<List/>}/>
+          <Route path="/authoption" element={<Authoption/>}/>
+          <Route path="/walkin" element={<Walkin/>}/>
           <Route path="/locationsetup" element={<Locationsetup/>}/>
           <Route path="/main" element={<Businessmain/>}/>
           <Route path="/booktime/:scheduleid/:serviceid/:serviceinfo" element={<BusinessBooktime/>}/>

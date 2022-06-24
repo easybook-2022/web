@@ -14,7 +14,7 @@ import {
 } from '../../../apis/business/owners'
 import { getLocationProfile, getLocationHours, setLocationHours, updateLocation, setReceiveType, getDayHours } from '../../../apis/business/locations'
 import { getMenus, removeMenu, addNewMenu } from '../../../apis/business/menus'
-import { cancelSchedule, doneService, getAppointments, getCartOrderers, bookWalkIn, removeBooking, getAppointmentInfo } from '../../../apis/business/schedules'
+import { cancelSchedule, doneService, getAppointments, getCartOrderers, removeBooking, getAppointmentInfo, blockTime } from '../../../apis/business/schedules'
 import { removeProduct } from '../../../apis/business/products'
 import { setWaitTime } from '../../../apis/business/carts'
 
@@ -30,6 +30,9 @@ Geocode.setLanguage("en");
 const LocationPin = () => <FontAwesomeIcon icon={faLocationPin} size="2x"/>
 
 export default function Main(props) {
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
   const params = useParams()
 
   const [ownerId, setOwnerid] = useState(null)
@@ -38,7 +41,6 @@ export default function Main(props) {
 
   const [appointments, setAppointments] = useState({ list: [], loading: false })
   const [chartInfo, setChartinfo] = useState({ chart: {}, workers: [], workersHour: {}, dayDir: 0, date: {}, loading: false })
-  const [bookWalkinconfirm, setBookwalkinconfirm] = useState({ show: false, worker: {}, client: { name: "", cellnumber: "" }, date: {}, confirm: false, note: "", errorMsg: "" })
   const [removeBookingconfirm, setRemovebookingconfirm] = useState({ show: false, scheduleid: -1, client: { name: "", cellnumber: "" }, workerid: -1, date: {}, reason: "", confirm: false })
 
   const [cartOrderers, setCartorderers] = useState([])
@@ -67,8 +69,8 @@ export default function Main(props) {
     errorMsg: ''
   })
 
-  const [locationInfo, setLocationinfo] = useState('')
   const [fileComp, setFilecomp] = useState(null)
+  const [locationInfo, setLocationinfo] = useState('')
   const [locationCoords, setLocationcoords] = useState({ longitude: null, latitude: null, address: '' })
   const [storeName, setStorename] = useState(loginLocationInfo.storeName)
   const [phonenumber, setPhonenumber] = useState(loginLocationInfo.phonenumber)
@@ -80,7 +82,7 @@ export default function Main(props) {
   const [logo, setLogo] = useState({ uri: '', name: '', size: { width: 0, height: 0 }, loading: false })
   const [locationReceivetype, setLocationreceivetype] = useState('')
 
-  const [days, setDays] = useState([
+  const [locationHours, setLocationhours] = useState([
     { key: "0", header: "Sunday", opentime: { hour: "06", minute: "00", period: "AM" }, closetime: { hour: "09", minute: "00", period: "PM" }, close: false },
     { key: "1", header: "Monday", opentime: { hour: "06", minute: "00", period: "AM" }, closetime: { hour: "09", minute: "00", period: "PM" }, close: false },
     { key: "2", header: "Tuesday", opentime: { hour: "06", minute: "00", period: "AM" }, closetime: { hour: "09", minute: "00", period: "PM" }, close: false },
@@ -124,43 +126,49 @@ export default function Main(props) {
       .then((res) => {
         if (res) {
           const { name, fullAddress, logo, type, receiveType, hours } = res.info
-          let openInfo, openMinute, openHour, closeInfo, closeMinute, closeHour
-          let currDate, calcDate, openTime, closeTime
+          let openInfo, openMinute, openHour, openPeriod, closeInfo, closeMinute, closeHour, closePeriod
+          let currDate, calcDate, header, openTime, closeTime, locationHours = []
 
           socket.emit("socket/business/login", ownerid, () => {
-            setShowinfo({ ...showInfo, locationHours: hours })
-
             for (let k = 0; k < 7; k++) {
-              let openInfo = hours[k].opentime
-              let closeInfo = hours[k].closetime
+              header = hours[k].header
+              openInfo = hours[k].opentime
+              closeInfo = hours[k].closetime
 
               openMinute = parseInt(openInfo.minute)
+              openMinute = openMinute < 10 ? "0" + openMinute : openMinute
               openHour = parseInt(openInfo.hour)
-              openHour = openInfo.period === "PM" ? openHour + 12 : openHour
+              openHour = openHour < 10 ? "0" + openHour : openHour
+              openPeriod = openInfo.period
 
               closeMinute = parseInt(closeInfo.minute)
+              closeMinute = closeMinute < 10 ? "0" + closeMinute : closeMinute
               closeHour = parseInt(closeInfo.hour)
-              closeHour = closeInfo.period === "PM" ? closeHour + 12 : closeHour
+              closeHour = closeHour < 10 ? "0" + closeHour : closeHour
+              closePeriod = closeInfo.period
 
               currDate = new Date()
-              calcDate = new Date(currDate.setDate(currDate.getDate() - currDate.getDay() + k)).toUTCString();
-              calcDate = calcDate.split(" ")
-              calcDate.pop()
-              calcDate.pop()
+              calcDate = new Date(currDate.setDate(currDate.getDate() - currDate.getDay() + k));
+              
+              let day = days[calcDate.getDay()]
+              let month = months[calcDate.getMonth()]
+              let date = calcDate.getDate()
+              let year = calcDate.getFullYear()
+              let dateStr = day + " " + month + " " + date + " " + year
 
-              calcDate = calcDate.join(" ") + " "
+              openTime = openHour + ":" + openMinute + " " + openPeriod
+              closeTime = closeHour + ":" + closeMinute + " " + closePeriod
 
-              openTime = (openHour < 10 ? "0" + openHour : openHour)
-              openTime += ":"
-              openTime += (openMinute < 10 ? "0" + openMinute : openMinute)
+              locationHours.push({ key: locationHours.length.toString(), header, opentime: {...hours[k].opentime}, closetime: {...hours[k].closetime} })
 
-              closeTime = (closeHour < 10 ? "0" + closeHour : closeHour)
-              closeTime += ":"
-              closeTime += (closeMinute < 10 ? "0" + closeMinute : closeMinute)
+              hours[k].opentime.hour = openHour.toString()
+              hours[k].opentime.minute = openMinute.toString()
+              hours[k].closetime.hour = closeHour.toString()
+              hours[k].closetime.minute = closeMinute.toString()
 
-              hours[k]["calcDate"] = calcDate
-              hours[k]["openunix"] = Date.parse(calcDate + openTime)
-              hours[k]["closeunix"] = Date.parse(calcDate + closeTime)
+              hours[k]["date"] = dateStr
+              hours[k]["openunix"] = Date.parse(dateStr + " " + openTime)
+              hours[k]["closeunix"] = Date.parse(dateStr + " " + closeTime)
               hours[k]["working"] = true
             }
 
@@ -175,12 +183,14 @@ export default function Main(props) {
             setLogo({ ...logo, uri: logo_url + logo.name, size: { width: logo.width, height: logo.height }})
             setLocationtype(type)
             setLocationreceivetype(receiveType)
-            setDays(hours)
+            setLocationhours(hours)
+            setShowinfo({ ...showInfo, locationHours })
             setTimerange(hours)
 
             if (type === 'store' || type === 'restaurant') {
               getAllCartOrderers()
             } else {
+              getTheWorkersHour()
               getListAppointments()
             }
           })
@@ -270,9 +280,6 @@ export default function Main(props) {
         if (res) {
           const { workersHour } = res
 
-          const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-          const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-
           let date = new Date(Date.now())
           let jsonDate = {"day":days[date.getDay()].substr(0, 3),"month":months[date.getMonth()],"date":date.getDate(),"year":date.getFullYear()}
 
@@ -288,7 +295,11 @@ export default function Main(props) {
                 let newScheduled = {}
 
                 for (let info in scheduled) {
-                  newScheduled[jsonDateToUnix(JSON.parse(info))] = scheduled[info]
+                  let splitInfo = info.split("-")
+                  let time = splitInfo[0]
+                  let status = splitInfo[1]
+
+                  newScheduled[jsonDateToUnix(JSON.parse(time)) + "-" + status] = scheduled[info]
                 }
 
                 workersHour[worker][day] = newScheduled
@@ -307,6 +318,9 @@ export default function Main(props) {
   }
 
   const getListAppointments = () => {
+    setViewtype('appointments_list')
+    setAppointments({ ...appointments, loading: true })
+
     const ownerid = localStorage.getItem("ownerid")
     const locationid = localStorage.getItem("locationid")
     const data = { ownerid, locationid }
@@ -319,8 +333,8 @@ export default function Main(props) {
       })
       .then((res) => {
         if (res) {
-          setAppointments({ ...appointments, list: res.appointments })
-          setViewtype('appointments_list')
+          setAppointments({ ...appointments, list: res.appointments, loading: false })
+          
           setLoaded(true)
         }
       })
@@ -334,9 +348,8 @@ export default function Main(props) {
     setViewtype("appointments_chart")
     setChartinfo({ ...chartInfo, loading: true })
 
-    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-    const locationid = localStorage.getItem("locationid"), today = new Date(), pushtime = 1000 * (60 * 15), newWorkershour = {...chartInfo.workersHour}
+    const locationid = localStorage.getItem("locationid")
+    const today = new Date(), pushtime = 1000 * (60 * 15), newWorkershour = {...chartInfo.workersHour}
     let chart, date = new Date(today.getTime())
 
     date.setDate(today.getDate() + dayDir)
@@ -442,6 +455,36 @@ export default function Main(props) {
         })
     }
   }
+  const blockTheTime = (workerid, jsonDate) => {
+    const newWorkershour = {...chartInfo.workersHour}
+    const data = { workerid, jsonDate: JSON.stringify(jsonDate) }
+    const unix = jsonDateToUnix(jsonDate)
+
+    blockTime(data)
+      .then((res) => {
+        if (res.status == 200) {
+          return res.data
+        }
+      })
+      .then((res) => {
+        if (res) {
+          if (res.action == "add") {
+            newWorkershour[workerid]["scheduled"][unix + "-b"] = res.id
+          } else {
+            if (unix + "-b" in newWorkershour[workerid]["scheduled"]) {
+              delete newWorkershour[workerid]["scheduled"][unix + "-b"]
+            }
+          }
+
+          setChartinfo({ ...chartInfo, workersHour: newWorkershour })
+        }
+      })
+      .catch((err) => {
+        if (err.response && err.response.status == 400) {
+          const { errormsg, status } = err.response.data
+        }
+      })
+  }
   const removeTheBooking = id => {
     if (!removeBookingconfirm.show) {
       getAppointmentInfo(id)
@@ -496,55 +539,6 @@ export default function Main(props) {
             const { errormsg, status } = err.response.data
           }
         })
-    }
-  }
-  const bookTheWalkIn = (worker, jsonDate) => {
-    if (!bookWalkinconfirm.show) {
-      setBookwalkinconfirm({ ...bookWalkinconfirm, show: true, worker, jsonDate })
-    } else {
-      const { worker, jsonDate, note, client } = bookWalkinconfirm
-
-      if (client.name && client.cellnumber) {
-        const locationid = localStorage.getItem("locationid")
-        const newWorkershour = {...chartInfo.workersHour}
-        const unix = jsonDateToUnix(jsonDate)
-
-        let data = { 
-          workerid: worker.id, locationid, time: jsonDate, note: note ? note : "", 
-          type: locationType, client
-        }
-
-        bookWalkIn(data)
-          .then((res) => {
-            if (res.status === 200) {
-              return res.data
-            }
-          })
-          .then((res) => {
-            if (res) {
-              newWorkershour[worker.id]["scheduled"][unix] = res.id
-
-              setBookwalkinconfirm({ ...bookWalkinconfirm, confirm: true })
-              setChartinfo({ ...chartInfo, workersHour: newWorkershour })
-
-              setTimeout(function () {
-                setBookwalkinconfirm({ ...bookWalkinconfirm, show: false, client: { name: "", cellnumber: "" }, jsonDate: {}, confirm: false })
-              }, 2000)
-            }
-          })
-          .catch((err) => {
-            if (err.response && err.response.status === 400) {
-              const { errormsg, status } = err.response.data
-
-            }
-          })
-      } else {
-        if (!client.name) {
-          setBookwalkinconfirm({ ...bookWalkinconfirm, errorMsg: "Please enter the client's name" })
-        } else {
-          setBookwalkinconfirm({ ...bookWalkinconfirm, errorMsg: "Please enter the client's cell number" })
-        }
-      }
     }
   }
 
@@ -735,7 +729,6 @@ export default function Main(props) {
     getTheLocationProfile()
     getTheLocationHours()
     getTheOwnerInfo()
-    getTheWorkersHour()
   }
 
   const verify = () => {
@@ -1058,25 +1051,18 @@ export default function Main(props) {
   }
   const updateWorkingHour = (index, timetype, dir, open) => {
     const newWorkerhours = [...accountForm.workerHours], timeRangeInfo = [...timeRange]
-    let value, { openunix, closeunix, calcDate } = timeRangeInfo[index]
+    let value, { openunix, closeunix, date } = timeRangeInfo[index]
     let { opentime, closetime } = newWorkerhours[index], valid = false
 
     value = open ? opentime : closetime
 
     let { hour, minute, period } = timeControl(timetype, value, dir, open)
+    let calcTime = Date.parse(date + " " + hour + ":" + minute + " " + period)
 
     if (open) {
-      valid = (
-        Date.parse(calcDate + " " + hour + ":" + minute + " " + period) >= openunix
-        &&
-        Date.parse(calcDate + " " + hour + ":" + minute + " " + period) <= Date.parse(calcDate + " " + closetime.hour + ":" + closetime.minute + " " + closetime.period)
-      )
+      valid = (calcTime >= openunix &&calcTime <= Date.parse(date + " " + closetime.hour + ":" + closetime.minute + " " + closetime.period))
     } else {
-      valid = (
-        Date.parse(calcDate + " " + hour + ":" + minute + " " + period) <= closeunix
-        &&
-        Date.parse(calcDate + " " + hour + ":" + minute + " " + period) >= Date.parse(calcDate + " " + opentime.hour + ":" + opentime.minute + " " + opentime.period)
-      )
+      valid = (calcTime <= closeunix && calcTime >= Date.parse(date + " " + opentime.hour + ":" + opentime.minute + " " + opentime.period))
     }
       
     if (valid) {
@@ -1111,7 +1097,7 @@ export default function Main(props) {
       newDays[index].closetime = value
     }
 
-    setDays(newDays)
+    setLocationhours(newDays)
   }
   const working = index => {
     const newWorkerhours = [...accountForm.workerHours]
@@ -1486,8 +1472,14 @@ export default function Main(props) {
             <div style={{ flexDirection: 'row', height: '5%', justifyContent: 'space-around', width: '100%' }}>
               {(locationType === "hair" || locationType === "nail") && (
                 <div id="view-types">
-                  <div className="view-type" onClick={() => getListAppointments()}>See{'\n'}Your(s)</div>
-                  <div className="view-type" onClick={() => getAppointmentsChart(0)}>See{'\n'}All Stylist(s)</div>
+                  <div className="view-type" style={{ 
+                    backgroundColor: viewType == "appointments_list" ? "black" : "transparent",
+                    color: viewType == "appointments_list" ? "white": "black"
+                  }} onClick={() => getListAppointments()}><div style={{ fontWeight: 'bold' }}>See</div>{'\n'}Your(s)</div>
+                  <div className="view-type" style={{ 
+                    backgroundColor: viewType == "appointments_chart" ? "black" : "transparent",
+                    color: viewType == "appointments_chart" ? "white": "black"
+                  }} onClick={() => getAppointmentsChart(0)}><div style={{ fontWeight: 'bold' }}>See</div>{'\n'}All Stylist(s)</div>
                 </div>
               )}
             </div>
@@ -1497,6 +1489,7 @@ export default function Main(props) {
                 appointments.list.length > 0 ? 
                   appointments.list.map((item, index) => (
                     <div key={item.key} className="schedule">
+                      <div className="schedule-header">{item.name}</div>
                       <div className="schedule-image">
                         <img 
                           alt="" 
@@ -1506,9 +1499,9 @@ export default function Main(props) {
                       </div>
                         
                       <div className="schedule-header">
-                        Client: {item.client.username + ' for ' + item.name}
-                        <br/>{displayTime(item.time)}
+                        Name: {item.client.username}
                         <br/>Stylist: {item.worker.username}
+                        <br/>{displayTime(item.time)}
                       </div>
 
                       <div id="schedule-actions">
@@ -1516,7 +1509,7 @@ export default function Main(props) {
                           <div className="schedule-action" onClick={() => cancelTheSchedule(index, "appointment")}>Cancel</div>
                         </div>
                         <div className="column">
-                          <div className="schedule-action" onClick={() => window.location = "booktime/" + item.id + "/" + (item.serviceid === "" ? null : item.serviceid) + "/" + item.name}>Pick another time for client</div>
+                          <div className="schedule-action" onClick={() => window.location = "booktime/" + item.id + "/" + (item.serviceid === "" ? null : item.serviceid) + "/" + item.name}>Change time for client</div>
                         </div>
                         <div className="column">
                           <div className="schedule-action" onClick={() => doneTheService(index, item.id)}>Done</div>
@@ -1526,7 +1519,7 @@ export default function Main(props) {
                   ))
                   :
                   <div id="body-result">
-                    <div id="body-result-header">You will see your appointment(s) here in order</div>
+                    <div id="body-result-header">You will see your appointment(s) here</div>
                   </div>
                 :
                 <div id="loading">
@@ -1570,28 +1563,29 @@ export default function Main(props) {
                               key={worker.key}
                               className="chart-worker"
                               style={{
-                                backgroundColor: item.time in workersHour[worker.id]["scheduled"] ? 'black' : 'transparent',
+                                backgroundColor: (
+                                  item.time + "-c" in chartInfo.workersHour[worker.id]["scheduled"] || 
+                                  item.time + "-b" in chartInfo.workersHour[worker.id]["scheduled"]
+                                ) ? 
+                                item.time + "-c" in chartInfo.workersHour[worker.id]["scheduled"] ? 
+                                  'black' 
+                                  :
+                                  'grey'
+                                : 
+                                'transparent',
                                 opacity: (
-                                  item.time >= workersHour[worker.id][currDay]["open"] && item.time < workersHour[worker.id][currDay]["close"]
-                                  &&
-                                  workersHour[worker.id][currDay]["working"] == true
-                                  &&
                                   !item.timepassed
+                                  ||
+                                  item.time + "-b" in chartInfo.workersHour[worker.id]["scheduled"]
                                 ) ? 1 : 0.3,
                                 width: workers.length < 5 ? (width / workers.length) : 200,
-                                pointerEvents: (
-                                  item.time >= workersHour[worker.id][currDay]["open"] && item.time < workersHour[worker.id][currDay]["close"] // working times
-                                  &&
-                                  workersHour[worker.id][currDay]["working"] == true
-                                  &&
-                                  !item.timepassed
-                                ) ? "" : "none"
+                                pointerEvents: item.timepassed ? "none" : ""
                               }}
                               onClick={() => {
-                                if (item.time in workersHour[worker.id]["scheduled"]) {
-                                  removeTheBooking(workersHour[worker.id]["scheduled"][item.time])
+                                if (item.time + "-c" in chartInfo.workersHour[worker.id]["scheduled"]) {
+                                  removeTheBooking(chartInfo.workersHour[worker.id]["scheduled"][item.time])
                                 } else {
-                                  if (item.time >= workersHour[worker.id][currDay]["open"] && item.time < workersHour[worker.id][currDay]["close"]) bookTheWalkIn(worker, item.jsonDate)
+                                  blockTheTime(worker.id, item.jsonDate)
                                 }
                               }}
                             >
@@ -1599,8 +1593,8 @@ export default function Main(props) {
                                 className="chart-time-header"
                                 style={{
                                   color: (
-                                    item.time >= workersHour[worker.id][currDay]["open"] && item.time < workersHour[worker.id][currDay]["close"] ?
-                                      item.time in workersHour[worker.id]["scheduled"] ? 'white' : 'black'
+                                    item.time >= chartInfo.workersHour[worker.id][currDay]["open"] && item.time < chartInfo.workersHour[worker.id][currDay]["close"] ?
+                                      item.time + "-c" in chartInfo.workersHour[worker.id]["scheduled"] ? 'white' : 'black'
                                       :
                                       'black'
                                   )
@@ -1668,7 +1662,7 @@ export default function Main(props) {
         <div id="loading"><Loadingprogress/></div>
       }
 
-      {(cancelInfo.show || showMenurequired || showInfo.show || showMoreoptions.show || bookWalkinconfirm.show || removeBookingconfirm.show || showDisabledscreen) && (
+      {(cancelInfo.show || showMenurequired || showInfo.show || showMoreoptions.show || removeBookingconfirm.show || showDisabledscreen) && (
         <div id="hidden-box">
           {cancelInfo.show && (
             <div id="cancel-request-box">
@@ -1830,6 +1824,14 @@ export default function Main(props) {
 
                           window.location = "/list"
                         }}>More Business(es)</div>
+
+                        <div className="more-option-touch" onClick={() => {
+                          localStorage.setItem("phase", "walkin")
+
+                          setShowmoreoptions({ ...showMoreoptions, show: false })
+
+                          window.location = "/walkin"
+                        }}>Walk-in(s)</div>
 
                         {(locationType === "hair" || locationType === "nail") && (
                           <div id="receive-types-box">
@@ -2004,7 +2006,7 @@ export default function Main(props) {
 
                                                 newDays[index].opentime["hour"] = e.target.value.toString()
 
-                                                setDays(newDays)
+                                                setLocationhours(newDays)
                                               }} type="text" maxLength={2} value={info.opentime.hour}/>
                                               <div className="selection-arrow" onClick={() => updateTime(index, "hour", "down", true)}>
                                                 <FontAwesomeIcon icon={faArrowDown}/>
@@ -2022,7 +2024,7 @@ export default function Main(props) {
 
                                                 newDays[index].opentime["minute"] = e.target.value.toString()
 
-                                                setDays(newDays)
+                                                setLocationhours(newDays)
                                               }} type="text" maxLength={2} value={info.opentime.minute}/>
                                               <div className="selection-arrow" onClick={() => updateTime(index, "minute", "down", true)}>
                                                 <FontAwesomeIcon icon={faArrowDown}/>
@@ -2051,7 +2053,7 @@ export default function Main(props) {
 
                                                 newDays[index].closetime["hour"] = e.target.value.toString()
 
-                                                setDays(newDays)
+                                                setLocationhours(newDays)
                                               }} type="text" maxLength={2} value={info.closetime.hour}/>
                                               <div className="selection-arrow" onClick={() => updateTime(index, "hour", "down", false)}>
                                                 <FontAwesomeIcon icon={faArrowDown}/>
@@ -2069,7 +2071,7 @@ export default function Main(props) {
 
                                                 newDays[index].closetime["minute"] = e.target.value.toString()
 
-                                                setDays(newDays)
+                                                setLocationhours(newDays)
                                               }} type="text" maxLength={2} value={info.closetime.minute}/>
                                               <div className="selection-arrow" onClick={() => updateTime(index, "minute", "down", false)}>
                                                 <FontAwesomeIcon icon={faArrowDown}/>
@@ -2092,7 +2094,7 @@ export default function Main(props) {
 
                                         newDays[index].close = true
 
-                                        setDays(newDays)
+                                        setLocationhours(newDays)
                                       }}>Change to not open</div>
                                     </>
                                     :
@@ -2104,7 +2106,7 @@ export default function Main(props) {
 
                                         newDays[index].close = false
 
-                                        setDays(newDays)
+                                        setLocationhours(newDays)
                                       }}>Change to open</div>
                                     </>
                                   }
@@ -2984,57 +2986,6 @@ export default function Main(props) {
                       </div>
                     )}
                   </>
-                }
-              </div>
-            </div>
-          )}
-          {bookWalkinconfirm.show && (
-            <div id="bookwalkin-container">
-              <div id="bookwalkin-box">
-                {!bookWalkinconfirm.confirm ? 
-                  <>
-                    <div id="bookwalkin-header">
-                      (walk-in) or (call) appointment for
-                      <br/>
-                      {bookWalkinconfirm.worker.username}
-                      <br/>
-                      {displayTime(bookWalkinconfirm.jsonDate)}
-                    </div>
-
-                    <div className="row">
-                      <input 
-                        className="bookwalkin-input" placeholder="Enter client name" 
-                        onChange={e => setBookwalkinconfirm({ 
-                          ...bookWalkinconfirm, 
-                          client: {...bookWalkinconfirm.client, name: e.target.value }, 
-                          errorMsg: ""
-                        })} value={bookWalkinconfirm.client.name}
-                      />
-                    </div>
-                    <div className="row">
-                      <input 
-                        className="bookwalkin-input" placeholder="Enter client's number" type="text" 
-                        onChange={(e) => setBookwalkinconfirm({
-                          ...bookWalkinconfirm,
-                          client: {...bookWalkinconfirm.client, cellnumber: displayPhonenumber(bookWalkinconfirm.client.cellnumber, e.target.value, () => {})},
-                          errorMsg: ""
-                        })} value={bookWalkinconfirm.client.cellnumber}
-                      />
-                    </div>
-
-                    <div className="errormsg">{bookWalkinconfirm.errorMsg}</div>
-
-                    <div id="bookwalkin-actions">
-                      <div className="bookwalkin-action" onClick={() => setBookwalkinconfirm({ ...bookWalkinconfirm, show: false })}>Cancel</div>
-                      <div className="bookwalkin-action" onClick={() => bookTheWalkIn()}>Ok</div>
-                    </div>
-                  </>
-                  :
-                  <div id="bookwalkin-header">
-                    Appointment set for client: {bookWalkinconfirm.client.name}
-                    <br/>
-                    {displayTime(bookWalkinconfirm.jsonDate)}
-                  </div>
                 }
               </div>
             </div>
