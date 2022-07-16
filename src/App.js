@@ -13,6 +13,7 @@ import Usermain from './pages/user/main';
 import Restaurantprofile from './pages/user/restaurants/profile';
 import Itemprofile from './components/user/itemprofile';
 import Seeorders from './pages/user/seeorders'
+import Diningtable from './pages/user/diningtable'
 
 import Salonprofile from './pages/user/salons/profile';
 import UserBooktime from './pages/user/salons/booktime';
@@ -70,6 +71,7 @@ export default function App() {
         <Routes>
           <Route exact path="/" element={<Usermain/>}/>
           <Route path="/seeorders/:ordernumber" element={<Seeorders/>}/>
+          <Route path="/diningtable/:locationid/:tableid" element={<Diningtable/>}/>
           <Route path="/restaurantprofile/:locationid" element={<Restaurantprofile/>}/>
           <Route path="/itemprofile/:locationid/:menuid/:productid/:productinfo/:type" element={<Itemprofile/>}/>
           <Route path="/orders" element={<Orders/>}/>

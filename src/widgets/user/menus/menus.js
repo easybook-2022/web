@@ -13,6 +13,7 @@ const wsize = p => {return width * (p / 100)}
 
 export default function Menus(props) {
   const { locationid, refetchMenu, type } = props
+  const tableOrder = props.tableOrder ? true : false
   const [requestInfo, setRequestinfo] = useState({ search: '', error: false })
   const [menuInfo, setMenuinfo] = useState({ list: [], photos: [] })
   const [loaded, setLoaded] = useState(false)
@@ -64,10 +65,19 @@ export default function Menus(props) {
                           if (type === "salon") {
                             window.location = "/booktime/" + locationid + "/null/" + info.id + "/null"
                           } else {
-                            window.location = "/itemprofile/" + locationid + "/null/" + info.id + "/null/restaurant"
+                            if (tableOrder) {
+                              props.orderItem(info.id)
+                            } else {
+                              window.location = "/itemprofile/" + locationid + "/null/" + info.id + "/null/restaurant"
+                            }
                           }
                         }}
-                      >{type === "salon" ? "Book a time" : "See/Buy"}</div>
+                      >{
+                        type === "salon" ? 
+                          "Book a time" 
+                          : 
+                          tableOrder ? "Order" : "See/Buy"
+                      }</div>
                     </div>
                   </div>
                 }
@@ -80,20 +90,29 @@ export default function Menus(props) {
               {info.listType === "list" ? 
                 displayList({ id: info.id, name: info.name, image: info.image, list: info.list })
                 :
-                <div className="item">
+                <div className="item" onClick={() => {
+                  if (type === "salon") {
+                    window.location = "/booktime/" + locationid + "/null/" + info.id + "/null"
+                  } else {
+                    if (tableOrder) {
+                      props.orderItem(info.id)
+                    } else {
+                      window.location = '/itemprofile/' + locationid + '/null/' + info.id + '/null/restaurant'
+                    }
+                  }
+                }}>
                   <div className="item-image-holder">
                     <img alt="" className="item-image" style={resizePhoto(info.image, 50)} src={info.image.name ? logo_url + info.image.name : "/noimage.jpeg"}/>
                   </div>
                   <div className="column"><div className="item-header">{info.name}</div></div>
                   <div className="column"><div className="item-header">{info.price ? '$' + info.price : info.sizes.length + ' size(s)'}</div></div>
                   <div className="column">
-                    <div className="item-action" onClick={() => {
-                      if (type === "salon") {
-                        window.location = "/booktime/" + locationid + "/null/" + info.id + "/null"
-                      } else {
-                        window.location = '/itemprofile/' + locationid + '/null/' + info.id + '/null/restaurant'
-                      }
-                    }}>{type === "salon" ? "Book a time" : "See/Buy"}</div>
+                    <div className="item-action">{
+                      type === "salon" ? 
+                        "Book a time" 
+                        : 
+                        tableOrder ? "Order" : "See/Buy"
+                    }</div>
                   </div>
                 </div>
               }
@@ -109,7 +128,7 @@ export default function Menus(props) {
   return (
     loaded ? 
       <div id="menus">
-        {(menuInfo.photos.length > 0 || menuInfo.list.length > 0) && (
+        {((menuInfo.photos.length > 0 || menuInfo.list.length > 0) && !tableOrder) && (
           <>
             <div id="menu-input-box">
               <div id="menu-input-container">
@@ -128,7 +147,11 @@ export default function Menus(props) {
                   if (type === "salon") {
                     window.location = "/booktime/" + locationid + "/null/null/" + requestInfo.search
                   } else {
-                    window.location = "/itemprofile/" + locationid + "/null/null/" + requestInfo.search + "/restaurant"
+                    if (tableOrder) {
+
+                    } else {
+                      window.location = "/itemprofile/" + locationid + "/null/null/" + requestInfo.search + "/restaurant"
+                    }
                   }
                 } else setRequestinfo({ ...requestInfo, error: true })
               }}>{type === "salon" ? "Book now" : "Order item"}</div>
@@ -157,28 +180,3 @@ export default function Menus(props) {
     <Loadingprogress/>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

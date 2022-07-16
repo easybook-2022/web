@@ -1,5 +1,5 @@
 import './main.scss';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { geolocated } from "react-geolocated";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -68,7 +68,7 @@ export default function Main(props) {
         })
     }
   }
-  const getTheNumCartItems = async() => {
+  const getTheNumCartItems = () => {
     const userid = localStorage.getItem("userid")
 
     if (userid) {
@@ -147,7 +147,7 @@ export default function Main(props) {
         }
       })
   }
-  const getLocationPermission = () => {
+  const getLocationPermission = async() => {
     let longitude = localStorage.getItem("longitude")
     let latitude = localStorage.getItem("latitude")
 
@@ -197,7 +197,7 @@ export default function Main(props) {
 
     return ""
   }
-  const startWebsocket = async() => {
+  const startWebsocket = () => {
     socket.on("updateNumNotifications", () => fetchTheNumNotifications())
     socket.io.on("open", () => {
       if (userId !== null) {
@@ -221,7 +221,7 @@ export default function Main(props) {
       }, 1000)
     }
   }
-
+  
   useEffect(() => {
     initialize()
   }, [])
