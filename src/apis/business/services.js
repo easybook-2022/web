@@ -1,15 +1,17 @@
 import axios from 'axios'
 import { url } from '../../info'
 
+const beginUrl = `${url}/services/`
+
 export const getServices = data => {
 	return axios.post(
-		`${url}/services/get_services`,
+		`${beginUrl}get_services`,
 		data
 	)
 }
 
 export const getServiceInfo = id => {
-	return axios.get(`${url}/services/get_service_info/${id}`)
+	return axios.get(`${beginUrl}get_service_info/${id}`)
 }
 
 export const addNewService = data => {
@@ -25,7 +27,7 @@ export const addNewService = data => {
   form.append("web", true)
 
 	return axios.post(
-		`${url}/services/add_service`,
+		`${beginUrl}add_service`,
 		form
 	)
 }
@@ -44,11 +46,11 @@ export const updateService = data => {
   form.append("web", true)
 
 	return axios.post(
-		`${url}/services/update_service`,
+		`${beginUrl}update_service`,
 		form
 	)
 }
 
 export const removeService = (id) => {
-	return axios.get(`${url}/services/remove_service/${id}`)
+	return axios.get(`${beginUrl}remove_service/${id}`)
 }

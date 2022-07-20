@@ -10,22 +10,19 @@ import { getNumNotifications } from '../../../apis/user/users'
 import { getLocations, getMoreLocations } from '../../../apis/user/locations'
 import { getNumCartItems } from '../../../apis/user/carts'
 
-// widgets
-import NotificationsBox from '../../../widgets/user/notification'
-import Userauth from '../../../widgets/user/userauth'
-
 // components
 import Orders from '../../../components/user/orders'
+
+// widgets
+import Disable from '../../../widgets/user/disable'
+import NotificationsBox from '../../../widgets/user/notification'
+import Userauth from '../../../widgets/user/userauth'
 
 const wsize = p => {return window.innerWidth * (p / 100)}
 
 export default function Main(props) {
   const params = useParams()
   let updateTrackUser
-  const firstTime = params.firstTime ? 
-    true 
-    : 
-    false 
 
   const [locationPermission, setLocationpermission] = useState(false)
   const [geolocation, setGeolocation] = useState({ longitude: null, latitude: null })
@@ -222,9 +219,7 @@ export default function Main(props) {
     }
   }
   
-  useEffect(() => {
-    initialize()
-  }, [])
+  useEffect(() => initialize(), [])
 
   useEffect(() => {
     startWebsocket()
@@ -282,13 +277,30 @@ export default function Main(props) {
                           window.location.href = "/" + info.nav + "/" + info.id
                         }}>
                           <div className="location-photo-holder">
-                            <img alt="" src={logo_url + info.logo.name} style={resizePhoto(info.logo, 100)}/>
+                            <img alt="" src={
+                              info.logo.name ? 
+                                logo_url + info.logo.name 
+                                :
+                                (
+                                  info.service == "store" && "/store-profile.png"
+                                  ||
+                                  info.service == "restaurant" && "/restaurant-profile.png"
+                                  ||
+                                  info.service == "hair" && "/hairsalon-profile.png"
+                                  ||
+                                  info.service == "nail" && "/nailsalon-profile.png"
+                                )
+                            } style={resizePhoto(info.logo, 100)}/>
                           </div>
 
                           <div className="location-header">{info.name}</div>
                           <div className="location-header">{info.distance}</div>
 
-                          <div className="location-action">{info.service === "restaurant" ? "Order" : "Book"} now</div>
+                          <div className="location-action">
+                            {(info.service === "restaurant" || info.service === "store") && "Order"} 
+                            {(info.service === "hair" || info.service === "nail") && "Book"}
+                            now
+                          </div>
                         </div>
                       ))}
                     </div>

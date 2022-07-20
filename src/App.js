@@ -71,7 +71,7 @@ export default function App() {
         <Routes>
           <Route exact path="/" element={<Usermain/>}/>
           <Route path="/seeorders/:ordernumber" element={<Seeorders/>}/>
-          <Route path="/diningtable/:locationid/:tableid" element={<Diningtable/>}/>
+          <Route path="/diningtable/:tableid" element={<Diningtable/>}/>
           <Route path="/restaurantprofile/:locationid" element={<Restaurantprofile/>}/>
           <Route path="/itemprofile/:locationid/:menuid/:productid/:productinfo/:type" element={<Itemprofile/>}/>
           <Route path="/orders" element={<Orders/>}/>

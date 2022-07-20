@@ -1,8 +1,10 @@
 import axios from 'axios'
 import { url } from '../../info'
 
+const beginUrl = `${url}/products/`
+
 export const getProductInfo = id => {
-	return axios.get(`${url}/products/get_product_info/${id}`)
+	return axios.get(`${beginUrl}get_product_info/${id}`)
 }
 
 export const addNewProduct = data => {
@@ -21,7 +23,7 @@ export const addNewProduct = data => {
   form.append("web", true)
 
 	return axios.post(
-		`${url}/products/add_product`,
+		`${beginUrl}add_product`,
 		form
 	)
 }
@@ -43,11 +45,11 @@ export const updateProduct = data => {
   form.append("web", true)
 
 	return axios.post(
-		`${url}/products/update_product`,
+		`${beginUrl}update_product`,
 		form
 	)
 }
 
 export const removeProduct = (id) => {
-	return axios.post(`${url}/products/remove_product/${id}`)
+	return axios.post(`${beginUrl}remove_product/${id}`)
 }

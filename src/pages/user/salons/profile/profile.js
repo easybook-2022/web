@@ -75,13 +75,14 @@ export default function Profile(props) {
       })
       .then((res) => {
         if (res) {
-          const { name, logo, fullAddress, city, province, postalcode, phonenumber, distance } = res.info
+          const { name, logo, fullAddress, city, province, postalcode, phonenumber, distance, hours } = res.info
 
           setLogo(logo)
           setName(name)
           setAddress(fullAddress)
           setPhonenumber(phonenumber)
           setDistance(distance)
+          setShowinfo({ ...showInfo, locationHours: hours })
           setLoaded(true)
         }
       })
@@ -114,9 +115,7 @@ export default function Profile(props) {
       })
   }
   
-  useEffect(() => {
-    initialize()
-  }, [])
+  useEffect(() => initialize(), [])
 
   return (
     <div id="salonprofile">
@@ -190,14 +189,16 @@ export default function Profile(props) {
       }
 
       {openCart && <div id="hidden-box"><Orders close={() => {
-        getTheNumCartItems()
         setOpencart(false)
+        window.location = "/main"
       }}/></div>}
       {showAuth.show && (
         <div id="hidden-box">
           <Userauth close={() => setShowauth({ ...showAuth, show: false, action: "" })} done={id => {
-            socket.emit("socket/user/login", "user" + id, () => setUserid(id))
-            setShowauth({ ...showAuth, show: false, action: false })
+            socket.emit("socket/user/login", "user" + id, () => {
+              setUserid(id)
+              setShowauth({ ...showAuth, show: false, action: false })
+            })
           }}/>
         </div>
       )}
@@ -206,7 +207,7 @@ export default function Profile(props) {
           <div id="show-info-container">
             <div id="show-info-box">
               <div style={{ alignItems: 'center' }}>
-                <div id="show-info-close" onClick={() => setShowinfo(false)}>
+                {/*<div id="show-info-close" onClick={() => setShowinfo(false)}>
                   <FontAwesomeIcon icon={faTimesCircle} size="3x"/>
                 </div>
 
@@ -214,6 +215,31 @@ export default function Profile(props) {
                 <div className="show-info-header">{address}</div>
                 <div id="show-info-phonenumber">{phonenumber}</div>
                 <div className="show-info-header">{distance}</div>
+
+                <div id="place-hours">
+                  <div id="place-hours-header">Business's Hour(s)</div>
+
+                  {showInfo.locationHours.map(info => (
+                    !info.close && (
+                      <div className="worker-time-container" key={info.key}>
+                        <div className="day-header">{info.header}: <div>
+                        <div className="time-headers">
+                          <div className="time-header">{info.opentime.hour}</div>
+                          <div className="column"><div>:</div></div>
+                          <div className="time-header">{info.opentime.minute}</div>
+                          <div className="time-header">{info.opentime.period}</div>
+                        </div>
+                        <div className="column"><div> - </div></div>
+                        <div className="time-headers">
+                          <div className="time-header">{info.closetime.hour}</div>
+                          <div className="column"><div>:</div></div>
+                          <div className="time-header">{info.closetime.minute}</div>
+                          <div className="time-header">{info.closetime.period}</div>
+                        </div>
+                      </div>
+                    )
+                  ))}
+                </div>
 
                 <div id="worker-info-list">
                   {showInfo.workerHours.map(worker => (
@@ -248,23 +274,12 @@ export default function Profile(props) {
                       </div>
                     </div>
                   ))}
-                </div>
+                </div>*/}
               </div>
-            </div>
+            </div>*
           </div>
         </div>
       )}
     </div>
   )
 }
-
-
-
-
-
-
-
-
-
-
-

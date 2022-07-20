@@ -23,63 +23,66 @@ const wsize = p => {return window.innerWidth * (p / 100)}
 
 export default function Booktime(props) {
   const params = useParams()
-  const { locationid, serviceid, serviceinfo } = params
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
   const pushtime = 1000 * (60 * 15)
 
+  const { locationid, serviceid, serviceinfo } = params
   const scheduleid = params.scheduleid !== "null" ? params.scheduleid : null
 
-  const [name, setName] = useState()
-  const [allWorkers, setAllworkers] = useState({})
+  const [userId, setUserid] = useState(null)
+  const [name, setName] = useState('')
   const [hoursInfo, setHoursinfo] = useState({})
-  const [scheduled, setScheduled] = useState({})
   const [oldTime, setOldtime] = useState(0)
-  const [openTime, setOpentime] = useState({ hour: 0, minute: 0 })
-  const [closeTime, setClosetime] = useState({ hour: 0, minute: 0 })
   const [selectedDateinfo, setSelecteddateinfo] = useState({ month: '', year: 0, day: '', date: 0 })
+  const [bookedDateinfo, setBookeddateinfo] = useState({ month: '', year: 0, day: '', date: 0, blocked: [] })
+  const [selectedWorkerinfo, setSelectedworkerinfo] = useState({ id: -1, hours: {}, loading: false })
   const [calendar, setCalendar] = useState({ firstDay: 0, numDays: 30, data: [
     { key: "day-row-0", row: [
-        { key: "day-0-0", num: 0, passed: false }, { key: "day-0-1", num: 0, passed: false }, { key: "day-0-2", num: 0, passed: false }, 
-        { key: "day-0-3", num: 0, passed: false }, { key: "day-0-4", num: 0, passed: false }, { key: "day-0-5", num: 0, passed: false }, 
-        { key: "day-0-6", num: 0, passed: false }
+        { key: "day-0-0", num: 0, passed: false, noservice: false }, { key: "day-0-1", num: 0, passed: false, noservice: false }, { key: "day-0-2", num: 0, passed: false, noservice: false }, 
+        { key: "day-0-3", num: 0, passed: false, noservice: false }, { key: "day-0-4", num: 0, passed: false, noservice: false }, { key: "day-0-5", num: 0, passed: false, noservice: false }, 
+        { key: "day-0-6", num: 0, passed: false, noservice: false }
       ]}, 
       { key: "day-row-1", row: [
-        { key: "day-1-0", num: 0, passed: false }, { key: "day-1-1", num: 0, passed: false }, { key: "day-1-2", num: 0, passed: false }, 
-        { key: "day-1-3", num: 0, passed: false }, { key: "day-1-4", num: 0, passed: false }, { key: "day-1-5", num: 0, passed: false }, 
-        { key: "day-1-6", num: 0, passed: false }
+        { key: "day-1-0", num: 0, passed: false, noservice: false }, { key: "day-1-1", num: 0, passed: false, noservice: false }, { key: "day-1-2", num: 0, passed: false, noservice: false }, 
+        { key: "day-1-3", num: 0, passed: false, noservice: false }, { key: "day-1-4", num: 0, passed: false, noservice: false }, { key: "day-1-5", num: 0, passed: false, noservice: false }, 
+        { key: "day-1-6", num: 0, passed: false, noservice: false }
       ]}, 
       { key: "day-row-2", row: [
-        { key: "day-2-0", num: 0, passed: false }, { key: "day-2-1", num: 0, passed: false }, { key: "day-2-2", num: 0, passed: false }, 
-        { key: "day-2-3", num: 0, passed: false }, { key: "day-2-4", num: 0, passed: false }, { key: "day-2-5", num: 0, passed: false }, 
-        { key: "day-2-6", num: 0, passed: false }
+        { key: "day-2-0", num: 0, passed: false, noservice: false }, { key: "day-2-1", num: 0, passed: false, noservice: false }, { key: "day-2-2", num: 0, passed: false, noservice: false }, 
+        { key: "day-2-3", num: 0, passed: false, noservice: false }, { key: "day-2-4", num: 0, passed: false, noservice: false }, { key: "day-2-5", num: 0, passed: false, noservice: false }, 
+        { key: "day-2-6", num: 0, passed: false, noservice: false }
       ]}, 
       { key: "day-row-3", row: [
-        { key: "day-3-0", num: 0, passed: false }, { key: "day-3-1", num: 0, passed: false }, { key: "day-3-2", num: 0, passed: false }, 
-        { key: "day-3-3", num: 0, passed: false }, { key: "day-3-4", num: 0, passed: false }, { key: "day-3-5", num: 0, passed: false }, 
-        { key: "day-3-6", num: 0, passed: false }
+        { key: "day-3-0", num: 0, passed: false, noservice: false }, { key: "day-3-1", num: 0, passed: false, noservice: false }, { key: "day-3-2", num: 0, passed: false, noservice: false }, 
+        { key: "day-3-3", num: 0, passed: false, noservice: false }, { key: "day-3-4", num: 0, passed: false, noservice: false }, { key: "day-3-5", num: 0, passed: false, noservice: false }, 
+        { key: "day-3-6", num: 0, passed: false, noservice: false }
       ]}, 
       { key: "day-row-4", row: [
-        { key: "day-4-0", num: 0, passed: false }, { key: "day-4-1", num: 0, passed: false }, { key: "day-4-2", num: 0, passed: false }, 
-        { key: "day-4-3", num: 0, passed: false }, { key: "day-4-4", num: 0, passed: false }, { key: "day-4-5", num: 0, passed: false }, 
-        { key: "day-4-6", num: 0, passed: false }
+        { key: "day-4-0", num: 0, passed: false, noservice: false }, { key: "day-4-1", num: 0, passed: false, noservice: false }, { key: "day-4-2", num: 0, passed: false, noservice: false }, 
+        { key: "day-4-3", num: 0, passed: false, noservice: false }, { key: "day-4-4", num: 0, passed: false, noservice: false }, { key: "day-4-5", num: 0, passed: false, noservice: false }, 
+        { key: "day-4-6", num: 0, passed: false, noservice: false }
       ]}, 
       { key: "day-row-5", row: [
-        { key: "day-5-0", num: 0, passed: false }, { key: "day-5-1", num: 0, passed: false }, { key: "day-5-2", num: 0, passed: false }, 
-        { key: "day-5-3", num: 0, passed: false }, { key: "day-5-4", num: 0, passed: false }, { key: "day-5-5", num: 0, passed: false }, 
-        { key: "day-5-6", num: 0, passed: false }
+        { key: "day-5-0", num: 0, passed: false, noservice: false }, { key: "day-5-1", num: 0, passed: false, noservice: false }, { key: "day-5-2", num: 0, passed: false, noservice: false }, 
+        { key: "day-5-3", num: 0, passed: false, noservice: false }, { key: "day-5-4", num: 0, passed: false, noservice: false }, { key: "day-5-5", num: 0, passed: false, noservice: false }, 
+        { key: "day-5-6", num: 0, passed: false, noservice: false }
       ]}
   ], loading: false, errorMsg: "" })
-  const [userId, setUserid] = useState(null)
   const [times, setTimes] = useState([])
-  const [selectedWorkerinfo, setSelectedworkerinfo] = useState({ worker: null, workers: [], numWorkers: 0, loading: false })
+  const [allStylists, setAllstylists] = useState({ stylists: [], numStylists: 0, ids: [] })
+  const [allWorkerstime, setAllworkerstime] = useState({})
+  const [scheduled, setScheduled] = useState({})
   const [loaded, setLoaded] = useState(false)
-  const [showAuth, setShowauth] = useState({ show: false, booking: false })
-  const [step, setStep] = useState(0)
-  const [openOrders, setOpenorders] = useState(false)
-  const [numCartItems, setNumcartitems] = useState(0)
-  const [confirm, setConfirm] = useState({ show: false, service: "", time: 0, workerIds: [], note: "", requested: false, errormsg: "" })
 
+  const [step, setStep] = useState(0)
+  const [numCartItems, setNumcartitems] = useState(0)
+  
+  const [confirm, setConfirm] = useState({ show: false, service: "", time: 0, workerIds: [], note: "", requested: false, errormsg: "" })
+  const [showTimetaken, setShowtimetaken] = useState({ show: false, time: '' })
+  const [openCart, setOpencart] = useState(false)
+  const [showAuth, setShowauth] = useState({ show: false, booking: false })
+  
   const getTheNumCartItems = () => {
     const userid = localStorage.getItem("userid")
 
@@ -123,7 +126,7 @@ export default function Booktime(props) {
         }
       })
   }
-  const getTheAppointmentInfo = () => {
+  const getTheAppointmentInfo = (fetchBlocked) => {
     getAppointmentInfo(scheduleid)
       .then((res) => {
         if (res.status === 200) {
@@ -132,65 +135,134 @@ export default function Booktime(props) {
       })
       .then((res) => {
         if (res) {
-          const { locationId, name, time, worker } = res
+          const { locationId, name, time, worker, blocked } = res
+          const unix = jsonDateToUnix(time)
 
           setName(name)
-          setOldtime(jsonDateToUnix(time))
-          setSelectedworkerinfo(prev => ({ ...prev, worker }))
-          getTheLocationHours(jsonDateToUnix(time))
+          setOldtime(unix)
+
+          if (!fetchBlocked) setSelectedworkerinfo({ ...selectedWorkerinfo, id: worker.id })
+
+          const prevTime = new Date(unix)
+
+          blocked.forEach(function (info) {
+            info["time"] = JSON.parse(info["time"])
+            info["unix"] = jsonDateToUnix(info["time"])
+          })
+
+          setBookeddateinfo({ 
+            ...bookedDateinfo, 
+            month: months[prevTime.getMonth()],  
+            day: days[prevTime.getDay()].substr(0, 3),
+            year: prevTime.getFullYear(),
+            date: prevTime.getDate(),
+            blocked
+          })
+        }
+      })
+  }
+  const getTheLocationHours = () => {
+    getLocationHours(locationid)
+      .then((res) => {
+        if (res.status === 200) {
+          return res.data
+        }
+      })
+      .then((res) => {
+        if (res) {
+          const { hours } = res
+
+          setHoursinfo(hours)
+          setLoaded(true)
+        }
+      })
+      .catch((err) => {
+        if (err.response && err.response.status === 400) {
+          const { errormsg, status } = err.response.data
         }
       })
   }
   const getCalendar = (month, year) => {
     let currTime = new Date(), currDate = 0, currDay = ''
-    let datenow = Date.parse(days[currTime.getDay()] + " " + months[currTime.getMonth()] + " " + currTime.getDate() + " " + year)
     let firstDay = (new Date(year, month)).getDay(), numDays = 32 - new Date(year, month, 32).getDate(), daynum = 1
-    let data = calendar.data, datetime = 0, hourInfo, timeNow, hourNow = currTime.getHours(), minuteNow = currTime.getMinutes()
-    let current, now, newMonth, newYear
+    let data = calendar.data, datetime = 0, hourInfo, closedtime, now = Date.parse(
+      days[currTime.getDay()] + " " + 
+      months[currTime.getMonth()] + " " + 
+      currTime.getDate() + " " + 
+      currTime.getFullYear()
+    ), timeStr = ""
 
     data.forEach(function (info, rowindex) {
       info.row.forEach(function (day, dayindex) {
         day.num = 0
         day.noservice = false
 
+        timeStr = days[dayindex] + " " + months[month] + " " + daynum + " " + year
+
         if (rowindex === 0) {
           if (dayindex >= firstDay) {
-            datetime = Date.parse(days[dayindex] + " " + months[month] + " " + daynum + " " + year)
+            datetime = Date.parse(timeStr)
 
-            day.passed = datenow > datetime
+            day.passed = now > datetime
+            day.noservice = selectedWorkerinfo.id > -1 ? 
+            !(days[dayindex].substr(0, 3) in selectedWorkerinfo.hours)
+            :
+            !(days[dayindex].substr(0, 3) in allWorkerstime)
 
-            day.noservice = selectedWorkerinfo.worker != null ? 
-              !(days[dayindex].substr(0, 3) in selectedWorkerinfo.worker.days)
-              :
-              !(days[dayindex].substr(0, 3) in allWorkers)
+            if (!day.noservice) {
+              if (selectedWorkerinfo.id > -1 && days[dayindex].substr(0, 3) in selectedWorkerinfo.hours) {
+                let timeInfo = selectedWorkerinfo.hours[days[dayindex].substr(0, 3)]
+
+                day.noservice = !(Date.now() < Date.parse(timeStr + " " + timeInfo.end))
+              } else {
+                let timeInfos = allWorkerstime[days[dayindex].substr(0, 3)]
+
+                timeInfos.forEach(function (timeInfo) {
+                  day.noservice = !(Date.now() < Date.parse(timeStr + " " + timeInfo.end))
+                })
+              }
+            }
             
             day.num = daynum
             daynum++
           }
         } else if (daynum <= numDays) {
-          datetime = Date.parse(days[dayindex] + " " + months[month] + " " + daynum + " " + year)
+          datetime = Date.parse(timeStr)
 
-          day.passed = datenow > datetime
-
-          day.noservice = selectedWorkerinfo.worker != null ? 
-            !(days[dayindex].substr(0, 3) in selectedWorkerinfo.worker.days)
+          day.passed = now > datetime
+          day.noservice = selectedWorkerinfo.id > -1 ? 
+            !(days[dayindex].substr(0, 3) in selectedWorkerinfo.hours)
             :
-            !(days[dayindex].substr(0, 3) in allWorkers)
-          
+            !(days[dayindex].substr(0, 3) in allWorkerstime)
+
+          if (!day.noservice) {
+            if (selectedWorkerinfo.id > -1 && days[dayindex].substr(0, 3) in selectedWorkerinfo.hours) {
+              let timeInfo = selectedWorkerinfo.hours[days[dayindex].substr(0, 3)]
+
+              day.noservice = !(Date.now() < Date.parse(timeStr + " " + timeInfo.end))
+            } else {
+              let timeInfos = allWorkerstime[days[dayindex].substr(0, 3)]
+
+              timeInfos.forEach(function (timeInfo) {
+                day.noservice = !(Date.now() < Date.parse(timeStr + " " + timeInfo.end))
+              })
+            }
+          }
+
           day.num = daynum
           daynum++
         }
 
-        if (day.num > 0 && (!day.passed && !day.noservice) && currDate == 0) {
+        if (day.num > 0 && (!day.passed && !day.noservice) && currDate === 0) {
           currDay = days[dayindex].substr(0, 3)
 
-          if (currDay.substr(0, 3) in hoursInfo) {
-            hourInfo = hoursInfo[currDay.substr(0, 3)]
+          if (currDay in hoursInfo) {
+            hourInfo = hoursInfo[currDay]
 
-            current = Date.parse(days[dayindex] + " " + months[month] + ", " + day.num + " " + year + " " + hourInfo["closeHour"] + ":" + hourInfo["closeMinute"])
-            now = Date.parse(days[currTime.getDay()] + " " + months[currTime.getMonth()] + ", " + currTime.getDate() + " " + currTime.getFullYear() + " " + currTime.getHours() + ":" + currTime.getMinutes())
+            closedtime = Date.parse(timeStr + " " + hourInfo["closeHour"] + ":" + hourInfo["closeMinute"])
+            now = Date.now()
 
-            if (now < current) {
+            if (now < closedtime) {
               currDate = day.num
             } else {
               day.passed = true
@@ -202,186 +274,16 @@ export default function Booktime(props) {
       })
     })
 
-    if (step == 1) {
-      if (currDate == 0) {
-        newMonth = month == 11 ? month = 0 : month + 1
-        newYear = month == 11 ? year + 1 : year
-
-        let { currDate, currDay } = getCalendar(newMonth, newYear)
-      }
-    }
-
-    setSelecteddateinfo({ ...selectedDateinfo, date: currDate })
-    setCalendar({ ...calendar, firstDay, numDays, data, loading: false })
-
-    return { currDate, currDay }
-  }
-  const getTimes = (date, day) => {
-    const { month, year } = selectedDateinfo
-    let start = day in allWorkers ? allWorkers[day][0]["start"] : openTime.hour + ":" + openTime.minute
-    let end = day in allWorkers ? allWorkers[day][0]["end"] : closeTime.hour + ":" + closeTime.minute
-    let openStr = month + " " + date + ", " + year + " " + start
-    let closeStr = month + " " + date + ", " + year + " " + end
-    let openDateStr = Date.parse(openStr), closeDateStr = Date.parse(closeStr), calcDateStr = openDateStr
-    let currenttime = Date.now(), newTimes = [], timesRow = [], timesNum = 0
-
-    while (calcDateStr < (closeDateStr - pushtime)) {
-      calcDateStr += pushtime
-
-      let timestr = new Date(calcDateStr)
-      let hour = timestr.getHours()
-      let minute = timestr.getMinutes()
-      let period = hour < 12 ? "am" : "pm"
-      let timedisplay = (
-        hour <= 12 ? 
-          (hour === 0 ? 12 : hour) 
-          : 
-          hour - 12
-        ) 
-        + ":" + 
-        (minute < 10 ? '0' + minute : minute) + " " + period
-
-      let timepassed = currenttime > calcDateStr
-      let timetaken = false
-
-      if (selectedWorkerinfo.worker != null) { // worker is selected
-        const workerid = selectedWorkerinfo.worker.id
-
-        timetaken = JSON.stringify(scheduled).includes("\"" + calcDateStr + "\":" + workerid)
-
-      } else {
-        let numWorkers = Object.keys(scheduled).length
-        let occur = JSON.stringify(scheduled).split("\"" + calcDateStr + "\":").length - 1
-
-        timetaken = occur == numWorkers
-      }
-
-      let availableService = false, workerIds = []
-
-      if (selectedWorkerinfo.worker != null && day.substr(0, 3) in selectedWorkerinfo.worker.days) {
-        let startTime = selectedWorkerinfo.worker.days[day.substr(0, 3)]["start"]
-        let endTime = selectedWorkerinfo.worker.days[day.substr(0, 3)]["end"]
-
-        if (
-          calcDateStr >= Date.parse(openStr.substring(0, openStr.length - 5) + startTime) 
-          && 
-          calcDateStr <= Date.parse(closeStr.substring(0, closeStr.length - 5) + endTime)
-        ) {
-          availableService = true
-          workerIds = [selectedWorkerinfo.worker.days[day.substr(0, 3)]["workerId"]]
-        }
-      } else {
-        if (day.substr(0, 3) in allWorkers) {
-          let times = allWorkers[day.substr(0, 3)]
-          let startTime = "", endTime = ""
-
-          times.forEach(function (info) {
-            startTime = info.start
-            endTime = info.end
-
-            if (
-              calcDateStr >= Date.parse(openStr.substring(0, openStr.length - 5) + startTime) 
-              && 
-              calcDateStr <= Date.parse(closeStr.substring(0, closeStr.length - 5) + endTime)
-            ) {              
-              availableService = true
-              workerIds.push(info.workerId)
-            }
-          })
-        }
-      }
-
-      if (!timepassed && !timetaken && availableService === true) {
-        timesRow.push({
-          key: timesNum.toString(), header: timedisplay, 
-          time: calcDateStr, workerIds
-        })
-        timesNum++
-
-        if (timesRow.length === 3) {
-          newTimes.push({ key: newTimes.length, row: timesRow })
-          timesRow = []
-        }
-      }
-    }
-
-    if (timesRow.length > 0) {
-      for (let k = 0; k < (3 - timesRow.length); k++) {
-        timesRow.push({ key: timesNum.toString() })
-      }
-
-      newTimes.push({ key: newTimes.length, row: timesRow })
-    }
-
-    setTimes(newTimes)
-  }
-  const getTheLocationHours = async(time) => {
-    const day = selectedDateinfo.day ? selectedDateinfo.day : new Date(Date.now()).toString().split(" ")[0]
-
-    getLocationHours(locationid)
-      .then((res) => {
-        if (res.status === 200) {
-          return res.data
-        }
-      })
-      .then((res) => {
-        if (res) {
-          const { hours } = res
-          const timeInfo = hours[day.substr(0, 3)]
-
-          let openHour = timeInfo["openHour"], openMinute = timeInfo["openMinute"], openPeriod = timeInfo["openPeriod"]
-          let closeHour = timeInfo["closeHour"], closeMinute = timeInfo["closeMinute"], closePeriod = timeInfo["closePeriod"]
-
-          const now = Date.now()
-          const currTime = new Date(now)
-          const currMonth = months[currTime.getMonth()]
-          const currDay = days[currTime.getDay()]
-          let currDate = currTime.getDate()
-
-          let selectedTime = time != undefined ? new Date(time) : null
-          let selectedDay = null, selectedDate = null, selectedMonth = null, selectedYear = null
-          let closedtime
-
-          if (selectedTime) {
-            selectedDay = days[selectedTime.getDay()]
-            selectedDate = selectedTime.getDate()
-            selectedMonth = months[selectedTime.getMonth()]
-            selectedYear = selectedTime.getFullYear()
-            closedtime = Date.parse(selectedDay + " " + selectedMonth + ", " + selectedDate + " " + selectedYear + " " + closeHour + ":" + closeMinute)
-
-            if (now > closedtime) { // current selected date passed close time
-              setSelecteddateinfo({ ...selectedDateinfo, month: currMonth, year: currTime.getFullYear(), day: currDay.substr(0, 3), date: currDate, time: 0 })
-
-              getCalendar(currTime.getMonth(), currTime.getFullYear())
-            } else {
-              selectedDay = days[selectedTime.getDay()]
-              selectedDate = selectedTime.getDate()
-              selectedMonth = months[selectedTime.getMonth()]
-
-              getCalendar(selectedTime.getMonth(), selectedTime.getFullYear())
-              setSelecteddateinfo({ ...selectedDateinfo, month: selectedMonth, year: selectedTime.getFullYear(), day: selectedDay.substr(0, 3), date: selectedDate, time: 0 })
-            }
-          } else {
-            let { currDate, currDay } = getCalendar(currTime.getMonth(), currTime.getFullYear())
-
-            setSelecteddateinfo({
-              month: currMonth, year: currTime.getFullYear(), day: currDay.substr(0, 3),
-              date: currDate,
-              time: 0
-            })
-          }
-
-          setHoursinfo(hours)
-          setOpentime({ ...openTime, hour: openHour, minute: openMinute })
-          setClosetime({ ...closeTime, hour: closeHour, minute: closeMinute })
-          setLoaded(true)
-        }
-      })
-      .catch((err) => {
-        if (err.response && err.response.status === 400) {
-          const { errormsg, status } = err.response.data
-        }
-      })
+    setSelecteddateinfo({ 
+      ...selectedDateinfo, 
+      month: months[month], day: currDay, 
+      date: bookedDateinfo.date === 0 ? 
+        currDate 
+        : 
+        bookedDateinfo.date < currDate ? currDate : bookedDateinfo.date,
+      year 
+    })
+    setCalendar({ ...calendar, data, firstDay, numDays })
   }
   const getAllTheStylists = () => {
     getAllStylists(locationid)
@@ -392,7 +294,7 @@ export default function Booktime(props) {
       })
       .then((res) => {
         if (res) {
-          setSelectedworkerinfo(prev => ({ ...prev, workers: res.owners, numWorkers: res.numWorkers, loading: false }))
+          setAllstylists({ ...allStylists, stylists: res.owners, numStylists: res.numWorkers, ids: res.ids })
         }
       })
       .catch((err) => {
@@ -410,7 +312,7 @@ export default function Booktime(props) {
       })
       .then((res) => {
         if (res) {
-          setAllworkers(res.workers)
+          setAllworkerstime(res.workers)
         }
       })
       .catch((err) => {
@@ -419,12 +321,12 @@ export default function Booktime(props) {
         }
       })
   }
-  const getTheWorkersHour = () => {
+  const getAllScheduledTimes = () => {
     const data = { locationid, ownerid: null }
 
     getWorkersHour(data)
       .then((res) => {
-        if (res.status == 200) {
+        if (res.status === 200) {
           return res.data
         }
       })
@@ -434,11 +336,15 @@ export default function Booktime(props) {
 
           for (let worker in workersHour) {
             for (let info in workersHour[worker]) {
-              if (info == "scheduled") {
+              if (info === "scheduled") {
                 const newScheduled = {}
 
                 for (let time in workersHour[worker]["scheduled"]) {
-                  newScheduled[jsonDateToUnix(JSON.parse(time))] = workersHour[worker]["scheduled"][time]
+                  let splitInfo = info.split("-")
+                  let time = splitInfo[0]
+                  let status = splitInfo[1]
+
+                  newScheduled[jsonDateToUnix(JSON.parse(time)) + "-" + worker + "-" + status] = workersHour[worker]["scheduled"][info]
                 }
 
                 workersHour[worker]["scheduled"] = newScheduled
@@ -451,8 +357,6 @@ export default function Booktime(props) {
       })
   }
   const selectWorker = id => {
-    setSelectedworkerinfo({ ...selectedWorkerinfo, loading: true })
-
     getStylistInfo(id)
       .then((res) => {
         if (res.status === 200) {
@@ -461,17 +365,7 @@ export default function Booktime(props) {
       })
       .then((res) => {
         if (res) {
-          selectedWorkerinfo.workers.forEach(function (item) {
-            item.row.forEach(function (worker) {
-              if (worker.id === id) {
-                let workerinfo = {...worker, days: res.days }
-
-                setSelectedworkerinfo({ ...selectedWorkerinfo, show: true, worker: workerinfo, loading: false })
-              }
-            })
-          })
-
-          getTheLocationHours(oldTime)
+          setSelectedworkerinfo({ ...selectedWorkerinfo, id, hours: res.days })
           setStep(1)
         }
       })
@@ -482,15 +376,13 @@ export default function Booktime(props) {
       })
   }
   const dateNavigate = (dir) => {
-    setLoaded(false)
-
     const currTime = new Date(Date.now())
     const currDay = days[currTime.getDay()]
     const currMonth = months[currTime.getMonth()]
 
     let month = months.indexOf(selectedDateinfo.month), year = selectedDateinfo.year
 
-    month = dir == 'left' ? month - 1 : month + 1
+    month = dir === 'left' ? month - 1 : month + 1
 
     if (month < 0) {
       month = 11
@@ -500,46 +392,165 @@ export default function Booktime(props) {
       year++
     }
 
-    let { currDate } = getCalendar(month, year)
-
-    setSelecteddateinfo({ ...selectedDateinfo, month: months[month], date: currDate, year })
-    setLoaded(true)
+    getCalendar(month, year)
   }
-  const selectDate = async(date) => {
-    const { month, year } = selectedDateinfo
+  const selectDate = () => {
+    const { date, day, month, year } = selectedDateinfo, { blocked } = bookedDateinfo
+    const { openHour, openMinute, closeHour, closeMinute } = hoursInfo[day]
+    const numBlockTaken = scheduleid ? 1 + blocked.length : 0
+    let start = openHour + ":" + openMinute
+    let end = closeHour + ":" + closeMinute
+    let timeStr = month + " " + date + " " + year + " "
+    let openDateStr = Date.parse(timeStr + start), closeDateStr = Date.parse(timeStr + end), calcDateStr = openDateStr
+    let currenttime = Date.now(), newTimes = [], timesRow = [], timesNum = 0
 
-    let openStr = month + " " + date + ", " + year + " " + openTime.hour + ":" + openTime.minute
-    let closeStr = month + " " + date + ", " + year + " " + closeTime.hour + ":" + closeTime.minute
-    let openDateStr = Date.parse(openStr), day = new Date(openDateStr).toString().split(" ")[0]
+    while (calcDateStr < closeDateStr - pushtime) {
+      calcDateStr += pushtime
 
+      let timestr = new Date(calcDateStr)
+      let hour = timestr.getHours()
+      let minute = timestr.getMinutes()
+      let period = hour < 12 ? "am" : "pm"
+      let timedisplay = (
+        hour <= 12 ? 
+          hour === 0 ? 12 : hour
+          : 
+          hour - 12
+        ) 
+        + ":" + 
+        (minute < 10 ? '0' + minute : minute) + " " + period
+      let timepassed = currenttime > calcDateStr
+      let timetaken = false, timeBlocked = false
+
+      if (selectedWorkerinfo.id > -1) { // worker is selected
+        const workerid = selectedWorkerinfo.id
+
+        if (calcDateStr + "-" + workerid + "-c" in scheduled[workerid]["scheduled"]) {
+          timetaken = true
+        }
+      } else {
+        let numWorkers = Object.keys(scheduled).length
+        let occur = JSON.stringify(scheduled).split("\"" + calcDateStr + "-").length - 1
+
+        timetaken = occur === numWorkers
+      }
+
+      let availableService = false, workerIds = []
+
+      if (selectedWorkerinfo.id > -1 && day in selectedWorkerinfo.hours) {
+        let startTime = selectedWorkerinfo.hours[day]["start"]
+        let endTime = selectedWorkerinfo.hours[day]["end"]
+
+        if (
+          calcDateStr >= Date.parse(timeStr + startTime) 
+          && 
+          calcDateStr < Date.parse(timeStr + endTime)
+        ) {
+          availableService = true
+          workerIds = [selectedWorkerinfo.hours[day]["workerId"]]
+        }
+      } else {
+        if (day in allWorkerstime) {
+          let times = allWorkerstime[day]
+          let startTime = "", endTime = ""
+
+          times.forEach(function (info) {
+            startTime = info.start
+            endTime = info.end
+
+            if (
+              calcDateStr >= Date.parse(timeStr + startTime) 
+              && 
+              calcDateStr < Date.parse(timeStr + endTime)
+            ) {              
+              availableService = true
+              workerIds.push(info.workerId)
+            }
+          })
+        }
+      }
+
+      if (!timepassed && !timetaken && availableService === true) {
+        let startCalc = calcDateStr
+
+        for (let k = 1; k <= numBlockTaken; k++) {
+          if (selectedWorkerinfo.id > -1) {
+            let { start, end } = selectedWorkerinfo.hours[day]
+            if (startCalc + "-" + selectedWorkerinfo.id + "-b" in scheduled[selectedWorkerinfo.id]["scheduled"]) { // time is blocked
+              if (!JSON.stringify(blocked).includes("\"unix\":" + startCalc)) {
+                timeBlocked = true
+              }
+            } else if (startCalc + "-" + selectedWorkerinfo.id + "-c" in scheduled[selectedWorkerinfo.id]["scheduled"]) { // time is taken
+              timeBlocked = true
+            } else if (startCalc >= Date.parse(timeStr + end)) { // stylist is off
+              timeBlocked = true
+            }
+          }
+
+          startCalc += pushtime
+        }
+
+        if (!timeBlocked) {
+          timesRow.push({
+            key: timesNum.toString(), header: timedisplay, 
+            time: calcDateStr, workerIds
+          })
+          timesNum++
+
+          if (timesRow.length === 3) {
+            newTimes.push({ key: newTimes.length, row: timesRow })
+            timesRow = []
+          }
+        }
+      }
+    }
+
+    if (timesRow.length > 0) {
+      for (let k = 0; k < (3 - timesRow.length); k++) {
+        timesRow.push({ key: timesNum.toString() })
+      }
+
+      newTimes.push({ key: newTimes.length, row: timesRow })
+    }
+
+    setSelecteddateinfo({ ...selectedDateinfo, date, day })
+    setTimes(newTimes)
     setStep(2)
-    getTimes(date, day.substr(0, 3))
   }
-  const selectTime = (name, timeheader, time, workerIds) => {
+  const selectTime = info => {
+    const { time, workerIds } = info
+
     setConfirm({ ...confirm, show: true, service: name ? name : serviceinfo, time, workerIds })
   }
   const makeAnAppointment = id => {
     if (userId || id) {
-      setConfirm({ ...confirm, loading: true })
-      setShowauth({ ...showAuth, show: false })
+      setConfirm(prev => ({ ...prev, loading: true }))
+      setShowauth(prev => ({ ...prev, show: false }))
 
-      const { worker } = selectedWorkerinfo
+      const workerid = selectedWorkerinfo.id
+      const { blocked } = bookedDateinfo
       const { note, workerIds, time } = confirm
       const selectedinfo = new Date(time)
       const day = days[selectedinfo.getDay()], month = months[selectedinfo.getMonth()], date = selectedinfo.getDate(), year = selectedinfo.getFullYear()
       const hour = selectedinfo.getHours(), minute = selectedinfo.getMinutes()
-      const selecteddate = JSON.stringify({ day, month, date, year, hour, minute })
+      const selecteddate = { day, month, date, year, hour, minute }
+
+      blocked.forEach(function (info, index) {
+        info["newTime"] = unixToJsonDate(time + (info["unix"] - oldTime))
+        info["newUnix"] = (time + (info["unix"] - oldTime)).toString()
+      })
+
       let data = { 
         id: scheduleid, // id for socket purpose (updating)
         userid: userId || id, 
-        workerid: worker !== null ? worker.id : workerIds[Math.floor(Math.random() * (workerIds.length - 1)) + 0], 
+        workerid: workerid > -1 ? workerid : workerIds[Math.floor(Math.random() * (workerIds.length - 1)) + 0], 
         locationid, 
-        serviceid: serviceid !== 'null' ? serviceid : -1, 
+        serviceid: serviceid ? serviceid : -1, 
         serviceinfo: serviceinfo ? serviceinfo : name,
-        oldtime: oldTime,
         time: selecteddate, note: note ? note : "", 
+        timeDisplay: displayTime(selecteddate),
         type: scheduleid ? "remakeAppointment" : "makeAppointment",
-        timeDisplay: displayTime({ day, month, date, year, hour, minute })
+        blocked, unix: time
       }
 
       makeAppointment(data)
@@ -550,18 +561,19 @@ export default function Booktime(props) {
         })
         .then((res) => {
           if (res) {
-            data = { ...data, receiver: res.receiver, time, speak: res.speak }
+            data = { 
+              ...data, 
+              receiver: res.receiver, time, speak: res.speak, worker: res.speak.worker, 
+            }
+
             socket.emit("socket/makeAppointment", data, () => {
               setConfirm({ ...confirm, show: true, requested: true, loading: false })
 
               setTimeout(function () {
                 setConfirm({ ...confirm, show: false, requested: false })
 
-                setTimeout(function () {
-                  localStorage.setItem("openNotif", "true")
-
-                  window.location = "/"
-                }, 1000)
+                localStorage.setItem("openNotif", "true")
+                window.location = "/main"
               }, 2000)
             })
           }
@@ -569,28 +581,72 @@ export default function Booktime(props) {
         .catch((err) => {
           if (err.response && err.response.status === 400) {
             const { errormsg, status } = err.response.data
+
+            switch (status) {
+              case "scheduleConflict":
+                setConfirm({ errorMsg: "Unable to reschedule due to schedule conflict" })
+                
+                break;
+              case "confirmed":
+              case "blocked":
+                // already taken, booking is late
+                setShowtimetaken({ ...showTimetaken, show: true, time })
+
+                setTimeout(function () {
+                  setShowtimetaken({ ...showTimetaken, show: false })
+                }, 2000)
+
+                setConfirm({ ...confirm, show: false, requested: false })
+
+                break;
+              default:
+                setConfirm({ errorMsg: errormsg })
+            }
           }
         })
     } else {
-      setConfirm({ ...confirm, show: false })
-      setShowauth({ ...showAuth, show: true, booking: true })
+      setConfirm(prev => ({ ...prev, show: false }))
+      setShowauth(prev => ({ ...prev, show: true, booking: true }))
     }
   }
   const jsonDateToUnix = date => {
     return Date.parse(date["day"] + " " + date["month"] + " " + date["date"] + " " + date["year"] + " " + date["hour"] + ":" + date["minute"])
   }
+  const unixToJsonDate = unix => {
+    const info = new Date(unix)
+
+    return { 
+      day: days[info.getDay()], month: months[info.getMonth()], 
+      date: info.getDate(), year: info.getFullYear(), 
+      hour: info.getHours(), minute: info.getMinutes() 
+    }
+  }
 
   useEffect(() => {
     getTheNumCartItems()
     getAllTheStylists()
+    getTheLocationHours()
     getAllTheWorkersTime()
-    getTheWorkersHour()
 
     if (serviceid !== 'null') getTheServiceInfo()
     if (scheduleid !== 'null') getTheAppointmentInfo()
-
-    getTheLocationHours()
   }, [])
+
+  useEffect(() => {
+    const currTime = new Date()
+
+    if (oldTime === 0) {
+      getCalendar(currTime.getMonth(), currTime.getFullYear())
+    } else {
+      const prevTime = new Date(oldTime)
+
+      getCalendar(prevTime.getMonth(), prevTime.getFullYear())
+    }
+  }, [selectedWorkerinfo.hours])
+
+  useEffect(() => {
+    if (Object.keys(scheduled).length > 0) selectDate()
+  }, [scheduled])
 
   return (
     <div id="user-booktime">
@@ -606,16 +662,16 @@ export default function Booktime(props) {
           <>
             {step === 0 && (
               <div id="worker-selection">
-                <div id="worker-selection-header">Pick a stylist (Optional)</div>
+                <div id="worker-selection-header">Pick a {scheduleid !== 'null' ? 'different' : ''} stylist (Optional)</div>
                 
                 <div id="workers-list">
-                  {selectedWorkerinfo.workers.map((item, index) => (
+                  {allStylists.stylists.map((item, index) => (
                     <div key={item.key} className="workers-row">
                       {item.row.map(info => (
                         info.id ? 
                           <div key={info.key} className="worker" style={{ backgroundColor: (selectedWorkerinfo.worker && selectedWorkerinfo.worker.id === info.id) ? 'rgba(0, 0, 0, 0.3)' : null, pointerEvents: selectedWorkerinfo.loading ? "none" : "" }} onClick={() => selectWorker(info.id)}>
                             <div className="worker-profile">
-                              {info.profile.name && <img alt="" src={logo_url + info.profile.name} style={resizePhoto(info.profile, 70)}/>}
+                              <img alt="" src={info.profile.name ? logo_url + info.profile.name : "/profilepicture.jpeg"} style={resizePhoto(info.profile, 70)}/>
                             </div>
                             <div className="worker-header">{info.username}</div>
                           </div>
@@ -630,7 +686,7 @@ export default function Booktime(props) {
 
             {step === 1 && (
               <div id="date-selection">
-                <div id="date-selection-header">Tap a date below</div>
+                <div id="date-selection-header">Tap a {scheduleid !== 'null' ? 'different' : ''} date below</div>
 
                 {!calendar.loading ? 
                   <>
@@ -647,9 +703,7 @@ export default function Booktime(props) {
                     </div>
                     <div id="days">
                       <div id="days-header-row">
-                        {days.map((day, index) => (
-                          <div key={"day-header-" + index} className="days-header">{day.substr(0, 3)}</div>
-                        ))}
+                        {days.map((day, index) => <div key={"day-header-" + index} className="days-header">{day.substr(0, 3)}</div>)}
                       </div>
                       {calendar.data.map((info, rowindex) => (
                         <div key={info.key} className="days-data-row">
@@ -662,9 +716,15 @@ export default function Booktime(props) {
                                   <div key={day.key} className="day-touch" style={{ backgroundColor: 'rgba(0, 0, 0, 0.1)', pointerEvents: "none" }}>{day.num}</div>
                                 :
                                 selectedDateinfo.date === day.num ? 
-                                  <div key={day.key} className="day-touch" style={{ backgroundColor: 'black', color: 'white' }} onClick={() => selectDate(day.num)}>{day.num}</div>
+                                  <div key={day.key} className="day-touch" style={{ backgroundColor: 'black', color: 'white' }} onClick={() => {
+                                    setSelecteddateinfo({ ...selectedDateinfo, date: day.num, day: days[dayindex].substr(0, 3) })
+                                    getAllScheduledTimes()
+                                  }}>{day.num}</div>
                                   :
-                                  <div key={day.key} className="day-touch" onClick={() => selectDate(day.num)}>{day.num}</div>
+                                  <div key={day.key} className="day-touch" onClick={() => {
+                                    setSelecteddateinfo({ ...selectedDateinfo, date: day.num, day: days[dayindex].substr(0, 3) })
+                                    getAllScheduledTimes()
+                                  }}>{day.num}</div>
                               :
                               <div key={"calendar-header-" + rowindex + "-" + dayindex} className="day-touch-disabled"></div>
                           ))}
@@ -681,14 +741,15 @@ export default function Booktime(props) {
 
             {step === 2 && (
               <div id="times-selection">
-                <div id="times-header">Tap a time below</div>
+                <div id="times-header" style="font-size: 15px;">{scheduleid !== 'null' && 'Current: ' + displayTime(oldTime)}</div>
+                <div id="times-header">Tap a {scheduleid !== 'null' ? 'different' : ''} time below</div>
 
                 <div id="times">
                   {times.map(info => (
                     <div key={info.key} className="times-row">
                       {info.row.map(item => (
                         item.header ? 
-                          <div key={item.key} className="unselect" onClick={() => selectTime(name, item.header, item.time, item.workerIds)}>{item.header}</div>
+                          <div key={item.key} className="unselect" onClick={() => selectTime(item)}>{item.header}</div>
                           :
                           <div key={item.key} className="unselect" style={{ borderColor: 'transparent' }}></div>
                       ))}
@@ -711,11 +772,33 @@ export default function Booktime(props) {
                 setStep(step - 1)
               }}>Back</div>
 
-              {step === 0 && (
-                <div className="action" onClick={() => {
-                  getTheLocationHours(oldTime)
-                  setStep(1)
-                }}>Skip</div>
+              {(step === 0 || step === 1) && (
+                <>
+                  {step === 0 && (
+                    <>
+                      <div className="action" onClick={() => {
+                        if (allStylists.numStylists === 1) {
+                          selectWorker(allStylists.ids[0])
+                        } else {
+                          setSelectedworkerinfo({ ...selectedWorkerinfo, id: -1, hours: {} })
+                        }
+
+                        setStep(1)
+                      }}>{allStylists.numStylists === 1 ? 'Next' : 'Pick Random'}</div>
+
+                      {selectedWorkerinfo.id > -1 && allStylists.numStylists > 1 && (
+                        <div className="action" onClick={() => selectWorker(selectedWorkerinfo.id)}>Next</div>
+                      )}
+                    </>
+                  )}
+
+                  {step === 1 && (
+                    <div className="action" onClick={() => {
+                      getTheAppointmentInfo(true)
+                      getAllScheduledTimes()
+                    }}>Next</div>
+                  )}
+                </>
               )}
             </div>
           </>
@@ -727,7 +810,7 @@ export default function Booktime(props) {
           <div id="bottom-navs-row">
             {userId && (
               <div className="column">
-                <div className="bottom-nav" onClick={() => setOpenorders(true)}>
+                <div className="bottom-nav" onClick={() => setOpencart(true)}>
                   <FontAwesomeIcon icon={faShoppingBasket} size="2x"/>
                   {numCartItems > 0 && <div id="num-cart-items-header">{numCartItems}</div>}
                 </div>
@@ -763,7 +846,7 @@ export default function Booktime(props) {
                 <>
                   {oldTime === 0 ? 
                     <div id="confirm-header">
-                      <div style={{ fontFamily: 'appFont' }}>Make an appointment for</div>
+                      <div style="font-family: chilanka_400regular">Make an appointment for</div>
                       {confirm.service}<br/>
                       {displayTime(confirm.time)}<br/>
                     </div>
@@ -805,9 +888,16 @@ export default function Booktime(props) {
           </div>
         </div>
       )}
-      {openOrders && <div id="hidden-box"><Orders close={() => {
+      {showTimetaken.show && (
+        <div id="time-taken-box">
+          <div id="time-taken-container">
+            <div id="time-taken-header">{displayTime(showTimetaken.time)} has already been taken</div>
+          </div>
+        </div>
+      )}
+      {openCart && <div id="hidden-box"><Orders close={() => {
         getTheNumCartItems()
-        setOpenorders(false)
+        setOpencart(false)
       }}/></div>}
       {showAuth.show && (
         <div id="hidden-box">
@@ -817,6 +907,8 @@ export default function Booktime(props) {
 
               if (showAuth.booking === true) {
                 makeAnAppointment(id)
+              } else {
+                setShowauth(prev => ({ ...prev, show: false }))
               }
             })
           }}/>
