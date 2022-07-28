@@ -51,8 +51,8 @@
 				}
 			}
 
-			#box-header {
-				font-size: 40px;
+			#product-info-header {
+				font-size: 20px;
 				font-weight: bold;
 				padding: 10px 0;
 				text-align: center;
@@ -116,88 +116,21 @@
 				}
 			}
 
-			#others-box {
-				margin: 20px 0;
-
-				#others-header {
-					font-weight: bold;
-				}
-
-				#others {
-					margin: 20px 0;
-					width: 100%;
-
-					.other {
-						.other-name {
-							font-size: 20px;
-							font-weight: bold;
-						}
-
-						.other-input {
-							font-size: 20px;
-						}
-
-						.other-price {
-							font-weight: bold;
-							margin: 5px 10px 0 0 ;
-
-							#other-actions {
-								display: flex;
-								flex-direction: row;
-								margin-top: -5px;
-
-								.other-action-left {
-									border-radius: 5px 0 0 5px;
-									border-width: 0.5px;
-									padding: 10px;
-									width: 50px;
-								}
-
-								.other-action-left-disabled {
-									background-color: black;
-									border-radius: 0.25px 0 0 0.25px;
-									border-width: 0.5px;
-									padding: 10px;
-									width: 50px;
-								}
-
-								.other-action-right {
-									border-radius: 0 5px 5px 0;
-									border-width: 0.5px;
-									padding: 10px;
-									width: 50px;
-								}
-
-								.other-action-right-disabled {
-									background-color: black;
-									border-radius: 0 0.25px 0.25px 0;
-									border-width: 0.5px;
-									padding: 10px;
-									width: 50px;
-								}
-							}
-						}
-					}
-				}
-			}
-
-			#sizes-box {
-				margin: 20px auto;
+			.options-box {
+				margin: 0 auto 20px auto;
 				width: 80%;
 
-				#sizes-header {
+				.options-header {
 					font-weight: bold;
 				}
 
-				#sizes {
-					margin: 20px 0;
-
-					.size {
+				.options {
+					.option {
 						display: flex;
 						flex-direction: row;
 						margin: 5px 0;
 
-						.size-touch-disabled {
+						.option-touch-disabled {
 							background-color: black;
 							border-radius: 5px;
 							border-style: solid;
@@ -207,7 +140,7 @@
 							text-align: center;
 						}
 
-						.size-touch {
+						.option-touch {
 							border-radius: 5px;
 							border-style: solid;
 							border-width: 0.5px;
@@ -215,7 +148,7 @@
 							text-align: center;
 						}
 
-						.size-price {
+						.option-price {
 							font-weight: bold;
 							margin: 10px;
 						}
@@ -224,7 +157,7 @@
 			}
 
 			#note {
-				margin: 0 auto 20px auto;
+				margin: 50px auto 0 auto;
 				width: 90%;
 
 				#note-header {
@@ -316,5 +249,10 @@
 				text-align: center;
 			}
 		}
+	}
+
+	.errormsg {
+		color: darkred;
+		text-align: center;
 	}
 }

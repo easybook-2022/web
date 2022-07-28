@@ -34,88 +34,123 @@ export default function Menus(props) {
         }
       })
   }
+  const displayListItem = (id, info) => {
+    return (
+      <div className="item" onClick={() => {
+        if (type === "salon") {
+          window.location = "/booktime/" + locationid + "/null/" + info.id + "/null"
+        } else {
+          if (tableOrder) {
+            props.orderItem(info.id)
+          } else {
+            window.location = '/itemprofile/' + locationid + '/null/' + info.id + '/null/restaurant'
+          }
+        }
+      }}>
+        <div className="column" style={{ width: '50%' }}>
+          {info.image.name && (
+            <div className="item-image-holder">
+              <img alt="" className="item-image" style={resizePhoto(info.image, 50)} src={logo_url + info.image.name}/>
+            </div>
+          )}
+          <div className="item-header">{info.name}</div>
+          <div className="item-miniheader">{info.description}</div>
+        </div>
+
+        <div style={{ width: '40%' }}>
+          {info.price ? 
+            <div className="column"><div className="item-price">$ {info.price} (1 size)</div></div>
+            :
+            info.sizes.length > 0 ? 
+              <>
+                {info.sizes.map(size => <div className="item-price">{size.name}: ${size.price}</div>)}
+                <div className="item-price" style={{ marginTop: '5%' }}>({info.sizes.length}) sizes</div>
+              </>
+              :
+              info.quantities.map(quantity => <div className="item-price">{quantity.input}: ${quantity.price}</div>)
+          }
+        </div>
+        
+        <div className="item-actions" style={{ width: '20%' }}>
+          <div className="column">
+            <div className="item-action" onClick={() => {
+              if (type === "salon") {
+                window.location = "/booktime/" + locationid + "/null/" + info.id + "/null"
+              } else {
+                if (tableOrder) {
+                  props.orderItem(info.id)
+                } else {
+                  window.location = "/itemprofile/" + locationid + "/null/" + info.id + "/null/restaurant"
+                }
+              }
+            }}>{
+              type === "salon" ? 
+                "Book a time" 
+                : 
+                tableOrder ? "Order" : "See/Buy"
+            }</div>
+          </div>
+        </div>
+      </div>
+    )
+  }
   const displayList = info => {
-    let { id, image, name, list } = info
-    
+    let { id, image, name, list, show = true } = info
+
     return (
       <div>
         {name ?
           <div className="menu">
-            <div className="menu-row">
-              <div className="menu-image-holder">
-                <img alt="" className="menu-image" style={resizePhoto(image, 50)} src={image.name ? logo_url + image.name : "/noimage.jpeg"}/>
+            <div className="menu-row" onClick={() => {
+              const newList = [...menuInfo.list]
+
+              const toggleMenu = (list, parentId) => {
+                list.forEach(function (item) {
+                  item.show = false
+
+                  if (item.id == id) {
+                    item.show = show ? false : true
+                  } else if (item.list) {
+                    toggleMenu(item.list, item.id)
+                  }
+                })
+              }
+
+              toggleMenu(newList, "")
+
+              setMenuinfo({ ...menuInfo, list: newList })
+            }}>
+              {image.name && (
+                <div className="menu-image-holder">
+                  <img alt="" className="menu-image" style={resizePhoto(image, 50)} src="/noimage.jpeg"/>
+                </div>
+              )}
+                
+              <div className="column"><div className="menu-name">({list.length}) {name} (Menu)</div></div>
+              <div className="column">
+                <div className="menu-show">{show ? "Hide" : "Show"}</div>
               </div>
-              <div className="column"><div className="menu-name">{name} (Menu)</div></div>
             </div>
-            {list.length > 0 && list.map((info, index) => (
+            {list.length > 0 && list.map((listInfo, index) => (
               <div key={"list-" + index}>
-                {info.listType === "list" ? 
-                  displayList({ id: info.id, name: info.name, image: info.image, list: info.list })
-                  :
-                  <div className="item">
-                    <div className="item-image-holder">
-                      <img alt="" className="item-image" style={resizePhoto(info.image, 50)} src={info.image.name ? logo_url + info.image.name : "/noimage.jpeg"}/>
-                    </div>
-                    <div className="column"><div className="item-header">{info.name}</div></div>
-                    <div className="column"><div className="item-header">{info.price ? '$' + info.price : info.sizes.length + ' size(s)'}</div></div>
-                    <div className="column">
-                      <div 
-                        className="item-action" 
-                        onClick={() => {
-                          if (type === "salon") {
-                            window.location = "/booktime/" + locationid + "/null/" + info.id + "/null"
-                          } else {
-                            if (tableOrder) {
-                              props.orderItem(info.id)
-                            } else {
-                              window.location = "/itemprofile/" + locationid + "/null/" + info.id + "/null/restaurant"
-                            }
-                          }
-                        }}
-                      >{
-                        type === "salon" ? 
-                          "Book a time" 
-                          : 
-                          tableOrder ? "Order" : "See/Buy"
-                      }</div>
-                    </div>
-                  </div>
-                }
+                {show && (
+                  listInfo.listType === "list" ? 
+                    displayList({ id: listInfo.id, name: listInfo.name, image: listInfo.image, list: listInfo.list, show: listInfo.show })
+                    :
+                    <div>{displayListItem(id, listInfo)}</div>
+                )}
               </div>
             ))}
           </div>
           :
-          list.map((info, index) => (
+          list.map((listInfo, index) => (
             <div key={"list-" + index}>
-              {info.listType === "list" ? 
-                displayList({ id: info.id, name: info.name, image: info.image, list: info.list })
-                :
-                <div className="item" onClick={() => {
-                  if (type === "salon") {
-                    window.location = "/booktime/" + locationid + "/null/" + info.id + "/null"
-                  } else {
-                    if (tableOrder) {
-                      props.orderItem(info.id)
-                    } else {
-                      window.location = '/itemprofile/' + locationid + '/null/' + info.id + '/null/restaurant'
-                    }
-                  }
-                }}>
-                  <div className="item-image-holder">
-                    <img alt="" className="item-image" style={resizePhoto(info.image, 50)} src={info.image.name ? logo_url + info.image.name : "/noimage.jpeg"}/>
-                  </div>
-                  <div className="column"><div className="item-header">{info.name}</div></div>
-                  <div className="column"><div className="item-header">{info.price ? '$' + info.price : info.sizes.length + ' size(s)'}</div></div>
-                  <div className="column">
-                    <div className="item-action">{
-                      type === "salon" ? 
-                        "Book a time" 
-                        : 
-                        tableOrder ? "Order" : "See/Buy"
-                    }</div>
-                  </div>
-                </div>
-              }
+              {show && (
+                listInfo.listType === "list" ? 
+                  displayList({ id: listInfo.id, name: listInfo.name, image: listInfo.image, list: listInfo.list, show: listInfo.show })
+                  :
+                  <div>{displayListItem(id, listInfo)}</div>
+              )}
             </div>
           ))
         }
