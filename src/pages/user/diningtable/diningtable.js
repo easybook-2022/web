@@ -62,8 +62,7 @@ export default function Diningtable(props) {
       })
   }
   const selectOption = (index, option) => {
-    let newCost = showProductinfo.cost
-    let newOptions
+    let newCost = showProductinfo.cost, newOptions
 
     switch (option) {
       case "size":
@@ -114,7 +113,7 @@ export default function Diningtable(props) {
       default:
     }
   }
-  const changeQuantity = (action) => {
+  const changeQuantity = action => {
     let newQuantity = showProductinfo.quantity
     let newCost = 0
 
@@ -165,7 +164,7 @@ export default function Diningtable(props) {
     })
 
     if (cost > 0 || (newSizes.length > 0 || newQuantities.length > 0)) {
-      let data = { key: getId(), tableid, id, sizes: newSizes, quantities: newQuantities, percents: newPercents, image, quantity, note: note ? note : "" }
+      let data = { key: getId(), tableid, id, sizes: newSizes, quantities: newQuantities, percents: newPercents, image, quantity, note: note ? note : note }
 
       orderMeal(data)
         .then((res) => {

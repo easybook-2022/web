@@ -61,14 +61,24 @@ export default function Menus(props) {
           {info.price ? 
             <div className="column"><div className="item-price">$ {info.price} (1 size)</div></div>
             :
-            info.sizes.length > 0 ? 
-              <>
-                {info.sizes.map(size => <div className="item-price">{size.name}: ${size.price}</div>)}
-                <div className="item-price" style={{ marginTop: '5%' }}>({info.sizes.length}) sizes</div>
-              </>
-              :
-              info.quantities.map(quantity => <div className="item-price">{quantity.input}: ${quantity.price}</div>)
+            <>
+              {info.sizes.length > 0 && (
+                <>
+                  {info.sizes.map(size => <div className="item-price">{size.name}: ${size.price}</div>)}
+                  <div className="item-price" style={{ marginTop: '5%' }}>({info.sizes.length}) sizes</div>
+                </>
+              )}
+
+              {info.quantities.length > 0 && (
+                <>
+                  {info.quantities.map(quantity => <div className="item-price">{quantity.input}: ${quantity.price}</div>)}
+                  <div className="item-price" style={{ marginTop: '5%' }}>({info.quantities.length}) quantities</div>
+                </>
+              )}
+            </>
           }
+
+          {info.percents.map(percent => <div className="item-price">{percent.input}: ${percent.price}</div>)}
         </div>
         
         <div className="item-actions" style={{ width: '20%' }}>
@@ -95,7 +105,7 @@ export default function Menus(props) {
     )
   }
   const displayList = info => {
-    let { id, image, name, list, show = true } = info
+    let { id, image, name, list, show = true, parentId = "" } = info
 
     return (
       <div>
@@ -104,19 +114,21 @@ export default function Menus(props) {
             <div className="menu-row" onClick={() => {
               const newList = [...menuInfo.list]
 
-              const toggleMenu = (list, parentId) => {
+              const toggleMenu = (list) => {
                 list.forEach(function (item) {
-                  item.show = false
+                  if (item.parentId == parentId) {
+                    item.show = false
+                  }
 
                   if (item.id == id) {
                     item.show = show ? false : true
                   } else if (item.list) {
-                    toggleMenu(item.list, item.id)
+                    toggleMenu(item.list)
                   }
                 })
               }
 
-              toggleMenu(newList, "")
+              toggleMenu(newList)
 
               setMenuinfo({ ...menuInfo, list: newList })
             }}>
