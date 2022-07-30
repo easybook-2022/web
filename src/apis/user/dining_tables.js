@@ -3,8 +3,8 @@ import { url } from '../../info'
 
 const beginUrl = `${url}/dining_tables/`
 
-export const getTable = id => {
-  return axios.get(`${beginUrl}get_table/${id}`)
+export const getQrCode = id => {
+  return axios.get(`${beginUrl}get_qr_code/${id}`)
 }
 
 export const orderMeal = data => {

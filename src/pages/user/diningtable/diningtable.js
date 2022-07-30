@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimesCircle } from '@fortawesome/fontawesome-free-solid'
 import { socket, logo_url } from '../../../userInfo'
-import { getTable, orderMeal } from '../../../apis/user/dining_tables'
+import { getQrCode, orderMeal } from '../../../apis/user/dining_tables'
 import { getProductInfo } from '../../../apis/user/products'
 import { getId } from 'geottuse-tools'
 
@@ -16,6 +16,7 @@ export default function Diningtable(props) {
   const { tableid } = useParams()
 
   const [locationId, setLocationid] = useState('')
+  const [locationName, setLocationname] = useState('')
   const [name, setName] = useState('')
   const [loaded, setLoaded] = useState(false)
   const [refetchMenu, setRefetchmenu] = useState(0)
@@ -28,7 +29,7 @@ export default function Diningtable(props) {
   const [showAlert, setShowalert] = useState(false)
 
   const getTheTable = () => {
-    getTable(tableid)
+    getQrCode(tableid)
       .then((res) => {
         if (res.status === 200) {
           return res.data
@@ -38,6 +39,7 @@ export default function Diningtable(props) {
         if (res) {
           setName(res.name)
           setLocationid(res.locationid)
+          setLocationname(res.locationName)
           setLoaded(true)
         }
       })
@@ -202,9 +204,9 @@ export default function Diningtable(props) {
         <>
           <div id="box">
             <div id="header">
-              Table #{name}
-              <br/>
-              Order your meals below
+              <div style={{ fontSize: wsize(5) }}>Welcome to {locationName}</div>
+              <div style={{ fontSize: wsize(6), margin: '20px 0' }}>You are Table #{name}</div>
+              Order your food below
             </div>
 
             <div id="body">

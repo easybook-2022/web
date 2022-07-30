@@ -34,7 +34,7 @@ export default function Menus(props) {
         }
       })
   }
-  const displayListItem = (id, info) => {
+  const displayListItem = info => {
     return (
       <div className="item" onClick={() => {
         if (type === "salon") {
@@ -138,18 +138,15 @@ export default function Menus(props) {
                 </div>
               )}
                 
-              <div className="column"><div className="menu-name">({list.length}) {name} (Menu)</div></div>
-              <div className="column">
-                <div className="menu-show">{show ? "Hide" : "Show"}</div>
-              </div>
+              <div className="column"><div className="menu-name">{name} (Menu)</div></div>
             </div>
             {list.length > 0 && list.map((listInfo, index) => (
               <div key={"list-" + index}>
                 {show && (
                   listInfo.listType === "list" ? 
-                    displayList({ id: listInfo.id, name: listInfo.name, image: listInfo.image, list: listInfo.list, show: listInfo.show })
+                    displayList({ id: listInfo.id, name: listInfo.name, image: listInfo.image, list: listInfo.list, show: listInfo.show, parentId: listInfo.parentId })
                     :
-                    <div>{displayListItem(id, listInfo)}</div>
+                    <div>{displayListItem(listInfo)}</div>
                 )}
               </div>
             ))}
@@ -159,9 +156,9 @@ export default function Menus(props) {
             <div key={"list-" + index}>
               {show && (
                 listInfo.listType === "list" ? 
-                  displayList({ id: listInfo.id, name: listInfo.name, image: listInfo.image, list: listInfo.list, show: listInfo.show })
+                  displayList({ id: listInfo.id, name: listInfo.name, image: listInfo.image, list: listInfo.list, show: listInfo.show, parentId: listInfo.parentId })
                   :
-                  <div>{displayListItem(id, listInfo)}</div>
+                  <div>{displayListItem(listInfo)}</div>
               )}
             </div>
           ))
