@@ -217,9 +217,15 @@ export default function Booktime(props) {
               } else {
                 let timeInfos = allWorkerstime[days[dayindex].substr(0, 3)]
 
-                timeInfos.forEach(function (timeInfo) {
+                for (let k = 0; k < timeInfos.length; k++) {
+                  let timeInfo = timeInfos[k]
+
                   day.noservice = !(Date.now() < Date.parse(timeStr + " " + timeInfo.end))
-                })
+
+                  if (!day.noservice) {
+                    break;
+                  }
+                }
               }
             }
             
@@ -243,9 +249,15 @@ export default function Booktime(props) {
             } else {
               let timeInfos = allWorkerstime[days[dayindex].substr(0, 3)]
 
-              timeInfos.forEach(function (timeInfo) {
+              for (let k = 0; k < timeInfos.length; k++) {
+                let timeInfo = timeInfos[k]
+
                 day.noservice = !(Date.now() < Date.parse(timeStr + " " + timeInfo.end))
-              })
+
+                if (!day.noservice) {
+                  break;
+                }
+              }
             }
           }
 
