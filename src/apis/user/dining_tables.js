@@ -13,3 +13,7 @@ export const orderMeal = data => {
     data
   )
 }
+
+export const viewCustomerOrders = id => {
+  return axios.get(`${beginUrl}view_customer_orders/${id}`)
+}

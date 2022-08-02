@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimesCircle } from '@fortawesome/fontawesome-free-solid'
 import { socket, logo_url } from '../../../userInfo'
-import { getQrCode, orderMeal } from '../../../apis/user/dining_tables'
+import { getQrCode, orderMeal, viewCustomerOrders } from '../../../apis/user/dining_tables'
 import { getProductInfo } from '../../../apis/user/products'
 import { getId } from 'geottuse-tools'
 
@@ -27,6 +27,7 @@ export default function Diningtable(props) {
     errorMsg: ""
   })
   const [showAlert, setShowalert] = useState(false)
+  const [showOrders, setShoworders] = useState({ show: false, orders: [] })
 
   const getTheTable = () => {
     getQrCode(tableid)
@@ -41,10 +42,12 @@ export default function Diningtable(props) {
           setLocationid(res.locationid)
           setLocationname(res.locationName)
           setLoaded(true)
+
+          localStorage.setItem("tableId", tableid)
         }
       })
   }
-  const orderItem = id => {
+  const getMealInfo = id => {
     getProductInfo(id)
       .then((res) => {
         if (res.status === 200) {
@@ -54,10 +57,21 @@ export default function Diningtable(props) {
       .then((res) => {
         if (res) {
           let { cost, name, price, productImage, sizes, quantities, percents, quantity } = res.productInfo
+          let newCost = cost
+
+          if (sizes.length == 1) {
+            sizes[0].selected = true
+            newCost += parseFloat(sizes[0].price)
+          }
+
+          if (quantities.length == 1) {
+            quantities[0].selected = true
+            newCost += parseFloat(quantities[0].price)
+          }
 
           setShowproductinfo({
             ...showProductinfo,
-            show: true, id, cost, name, image: productImage, 
+            show: true, id, cost: newCost, name, image: productImage, 
             sizes, quantities, percents, price, quantity
           })
         }
@@ -145,7 +159,25 @@ export default function Diningtable(props) {
 
     setShowproductinfo({ ...showProductinfo, quantity: newQuantity, cost: newCost })
   }
-  const orderNow = () => {
+  const viewTheCustomerOrders = () => {
+    const tableId = localStorage.getItem("tableId")
+
+    viewCustomerOrders(tableId)
+      .then((res) => {
+        if (res.status === 200) {
+          return res.data
+        }
+      })
+      .then((res) => {
+        if (res) {
+          setShoworders({ ...showOrders, show: true, orders: res.orders })
+        }
+      })
+  }
+  const addToOrders = () => {
+
+  }
+  const sendOrders = () => {
     const { id, cost, price, sizes, quantities, percents, image, quantity, note } = showProductinfo
     const newSizes = [], newQuantities = [], newPercents = []
 
@@ -198,6 +230,8 @@ export default function Diningtable(props) {
     getTheTable()
   }, [])
 
+  const { sizes, quantities, percents } = showProductinfo
+
   return (
     <div id="diningtable">
       {loaded && ( 
@@ -206,7 +240,7 @@ export default function Diningtable(props) {
             <div id="header">
               <div style={{ fontSize: wsize(5) }}>Welcome to {locationName}</div>
               <div style={{ fontSize: wsize(6), margin: '20px 0' }}>You are Table #{name}</div>
-              Order your food below
+              Please order your food below
             </div>
 
             <div id="body">
@@ -215,10 +249,14 @@ export default function Diningtable(props) {
                 refetchMenu={refetchMenu}
                 type="restaurant"
                 tableOrder={true}
-                orderItem={orderItem}
+                getMealInfo={getMealInfo}
               />
             </div>
           </div>
+
+          {/*<div id="hover-box">
+            <div className="column"><div className="hover-header" onClick={() => viewTheCustomerOrders()}>{1} Orders</div></div>
+          </div>*/}
 
           {(showProductinfo.show || showAlert) && (
             <div id="hidden-box">
@@ -235,39 +273,57 @@ export default function Diningtable(props) {
                     <div id="product-info-header">{showProductinfo.name}</div>
 
                     <div className="options-box">
-                      {showProductinfo.sizes.length > 0 || showProductinfo.quantities.length > 0 && <div className="options-header">Select a {showProductinfo.sizes.length > 0 ? "size" : "quantity"}</div>}
+                      {(sizes.length > 0 || quantities.length) > 0 && (
+                        sizes.length > 0 ? 
+                          <div className="options-header">{sizes.length == 1 ? "(1 size only)" : "Select a size"}</div>
+                          :
+                          <div className="options-header">{quantities.length == 1 ? "(1 quantity only)" : "Select a quantity"}</div>
+                      )}
 
                       <div className="options">
-                        {showProductinfo.sizes.length > 0 ? 
-                          showProductinfo.sizes.map((size, index) => (
-                            <div key={size.key} className="option">
-                              <div className={size.selected ? "option-touch-disabled" : "option-touch"} onClick={() => selectOption(index, "size")}>{size.name}</div>
-                              <div className="option-price">$ {size.price}</div>
+                        {sizes.length > 0 && (
+                          sizes.length == 1 ? 
+                            <div className="option">
+                              <div className="option-price">{sizes[0].name + ": $" + sizes[0].price}</div>
                             </div>
-                          ))
-                          :
-                          showProductinfo.quantities.map((quantity, index) => (
-                            <div key={quantity.key} className="option">
-                              <div className={quantity.selected ? "option-touch-disabled" : "option-touch"} onClick={() => selectOption(index, "quantity")}>{quantity.input}</div>
-                              <div className="option-price">$ {quantity.price}</div>
+                            :
+                            sizes.map((size, index) => (
+                              <div key={size.key} className="option">
+                                <div className={size.selected ? "option-touch-disabled" : "option-touch"} onClick={() => selectOption(index, "size")}>{size.name}</div>
+                                <div className="option-price">$ {size.price}</div>
+                              </div>
+                            ))
+                        )}
+
+                        {quantities.length > 0 && (
+                          quantities.length == 1 ? 
+                            <div className="option">
+                              <div className="option-price">{quantities[0].input + ": $" + quantities[0].price}</div>
                             </div>
-                          ))
-                        }
+                            :
+                            quantities.map((quantity, index) => (
+                              <div key={quantity.key} className="option">
+                                <div className={quantity.selected ? "option-touch-disabled" : "option-touch"} onClick={() => selectOption(index, "quantity")}>{quantity.input}</div>
+                                <div className="option-price">$ {quantity.price}</div>
+                              </div>
+                            ))
+                        )}
+
+                        {percents.length > 0 && (
+                          percents.length == 1 ? 
+                            <div className="option">
+                              <div className="option-price">{percents[0].input + ": $" + percents[0].price}</div>
+                            </div>
+                            :
+                            percents.map((percent, index) => (
+                              <div key={percent.key} className="option">
+                                <div className={percent.selected ? "option-touch-disabled" : "option-touch"} onClck={() => selectOption(index, "percent")}>{percent.input}</div>
+                                <div className="option-price">$ {percent.price}</div>
+                              </div>
+                            ))
+                        )}
                       </div>
                     </div>
-
-                    {showProductinfo.percents.length > 0 && (
-                      <div className="options-box">
-                        <div className="options">
-                          {showProductinfo.percents.map((percent, index) => (
-                            <div key={percent.key} className="option">
-                              <div className={percent.selected ? "option-touch-disabled" : "option-touch"} onClck={() => selectOption(index, "percent")}>{percent.input}</div>
-                              <div className="option-price">$ {percent.price}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
 
                     <div id="quantity-row">
                       <div id="quantity">
@@ -303,7 +359,7 @@ export default function Diningtable(props) {
                     {showProductinfo.errorMsg ? <div className="errormsg">{showProductinfo.errorMsg}</div> : null}
 
                     <div id="item-actions">
-                      <div className="item-action" onClick={() => orderNow()}>Order item</div>
+                      <div className="item-action" onClick={() => sendOrders()}>Send to<br/>Kitchen</div>
                     </div>
                   </div>
                 </div>

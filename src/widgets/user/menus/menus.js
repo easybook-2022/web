@@ -1,5 +1,7 @@
 import './menus.scss';
 import { useEffect, useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChevronUp, faChevronDown } from '@fortawesome/fontawesome-free-solid'
 import { resizePhoto } from 'geottuse-tools'
 import { logo_url } from '../../../userInfo'
 import { getMenus } from '../../../apis/user/menus'
@@ -41,7 +43,7 @@ export default function Menus(props) {
           window.location = "/booktime/" + locationid + "/null/" + info.id + "/null"
         } else {
           if (tableOrder) {
-            props.orderItem(info.id)
+            props.getMealInfo(info.id)
           } else {
             window.location = '/itemprofile/' + locationid + '/null/' + info.id + '/null/restaurant'
           }
@@ -65,14 +67,12 @@ export default function Menus(props) {
               {info.sizes.length > 0 && (
                 <>
                   {info.sizes.map(size => <div className="item-price">{size.name}: ${size.price}</div>)}
-                  <div className="item-price" style={{ marginTop: '5%' }}>({info.sizes.length}) sizes</div>
                 </>
               )}
 
               {info.quantities.length > 0 && (
                 <>
                   {info.quantities.map(quantity => <div className="item-price">{quantity.input}: ${quantity.price}</div>)}
-                  <div className="item-price" style={{ marginTop: '5%' }}>({info.quantities.length}) quantities</div>
                 </>
               )}
             </>
@@ -88,7 +88,7 @@ export default function Menus(props) {
                 window.location = "/booktime/" + locationid + "/null/" + info.id + "/null"
               } else {
                 if (tableOrder) {
-                  props.orderItem(info.id)
+                  props.getMealInfo(info.id)
                 } else {
                   window.location = "/itemprofile/" + locationid + "/null/" + info.id + "/null/restaurant"
                 }
@@ -110,7 +110,7 @@ export default function Menus(props) {
     return (
       <div>
         {name ?
-          <div className="menu">
+          <div className="menu" style={{ backgroundColor: parentId ? 'white' : 'transparent' }}>
             <div className="menu-row" onClick={() => {
               const newList = [...menuInfo.list]
 
@@ -134,11 +134,12 @@ export default function Menus(props) {
             }}>
               {image.name && (
                 <div className="menu-image-holder">
-                  <img alt="" className="menu-image" style={resizePhoto(image, 50)} src="/noimage.jpeg"/>
+                  <img alt="" className="menu-image" style={resizePhoto(image, 50)} src={logo_url + image.name}/>
                 </div>
               )}
                 
               <div className="column"><div className="menu-name">{name} (Menu)</div></div>
+              <div className="column" style={{ marginLeft: 20 }}><FontAwesomeIcon icon={show ? faChevronUp : faChevronDown} size="2x"/></div>
             </div>
             {list.length > 0 && list.map((listInfo, index) => (
               <div key={"list-" + index}>
@@ -221,6 +222,8 @@ export default function Menus(props) {
         {displayList({ id: "", name: "", image: "", list: menuInfo.list })}
       </div>
     :
-    <Loadingprogress/>
+    <div style={{ height: '100vw', width: '100vw' }}>
+      <Loadingprogress/>
+    </div>
   )
 }
