@@ -1,13 +1,39 @@
 #diningtable {
 	background-color: rgba(127, 127, 127, 0.2);
 	height: 100vh;
-	overflow-y: scroll;
+	overflow: hidden;
 	width: 100vw;
 
+	#hover-box {
+		background-color: rgba(0, 0, 0, 0.1);
+		border-radius: 0 10px 10px 0;
+		display: flex;
+		flex-direction: row;
+		justify-content: space-around;
+		padding: 5px 0;
+
+		.hover-header {
+			background-color: white;
+			border-radius: 5px;
+			border-style: solid;
+			margin: 5px 2px;
+			padding: 5px;
+			text-align: center;
+			width: 45%;
+
+			&:hover {
+				opacity: 0.1;
+			}
+		}
+	}
+
 	#box {
+		height: 100%;
+		overflow-y: scroll;
+
 		#header {
 			font-weight: bold;
-			margin: 20px 0;
+			margin: 10px 0;
 			text-align: center;
 		}
 
@@ -25,25 +51,7 @@
 		}
 	}
 
-	#hover-box {
-		background-color: rgba(0, 0, 0, 0.1);
-		border-radius: 0 10px 10px 0;
-		height: 100px;
-		margin-top: 50%;
-		position: absolute;
-		top: 0;
-		width: 100px;
-
-		.hover-header {
-			background-color: white;
-			border-radius: 5px;
-			border-style: solid;
-			margin: 0 auto;
-			padding: 10px 0;
-			text-align: center;
-			width: 90%;
-		}
-	}
+		
 
 	#hidden-box {
 		background-color: rgba(0, 0, 0, 0.7);
@@ -282,6 +290,72 @@
 				font-weight: bold;
 				padding: 0 20px;
 				text-align: center;
+			}
+		}
+
+		#show-orders-box {
+			background-color: white;
+			height: 90%;
+			margin: 0 auto;
+			width: 90%;
+
+			#show-orders-close {
+				height: 32px;
+				margin: 20px auto;
+				width: 32px;
+			}
+
+			#show-orders-header {
+				font-weight: bold;
+				margin: 10px 0;
+				text-align: center;
+			}
+
+			#show-orders-send {
+				border-radius: 5px;
+				border-style: solid;
+				border-width: 1px;
+				margin: 20px auto;
+				padding: 5px;
+				text-align: center;
+				width: 100px;
+
+				&:hover {
+					opacity: 0.1
+				}
+			}
+
+			#show-orders-list {
+				height: 60%;
+				overflow-y: scroll;
+
+				.order {
+					border-style: solid;
+					border-width: 1px 0;
+					display: flex;
+					flex-direction: row;
+					justify-content: space-between;
+					padding: 10px;
+
+					.order-photo {
+						height: calc(100vw * 0.2);
+						width: calc(100vw * 0.2);
+					}
+
+					.order-cost {
+						font-weight: bold;
+						margin-top: 30px;
+					}
+
+					.order-delete {
+						height: 32px;
+						width: 32px;
+
+						&:hover {
+							opacity: 0.1;
+						}
+					}
+				}
 			}
 		}
 	}

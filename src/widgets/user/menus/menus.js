@@ -55,7 +55,11 @@ export default function Menus(props) {
               <img alt="" className="item-image" style={resizePhoto(info.image, 50)} src={logo_url + info.image.name}/>
             </div>
           )}
-          <div className="item-header">{info.name}</div>
+          <div className="item-header">
+            {info.number ? info.number + "." : ""}
+            {info.number && <br/>}
+            {info.name}
+          </div>
           <div className="item-miniheader">{info.description}</div>
         </div>
 
@@ -64,17 +68,8 @@ export default function Menus(props) {
             <div className="column"><div className="item-price">$ {info.price} (1 size)</div></div>
             :
             <>
-              {info.sizes.length > 0 && (
-                <>
-                  {info.sizes.map(size => <div className="item-price">{size.name}: ${size.price}</div>)}
-                </>
-              )}
-
-              {info.quantities.length > 0 && (
-                <>
-                  {info.quantities.map(quantity => <div className="item-price">{quantity.input}: ${quantity.price}</div>)}
-                </>
-              )}
+              {info.sizes.length > 0 && info.sizes.map(size => <div className="item-price">{size.name}: ${size.price}</div>)}
+              {info.quantities.length > 0 && info.quantities.map(quantity => <div className="item-price">{quantity.input}: ${quantity.price}</div>)}
             </>
           }
 
@@ -105,7 +100,7 @@ export default function Menus(props) {
     )
   }
   const displayList = info => {
-    let { id, image, name, list, show = true, parentId = "" } = info
+    let { id, image, number = "", name, list, show = true, parentId = "" } = info
 
     return (
       <div>
@@ -145,7 +140,7 @@ export default function Menus(props) {
               <div key={"list-" + index}>
                 {show && (
                   listInfo.listType === "list" ? 
-                    displayList({ id: listInfo.id, name: listInfo.name, image: listInfo.image, list: listInfo.list, show: listInfo.show, parentId: listInfo.parentId })
+                    displayList({ id: listInfo.id, number: listInfo.number, name: listInfo.name, image: listInfo.image, list: listInfo.list, show: listInfo.show, parentId: listInfo.parentId })
                     :
                     <div>{displayListItem(listInfo)}</div>
                 )}
@@ -157,7 +152,7 @@ export default function Menus(props) {
             <div key={"list-" + index}>
               {show && (
                 listInfo.listType === "list" ? 
-                  displayList({ id: listInfo.id, name: listInfo.name, image: listInfo.image, list: listInfo.list, show: listInfo.show, parentId: listInfo.parentId })
+                  displayList({ id: listInfo.id, number: listInfo.number, name: listInfo.name, image: listInfo.image, list: listInfo.list, show: listInfo.show, parentId: listInfo.parentId })
                   :
                   <div>{displayListItem(listInfo)}</div>
               )}
