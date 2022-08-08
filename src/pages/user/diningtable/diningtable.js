@@ -209,6 +209,7 @@ export default function Diningtable(props) {
 
     const { id, name, cost, price, sizes, quantities, percents, image, quantity, note } = showProductinfo
     const newOrders = [...orders]
+    let sizeRequired = sizes.length > 0, quantityRequired = quantities.length > 0, sizeSelected = "", quantitySelected = ""
 
     let newCost = 0
 
@@ -218,12 +219,14 @@ export default function Diningtable(props) {
       sizes.forEach(function (info) {
         if (info.selected) {
           newCost += parseFloat(info.price) * quantity
+          sizeSelected = info.name
         }
       })
 
       quantities.forEach(function (info) {
         if (info.selected) {
           newCost += parseFloat(info.price) * quantity
+          quantitySelected = info.input
         }
       })
     }
@@ -234,24 +237,28 @@ export default function Diningtable(props) {
       }
     })
 
-    newCost = newCost.toFixed(2)
+    if (price || ((sizeRequired && sizeSelected) || (quantityRequired && quantitySelected))) {
+      newCost = newCost.toFixed(2)
 
-    if (newCost.toString().split(".")[1].length < 2) {
-      newCost = newCost + "0"
+      if (newCost.toString().split(".")[1].length < 2) {
+        newCost = newCost + "0"
+      }
+
+      newOrders.unshift({
+        key: getId(),
+        productId: id,
+        name, price, sizes, quantities, percents,
+        image, quantity, note,
+        cost: newCost
+      })
+
+      localStorage.setItem("orders", JSON.stringify(newOrders))
+      setOrders(newOrders)
+
+      setShowproductinfo({ ...showProductinfo, show: false, id: -1, loading: false })
+    } else {
+      setShowproductinfo({ ...showProductinfo, errorMsg: "Please select a " + (sizeRequired ? "size" : "quantity") })
     }
-
-    newOrders.unshift({
-      key: getId(),
-      productId: id,
-      name, price, sizes, quantities, percents,
-      image, quantity, note,
-      cost: newCost
-    })
-
-    localStorage.setItem("orders", JSON.stringify(newOrders))
-    setOrders(newOrders)
-
-    setShowproductinfo({ ...showProductinfo, show: false, id: -1, loading: false })
   }
   const sendOrders = () => {
     const tableId = localStorage.getItem("tableId")
@@ -323,7 +330,12 @@ export default function Diningtable(props) {
 
     setOrders(newOrders)
     localStorage.setItem("orders", JSON.stringify(orders))
-    setShoworders({ ...showOrders, orders: newOrders })
+
+    setShoworders({ 
+      ...showOrders, 
+      show: newOrders.length > 0,
+      orders: newOrders 
+    })
   }
   
   useEffect(() => {

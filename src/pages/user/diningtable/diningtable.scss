@@ -1,3 +1,7 @@
+body {
+	overflow: hidden;
+}
+
 #diningtable {
 	background-color: rgba(127, 127, 127, 0.2);
 	height: 100vh;
@@ -47,11 +51,9 @@
 		}
 
 		#body {
-			padding-bottom: 100px;
+			padding-bottom: 200px;
 		}
 	}
-
-		
 
 	#hidden-box {
 		background-color: rgba(0, 0, 0, 0.7);
