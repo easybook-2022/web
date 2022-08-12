@@ -207,9 +207,10 @@ export default function Diningtable(props) {
   const addToOrders = () => {
     setShowproductinfo({ ...showProductinfo, loading: true })
 
-    const { id, name, cost, price, sizes, quantities, percents, image, quantity, note } = showProductinfo
+    let { id, name, cost, price, sizes, quantities, percents, image, quantity, note } = showProductinfo
     const newOrders = [...orders]
     let sizeRequired = sizes.length > 0, quantityRequired = quantities.length > 0, sizeSelected = "", quantitySelected = ""
+    let specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/, orderKey = ""
 
     let newCost = 0
 
@@ -244,8 +245,12 @@ export default function Diningtable(props) {
         newCost = newCost + "0"
       }
 
+      while (orderKey == "" || JSON.stringify(newOrders).includes(orderKey)) {
+        orderKey = getId()
+      }
+
       newOrders.unshift({
-        key: getId(),
+        key: orderKey,
         productId: id,
         name, price, sizes, quantities, percents,
         image, quantity, note,
@@ -349,14 +354,16 @@ export default function Diningtable(props) {
       {loaded && ( 
         <>
           <div id="hover-box">
-            {orders.length > 0 && (
-              <div className="hover-header" onClick={() => viewTheOrders()}>
-                <div style={{ fontWeight: 'bold' }}>{orders.length}</div><div style={{ fontWeight: 'bold' }}>See / Send</div>Your Orders
+            <div className="row" style={{ width: '100%' }}>
+              {orders.length > 0 && (
+                <div className="hover-header" onClick={() => viewTheOrders()}>
+                  <div style={{ fontWeight: 'bold' }}>{orders.length}</div><div style={{ fontWeight: 'bold' }}>See / Send</div>Your Orders
+                </div>
+              )}
+                
+              <div className="hover-header" onClick={() => viewTheTableOrders()}>
+                <div style={{ fontWeight: 'bold' }}>{numTableorders}</div>Ordered
               </div>
-            )}
-              
-            <div className="hover-header" onClick={() => viewTheTableOrders()}>
-              <div style={{ fontWeight: 'bold' }}>{numTableorders}</div>Ordered
             </div>
           </div>
 
@@ -390,6 +397,7 @@ export default function Diningtable(props) {
                         <img src={logo_url + showProductinfo.image.name} id="image"/>
                       </div>
                     )}
+
                     <div id="product-info-header">{showProductinfo.name}</div>
 
                     <div className="options-box">
@@ -413,7 +421,7 @@ export default function Diningtable(props) {
                             sizes.map((size, index) => (
                               <div key={size.key} className="option">
                                 <div className={size.selected ? "option-touch-disabled" : "option-touch"} onClick={() => selectOption(index, "size")}>{size.name}</div>
-                                <div className="option-price">$ {size.price}</div>
+                                <div className="column"><div className="option-price">$ {size.price}</div></div>
                               </div>
                             ))
                         )}
@@ -427,7 +435,7 @@ export default function Diningtable(props) {
                             quantities.map((quantity, index) => (
                               <div key={quantity.key} className="option">
                                 <div className={quantity.selected ? "option-touch-disabled" : "option-touch"} onClick={() => selectOption(index, "quantity")}>{quantity.input}</div>
-                                <div className="option-price">$ {quantity.price}</div>
+                                <div className="column"><div className="option-price">$ {quantity.price}</div></div>
                               </div>
                             ))
                         )}
@@ -441,7 +449,7 @@ export default function Diningtable(props) {
                             percents.map((percent, index) => (
                               <div key={percent.key} className="option">
                                 <div className={percent.selected ? "option-touch-disabled" : "option-touch"} onClck={() => selectOption(index, "percent")}>{percent.input}</div>
-                                <div className="option-price">$ {percent.price}</div>
+                                <div className="column"><div className="option-price">$ {percent.price}</div></div>
                               </div>
                             ))
                         )}
@@ -450,18 +458,10 @@ export default function Diningtable(props) {
 
                     <div id="quantity-row">
                       <div id="quantity">
-                        <div className="column">
-                          <div className="quantity-header">Quantity:</div>
-                        </div>
-                        <div className="column">
-                          <div className="quantity-action" onClick={() => changeQuantity("-")}>-</div>
-                        </div>
-                        <div className="column">
-                          <div className="quantity-header">{showProductinfo.quantity}</div>
-                        </div>
-                        <div className="column">
-                          <div className="quantity-action" onClick={() => changeQuantity("+")}>+</div>
-                        </div>
+                        <div className="column"><div className="quantity-header">Quantity:</div></div>
+                        <div className="column"><div className="quantity-action" onClick={() => changeQuantity("-")}>-</div></div>
+                        <div className="column"><div className="quantity-header">{showProductinfo.quantity}</div></div>
+                        <div className="column"><div className="quantity-action" onClick={() => changeQuantity("+")}>+</div></div>
                       </div>
                     </div>
 
@@ -511,7 +511,7 @@ export default function Diningtable(props) {
 
                   <div id="show-orders-list">
                     {showOrders.orders.map((order, index) => (
-                      <div className="order">
+                      <div key={order.key} className="order">
                         <div style={{ width: '50%' }}>
                           {order.image.name && (
                             <div className="order-photo">
