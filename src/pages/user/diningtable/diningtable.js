@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimesCircle } from '@fortawesome/fontawesome-free-solid'
 import { socket, logo_url } from '../../../userInfo'
-import { getQrCode, orderMeal, viewTableOrders } from '../../../apis/user/dining_tables'
+import { getQrCode, orderMeal, viewTableOrders, viewNumTableOrders } from '../../../apis/user/dining_tables'
 import { getProductInfo } from '../../../apis/user/products'
 import { getId } from 'geottuse-tools'
 
@@ -29,9 +29,8 @@ export default function Diningtable(props) {
     errorMsg: "",
     loading: false
   })
-  const [orders, setOrders] = useState([])
   const [showAlert, setShowalert] = useState(false)
-  const [showOrders, setShoworders] = useState({ show: false, orders: [] })
+  const [showCurrentorders, setShowcurrentorders] = useState({ show: false, orders: [] })
   const [showTableorders, setShowtableorders] = useState({ show: false, orders: [] })
 
   const getTheTable = () => {
@@ -59,7 +58,7 @@ export default function Diningtable(props) {
             if (!ordersStr) {
               localStorage.setItem("orders", "[]")
             } else {
-              setOrders(JSON.parse(ordersStr))
+              setShowcurrentorders({ ...showCurrentorders, show: false, orders: JSON.parse(ordersStr) })
             }
           }
         }
@@ -68,7 +67,7 @@ export default function Diningtable(props) {
         if (err.response && err.response.status === 400) {
           const { errormsg, status } = err.response.data
 
-          alert(errormsg)
+
         }
       })
   }
@@ -199,16 +198,26 @@ export default function Diningtable(props) {
         }
       })
   }
-  const viewTheOrders = () => {
-    const newOrders = [...orders]
+  const viewTheNumTableOrders = () => {
+    const tableId = localStorage.getItem("tableId")
 
-    setShoworders({ ...showOrders, show: true, orders: newOrders })
+    viewNumTableOrders(tableId)
+      .then((res) => {
+        if (res.status == 200) {
+          return res.data
+        }
+      })
+      .then((res) => {
+        if (res) {
+          setNumtableorders(res.numOrders)
+        }
+      })
   }
   const addToOrders = () => {
     setShowproductinfo({ ...showProductinfo, loading: true })
 
     let { id, name, cost, price, sizes, quantities, percents, image, quantity, note } = showProductinfo
-    const newOrders = [...orders]
+    const newOrders = [...showCurrentorders.orders]
     let sizeRequired = sizes.length > 0, quantityRequired = quantities.length > 0, sizeSelected = "", quantitySelected = ""
     let specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/, orderKey = ""
 
@@ -258,8 +267,8 @@ export default function Diningtable(props) {
       })
 
       localStorage.setItem("orders", JSON.stringify(newOrders))
-      setOrders(newOrders)
 
+      setShowcurrentorders({ ...showCurrentorders, orders: newOrders })
       setShowproductinfo({ ...showProductinfo, show: false, id: -1, loading: false })
     } else {
       setShowproductinfo({ ...showProductinfo, errorMsg: "Please select a " + (sizeRequired ? "size" : "quantity") })
@@ -267,7 +276,7 @@ export default function Diningtable(props) {
   }
   const sendOrders = () => {
     const tableId = localStorage.getItem("tableId")
-    const newOrders = [...orders]
+    const newOrders = [...showCurrentorders.orders]
     let sizes = [], quantities = [], percents = []
 
     newOrders.forEach(function (order) {
@@ -310,7 +319,7 @@ export default function Diningtable(props) {
         if (res) {
           data = { ...data, receiver: res.receiver }
           socket.emit("socket/orderMeal", data, () => {
-            setShoworders({ ...showOrders, show: false, orders: [] })
+            setShowcurrentorders({ ...showCurrentorders, show: false, orders: [] })
             setShowalert(true)
 
             setTimeout(function () {
@@ -329,15 +338,14 @@ export default function Diningtable(props) {
       })
   }
   const deleteOrder = index => {
-    const newOrders = [...orders]
+    const newOrders = [...showCurrentorders.orders]
 
     newOrders.splice(index, 1)
 
-    setOrders(newOrders)
-    localStorage.setItem("orders", JSON.stringify(orders))
+    localStorage.setItem("orders", JSON.stringify(newOrders))
 
-    setShoworders({ 
-      ...showOrders, 
+    setShowcurrentorders({ 
+      ...showCurrentorders, 
       show: newOrders.length > 0,
       orders: newOrders 
     })
@@ -355,13 +363,13 @@ export default function Diningtable(props) {
         <>
           <div id="hover-box">
             <div className="row" style={{ width: '100%' }}>
-              {orders.length > 0 && (
-                <div className="hover-header" onClick={() => viewTheOrders()}>
-                  <div style={{ fontWeight: 'bold' }}>{orders.length}</div><div style={{ fontWeight: 'bold' }}>See / Send</div>Your Orders
+              {showCurrentorders.orders.length > 0 && (
+                <div className="hover-header" onClick={() => setShowcurrentorders({ ...showCurrentorders, show: true })}>
+                  <div style={{ fontWeight: 'bold' }}>{showCurrentorders.orders.length}</div><div style={{ fontWeight: 'bold' }}>See / Send</div>Your Orders
                 </div>
               )}
                 
-              <div className="hover-header" onClick={() => viewTheTableOrders()}>
+              <div className="hover-header" style={{ pointerEvents: showCurrentorders.orders.length > 0 ? '' : 'none' }} onClick={() => viewTheTableOrders()}>
                 <div style={{ fontWeight: 'bold' }}>{numTableorders}</div>Ordered
               </div>
             </div>
@@ -385,7 +393,7 @@ export default function Diningtable(props) {
             </div>
           </div>
 
-          {(showProductinfo.show || showAlert || showOrders.show || showTableorders.show) && (
+          {(showProductinfo.show || showAlert || showCurrentorders.show || showTableorders.show) && (
             <div id="hidden-box">
               {showProductinfo.show && (
                 <div id="product-info-box">
@@ -502,15 +510,15 @@ export default function Diningtable(props) {
                   </div>
                 </div>
               )}
-              {showOrders.show && (
+              {showCurrentorders.show && (
                 <div id="show-orders-box">
-                  <div id="show-orders-close" onClick={() => setShoworders({ ...showOrders, show: false })}><FontAwesomeIcon icon={faTimesCircle} size="2x"/></div>
-                  <div id="show-orders-header">{showOrders.orders.length} Order(s)</div>
+                  <div id="show-orders-close" onClick={() => setShowcurrentorders({ ...showCurrentorders, show: false })}><FontAwesomeIcon icon={faTimesCircle} size="2x"/></div>
+                  <div id="show-orders-header">{showCurrentorders.orders.length} Order(s)</div>
 
                   <div id="show-orders-send" onClick={() => sendOrders()}>Send to<br/>Kitchen</div>
 
                   <div id="show-orders-list">
-                    {showOrders.orders.map((order, index) => (
+                    {showCurrentorders.orders.map((order, index) => (
                       <div key={order.key} className="order">
                         <div style={{ width: '50%' }}>
                           {order.image.name && (
@@ -525,12 +533,12 @@ export default function Diningtable(props) {
                             <div>$ {order.price} ({order.quantity})</div>
                             :
                             <>
-                              {order.sizes.map(info => info.selected ? <div>{info.name}: ${info.price} ({order.quantity})</div> : <div></div>)}
-                              {order.quantities.map(info => info.selected ? <div>{info.input}: ${info.price} ({order.quantity})</div> : <div></div>)}
+                              {order.sizes.map(info => info.selected ? <div key={info.key}>{info.name}: ${info.price} ({order.quantity})</div> : <div key={info.key}></div>)}
+                              {order.quantities.map(info => info.selected ? <div key={info.key}>{info.input}: ${info.price} ({order.quantity})</div> : <div key={info.key}></div>)}
                             </>
                           }
                               
-                          {order.percents.map(info => info.selected ? <div>{info.input}: ${info.price}</div> : <div></div>)}
+                          {order.percents.map(info => info.selected ? <div key={info.key}>{info.input}: ${info.price}</div> : <div key={info.key}></div>)}
 
                           <div className="order-cost">Cost: $ {order.cost}</div>
                         </div>
@@ -547,7 +555,7 @@ export default function Diningtable(props) {
 
                   <div id="show-orders-list">
                     {showTableorders.orders.map(order => (
-                      <div className="order">
+                      <div key={order.key} className="order">
                         <div style={{ width: '50%' }}>
                           {order.image.name && (
                             <div className="order-photo">
@@ -561,8 +569,8 @@ export default function Diningtable(props) {
                             <div>$ {order.price} ({order.quantity})</div>
                             :
                             <>
-                              {order.sizes.map(info => <div>{info.name}: ${info.price}</div>)}
-                              {order.quantities.map(info => <div>{info.input}: ${info.price}</div>)}
+                              {order.sizes.map(info => <div key={info.key}>{info.name}: ${info.price}</div>)}
+                              {order.quantities.map(info => <div key={info.key}>{info.input}: ${info.price}</div>)}
                             </>
                           }
                               

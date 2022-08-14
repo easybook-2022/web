@@ -19,3 +19,7 @@ export const orderMeal = data => {
 export const viewTableOrders = id => {
   return axios.get(`${beginUrl}view_table_orders/${id}`)
 }
+
+export const viewNumTableOrders = id => {
+  return axios.get(`${beginUrl}/view_num_table_orders/${id}`)
+}
