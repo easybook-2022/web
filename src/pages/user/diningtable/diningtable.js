@@ -80,7 +80,7 @@ export default function Diningtable(props) {
       })
       .then((res) => {
         if (res) {
-          let { cost, name, price, productImage, sizes, quantities, percents, quantity } = res.productInfo
+          let { cost, name, price, productImage, sizes, quantities, percents, extras, quantity } = res.productInfo
           let newCost = cost
 
           if (sizes.length == 1) {
@@ -96,7 +96,7 @@ export default function Diningtable(props) {
           setShowproductinfo({
             ...showProductinfo,
             show: true, id, cost: newCost, name, image: productImage, 
-            sizes, quantities, percents, price, quantity
+            sizes, quantities, percents, extras, price, quantity
           })
         }
       })
@@ -115,7 +115,7 @@ export default function Diningtable(props) {
           }
         })
         newOptions[index].selected = true
-        newCost = showProductinfo.quantity * parseFloat(newOptions[index].price)
+        newCost += showProductinfo.quantity * parseFloat(newOptions[index].price)
 
         setShowproductinfo({ ...showProductinfo, sizes: newOptions, cost: newCost, errorMsg: "" })
 
@@ -130,7 +130,7 @@ export default function Diningtable(props) {
           }
         })
         newOptions[index].selected = true
-        newCost = showProductinfo.quantity * parseFloat(newOptions[index].price)
+        newCost += showProductinfo.quantity * parseFloat(newOptions[index].price)
 
         setShowproductinfo({ ...showProductinfo, quantities: newOptions, cost: newCost, errorMsg: "" })
 
@@ -145,11 +145,26 @@ export default function Diningtable(props) {
           }
         })
         newOptions[index].selected = true
-        newCost = showProductinfo.quantity * parseFloat(newOptions[index].price)
+        newCost += showProductinfo.quantity * parseFloat(newOptions[index].price)
 
         setShowproductinfo({ ...showProductinfo, percents: newOptions, cost: newCost, errorMsg: "" })
 
         break;
+      case "extra":
+        newOptions = [...showProductinfo.extras]
+
+        newOptions.forEach(function (option) {
+          if (option.selected) {
+            option.selected = false
+            newCost -= parseFloat(option.price)
+          }
+        })
+        newOptions[index].selected = true
+        newCost += showProductinfo.quantity * parseFloat(newOptions[index].price)
+
+        setShowproductinfo({ ...showProductinfo, extras: newOptions, cost: newCost, errorMsg: "" })
+
+
       default:
     }
   }
@@ -166,19 +181,29 @@ export default function Diningtable(props) {
     if (showProductinfo.price) {
       newCost += newQuantity * parseFloat(showProductinfo.price)
     } else {
-      if (showProductinfo.sizes.length > 0) {
-        showProductinfo.sizes.forEach(function (size) {
-          if (size.selected) {
-            newCost += newQuantity * parseFloat(size.price)
-          }
-        })
-      } else {
-        showProductinfo.quantities.forEach(function (quantity) {
-          if (quantity.selected) {
-            newCost += newQuantity * parseFloat(quantity.price)
-          }
-        })
-      }
+      showProductinfo.sizes.forEach(function (size) {
+        if (size.selected) {
+          newCost += newQuantity * parseFloat(size.price)
+        }
+      })
+
+      showProductinfo.quantities.forEach(function (quantity) {
+        if (quantity.selected) {
+          newCost += newQuantity * parseFloat(quantity.price)
+        }
+      })
+
+      showProductinfo.percents.forEach(function (percent) {
+        if (percent.selected) {
+          newCost += newQuantity * parseFloat(percent.price)
+        }
+      })
+
+      showProductinfo.extras.forEach(function (extra) {
+        if (extra.selected) {
+          newCost += newQuantity * parseFloat(extra.price)
+        }
+      })
     }
 
     setShowproductinfo({ ...showProductinfo, quantity: newQuantity, cost: newCost })
@@ -216,10 +241,10 @@ export default function Diningtable(props) {
   const addToOrders = () => {
     setShowproductinfo({ ...showProductinfo, loading: true })
 
-    let { id, name, cost, price, sizes, quantities, percents, image, quantity, note } = showProductinfo
+    let { id, name, cost, price, sizes, quantities, percents, extras, image, quantity, note } = showProductinfo
     const newOrders = [...showCurrentorders.orders]
     let sizeRequired = sizes.length > 0, quantityRequired = quantities.length > 0, sizeSelected = "", quantitySelected = ""
-    let specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/, orderKey = ""
+    let orderKey = ""
 
     let newCost = 0
 
@@ -247,6 +272,12 @@ export default function Diningtable(props) {
       }
     })
 
+    extras.forEach(function (info) {
+      if (info.selected) {
+        newCost += parseFloat(info.price) * quantity
+      }
+    })
+
     if (price || ((sizeRequired && sizeSelected) || (quantityRequired && quantitySelected))) {
       newCost = newCost.toFixed(2)
 
@@ -261,7 +292,7 @@ export default function Diningtable(props) {
       newOrders.unshift({
         key: orderKey,
         productId: id,
-        name, price, sizes, quantities, percents,
+        name, price, sizes, quantities, percents, extras, 
         image, quantity, note,
         cost: newCost
       })
@@ -277,7 +308,7 @@ export default function Diningtable(props) {
   const sendOrders = () => {
     const tableId = localStorage.getItem("tableId")
     const newOrders = [...showCurrentorders.orders]
-    let sizes = [], quantities = [], percents = []
+    let sizes = [], quantities = [], percents = [], extras = []
 
     newOrders.forEach(function (order) {
       order.sizes.forEach(function (info) {
@@ -298,13 +329,21 @@ export default function Diningtable(props) {
         }
       })
 
+      order.extras.forEach(function (info) {
+        if (info.selected) {
+          extras.push(info.input)
+        }
+      })
+
       order.sizes = sizes
       order.quantities = quantities
       order.percents = percents
+      order.extras = extras
 
       sizes = []
       quantities = []
       percents = []
+      extras = []
     })
 
     let data = { orders: JSON.stringify(newOrders), tableid: tableId }
@@ -355,7 +394,7 @@ export default function Diningtable(props) {
     getTheTable()
   }, [])
 
-  const { sizes, quantities, percents } = showProductinfo
+  const { sizes, quantities, percents, extras } = showProductinfo
 
   return (
     <div id="diningtable">
@@ -365,11 +404,11 @@ export default function Diningtable(props) {
             <div className="row" style={{ width: '100%' }}>
               {showCurrentorders.orders.length > 0 && (
                 <div className="hover-header" onClick={() => setShowcurrentorders({ ...showCurrentorders, show: true })}>
-                  <div style={{ fontWeight: 'bold' }}>{showCurrentorders.orders.length}</div><div style={{ fontWeight: 'bold' }}>See / Send</div>Your Orders
+                  <div style={{ fontWeight: 'bold' }}>{showCurrentorders.orders.length}</div><div style={{ fontWeight: 'bold' }}>Change Orders/<br/>Send to Kitchen</div>
                 </div>
               )}
                 
-              <div className="hover-header" style={{ pointerEvents: showCurrentorders.orders.length > 0 ? '' : 'none' }} onClick={() => viewTheTableOrders()}>
+              <div className="hover-header" style={{ pointerEvents: numTableorders > 0 ? '' : 'none' }} onClick={() => viewTheTableOrders()}>
                 <div style={{ fontWeight: 'bold' }}>{numTableorders}</div>Ordered
               </div>
             </div>
@@ -409,57 +448,85 @@ export default function Diningtable(props) {
                     <div id="product-info-header">{showProductinfo.name}</div>
 
                     <div className="options-box">
-                      {(sizes.length > 0 || quantities.length) > 0 && (
-                        <div className="options-header">
-                          {sizes.length > 0 ? 
-                            sizes.length == 1 ? "(1 size only)" : "Select a size"
-                            :
-                            quantities.length == 1 ? "(1 quantity only)" : "Select a quantity"
-                          }
-                        </div>
-                      )}
-
                       <div className="options">
                         {sizes.length > 0 && (
                           sizes.length == 1 ? 
-                            <div className="option">
-                              <div className="option-price">{sizes[0].name + ": $" + sizes[0].price}</div>
-                            </div>
-                            :
-                            sizes.map((size, index) => (
-                              <div key={size.key} className="option">
-                                <div className={size.selected ? "option-touch-disabled" : "option-touch"} onClick={() => selectOption(index, "size")}>{size.name}</div>
-                                <div className="column"><div className="option-price">$ {size.price}</div></div>
+                            <>
+                              <div className="options-header">(1 size only)</div>
+                              <div className="option">
+                                <div className="option-price">{sizes[0].name + ": $" + sizes[0].price}</div>
                               </div>
-                            ))
+                            </>
+                            :
+                            <>
+                              <div className="options-header">Select a size</div>
+                              {sizes.map((size, index) => (
+                                <div key={size.key} className="option">
+                                  <div className={size.selected ? "option-touch-disabled" : "option-touch"} onClick={() => selectOption(index, "size")}>{size.name}</div>
+                                  <div className="column"><div className="option-price">$ {size.price}</div></div>
+                                </div>
+                              ))}
+                            </>
                         )}
 
                         {quantities.length > 0 && (
                           quantities.length == 1 ? 
-                            <div className="option">
-                              <div className="option-price">{quantities[0].input + ": $" + quantities[0].price}</div>
-                            </div>
-                            :
-                            quantities.map((quantity, index) => (
-                              <div key={quantity.key} className="option">
-                                <div className={quantity.selected ? "option-touch-disabled" : "option-touch"} onClick={() => selectOption(index, "quantity")}>{quantity.input}</div>
-                                <div className="column"><div className="option-price">$ {quantity.price}</div></div>
+                            <>
+                              <div className="options-header">(1 quantity only)</div>
+                              <div className="option">
+                                <div className="option-price">{quantities[0].input + ": $" + quantities[0].price}</div>
                               </div>
-                            ))
+                            </>
+                            :
+                            <>
+                              <div className="options-header">Select a quantity</div>
+                              {quantities.map((quantity, index) => (
+                                <div key={quantity.key} className="option">
+                                  <div className={quantity.selected ? "option-touch-disabled" : "option-touch"} onClick={() => selectOption(index, "quantity")}>{quantity.input}</div>
+                                  <div className="column"><div className="option-price">$ {quantity.price}</div></div>
+                                </div>
+                              ))}
+                            </>
                         )}
 
                         {percents.length > 0 && (
                           percents.length == 1 ? 
-                            <div className="option">
-                              <div className="option-price">{percents[0].input + ": $" + percents[0].price}</div>
-                            </div>
-                            :
-                            percents.map((percent, index) => (
-                              <div key={percent.key} className="option">
-                                <div className={percent.selected ? "option-touch-disabled" : "option-touch"} onClck={() => selectOption(index, "percent")}>{percent.input}</div>
-                                <div className="column"><div className="option-price">$ {percent.price}</div></div>
+                            <>
+                              <div className="options-header">(1 percent option only)</div>
+                              <div className="option">
+                                <div className="option-price">{percents[0].input + ": $" + percents[0].price}</div>
                               </div>
-                            ))
+                            </>
+                            :
+                            <>
+                              <div className="options-header">Select a percent option</div>
+                              {percents.map((percent, index) => (
+                                <div key={percent.key} className="option">
+                                  <div className={percent.selected ? "option-touch-disabled" : "option-touch"} onClck={() => selectOption(index, "percent")}>{percent.input}</div>
+                                  <div className="column"><div className="option-price">$ {percent.price}</div></div>
+                                </div>
+                              ))}
+                            </>
+                        )}
+
+                        {extras.length > 0 && (
+                          extras.length == 1 ? 
+                            <>
+                              <div className="options-header">(1 extra option only)</div>
+                              <div className="option">
+                                <div className="option-price">{extras[0].input + ": $" + extras[0].price}</div>
+                              </div>
+                            </>
+                            :
+                            <>
+                              <div className="options-header">Select an extra</div>
+                              {extras.map((extra, index) => (
+                                <div key={extra.key} className="option">
+                                  <div className={extra.selected ? "option-touch-disabled" : "option-touch"} onClick={() => selectOption(index, "extra")}>{extra.input}</div>
+                                  <div className="column"><div className="option-price">$ {extra.price}</div></div>
+                                </div>
+                              ))}
+                            </>
                         )}
                       </div>
                     </div>
@@ -539,6 +606,7 @@ export default function Diningtable(props) {
                           }
                               
                           {order.percents.map(info => info.selected ? <div key={info.key}>{info.input}: ${info.price}</div> : <div key={info.key}></div>)}
+                          {order.extras.map(info => info.selected ? <div key={info.key}>Extra: {info.input}: ${info.price}</div> : <div key={info.key}></div>)}
 
                           <div className="order-cost">Cost: $ {order.cost}</div>
                         </div>
@@ -574,7 +642,8 @@ export default function Diningtable(props) {
                             </>
                           }
                               
-                          {order.percents.map(info => info.selected ? <div>{info.input}: ${info.price}</div> : <div></div>)}
+                          {order.percents.map(info => <div key={info.key}>{info.input}: ${info.price}</div>)}
+                          {order.extras.map(info => <div key={info.key}>{info.input}: ${info.price}</div>)}
 
                           <div className="order-cost">Cost: $ {order.cost}</div>
                         </div>

@@ -74,6 +74,7 @@ export default function Menus(props) {
           }
 
           {info.percents.map(percent => <div className="item-price">{percent.input}: ${percent.price}</div>)}
+          {info.extras.map(extra => <div className="item-price">{extra.input}: ${extra.price}</div>)}
         </div>
         
         <div className="item-actions" style={{ width: '20%' }}>

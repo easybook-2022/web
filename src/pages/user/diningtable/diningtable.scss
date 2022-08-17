@@ -1,7 +1,11 @@
+body {
+	overflow: hidden;
+}
+
 #diningtable {
 	background-color: rgba(127, 127, 127, 0.2);
 	height: 100vh;
-	overflow-y: scroll;
+	overflow: hidden;
 	width: 100vw;
 
 	#hover-box {
@@ -29,6 +33,7 @@
 
 	#box {
 		height: 100%;
+		overflow-y: scroll;
 
 		#header {
 			font-weight: bold;
@@ -360,7 +365,6 @@
 	.column {
 		display: flex;
 		flex-direction: column;
-		height: 100%;
 		justify-content: space-around;
 	}
 
