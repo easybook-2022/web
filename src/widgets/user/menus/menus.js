@@ -17,7 +17,7 @@ export default function Menus(props) {
   const { locationid, refetchMenu, type } = props
   const tableOrder = props.tableOrder ? true : false
   const [requestInfo, setRequestinfo] = useState({ search: '', error: false })
-  const [menuInfo, setMenuinfo] = useState({ list: [], photos: [] })
+  const [menus, setMenus] = useState([])
   const [loaded, setLoaded] = useState(false)
 
   const getAllMenus = async() => {
@@ -31,7 +31,7 @@ export default function Menus(props) {
       })
       .then((res) => {
         if (res) {
-          setMenuinfo({ ...menuInfo, list: res.list, photos: res.photos })
+          setMenus(res.list)
           setLoaded(true)
         }
       })
@@ -108,7 +108,7 @@ export default function Menus(props) {
         {name ?
           <div className="menu" style={{ backgroundColor: parentId ? 'white' : 'transparent' }}>
             <div className="menu-row" onClick={() => {
-              const newList = [...menuInfo.list]
+              const newList = [...menus]
 
               const toggleMenu = (list) => {
                 list.forEach(function (item) {
@@ -126,7 +126,7 @@ export default function Menus(props) {
 
               toggleMenu(newList)
 
-              setMenuinfo({ ...menuInfo, list: newList })
+              setMenus(newList)
             }}>
               {image.name && (
                 <div className="menu-image-holder">
@@ -169,53 +169,7 @@ export default function Menus(props) {
   return (
     loaded ? 
       <div id="menus">
-        {((menuInfo.photos.length > 0 || menuInfo.list.length > 0) && !tableOrder) && (
-          <>
-            <div id="menu-input-box">
-              <div id="menu-input-container">
-                <input 
-                  id="menu-input" type="text" 
-                  placeholder={
-                    "Enter " + 
-                    (type === "restaurant" && "meal" || type === "store" && "product" || type === "salon" && "service") 
-                    + " # or name"
-                  } 
-                  onChange={e => setRequestinfo({ ...requestInfo, search: e.target.value, error: false })}
-                />
-              </div>
-              <div id="menu-input-touch" onClick={() => {
-                if (requestInfo.search) {
-                  if (type === "salon") {
-                    window.location = "/booktime/" + locationid + "/null/null/" + requestInfo.search
-                  } else {
-                    if (tableOrder) {
-
-                    } else {
-                      window.location = "/itemprofile/" + locationid + "/null/null/" + requestInfo.search + "/restaurant"
-                    }
-                  }
-                } else setRequestinfo({ ...requestInfo, error: true })
-              }}>{type === "salon" ? "Book now" : "Order item"}</div>
-            </div>
-            {requestInfo.error && <div id="menu-input-error">Your request is empty</div>}
-          </>
-        )}
-
-        {menuInfo.photos.length > 0 && (
-          menuInfo.photos[0].row && (
-            menuInfo.photos.map(info => (
-              info.row.map(item => (
-                item.photo && (
-                  <div key={item.key} className="menu-photo" style={resizePhoto(item.photo, wsize(95))}>
-                    <img alt="" style={{ height: '100%', width: '100%' }} src={item.photo.name ? logo_url + item.photo.name : "/noimage.jpeg"}/>
-                  </div>
-                )
-              ))
-            ))
-          )
-        )}
-
-        {displayList({ id: "", name: "", image: "", list: menuInfo.list })}
+        {displayList({ id: "", name: "", image: "", list: menus })}
       </div>
     :
     <div style={{ height: '100vw', width: '100vw' }}>
