@@ -8,15 +8,15 @@ body {
 	overflow: hidden;
 	width: 100vw;
 
-	#hover-box {
+	#action-box {
 		background-color: rgba(0, 0, 0, 0.1);
-		border-radius: 0 10px 10px 0;
 		display: flex;
 		flex-direction: column;
+		height: 15%;
 		justify-content: space-around;
 		padding: 5px 0;
 
-		.hover-header {
+		.action-header {
 			background-color: white;
 			border-radius: 5px;
 			border-style: solid;
@@ -32,7 +32,7 @@ body {
 	}
 
 	#box {
-		height: 100%;
+		height: 85%;
 		overflow-y: scroll;
 
 		#header {
@@ -61,6 +61,7 @@ body {
 		flex-direction: column;
 		height: 100vh;
 		justify-content: space-around;
+		overflow: hidden;
 		position: absolute;
 		top: 0;
 		width: 100vw;
@@ -295,43 +296,50 @@ body {
 			}
 		}
 
-		#show-orders-box {
+		#show-current-orders-box {
 			background-color: white;
 			height: 90%;
 			margin: 0 auto;
 			width: 90%;
 
-			#show-orders-close {
-				height: 32px;
-				margin: 20px auto;
-				width: 32px;
-			}
+			#show-current-orders-headers {
+				display: flex;
+				flex-direction: column;
+				height: 30%;
+				justify-content: space-around;
 
-			#show-orders-header {
-				font-weight: bold;
-				margin: 10px 0;
-				text-align: center;
-			}
+				#show-current-orders-close {
+					height: 32px;
+					margin: 20px auto;
+					width: 32px;
+				}
 
-			#show-orders-send {
-				border-radius: 5px;
-				border-style: solid;
-				border-width: 1px;
-				margin: 20px auto;
-				padding: 5px;
-				text-align: center;
-				width: 100px;
+				#show-current-orders-header {
+					font-weight: bold;
+					margin-top: 10px;
+					text-align: center;
+				}
 
-				&:hover {
-					opacity: 0.1
+				#show-current-orders-send {
+					border-radius: 5px;
+					border-style: solid;
+					border-width: 1px;
+					margin: 20px auto;
+					padding: 5px;
+					text-align: center;
+					width: 100px;
+
+					&:hover {
+						opacity: 0.1
+					}
 				}
 			}
 
-			#show-orders-list {
-				height: 60%;
+			#show-current-orders-list {
+				height: 70%;
 				overflow-y: scroll;
 
-				.order {
+				.current-order {
 					border-style: solid;
 					border-width: 1px 0;
 					display: flex;
@@ -339,17 +347,90 @@ body {
 					justify-content: space-between;
 					padding: 10px;
 
-					.order-photo {
+					.current-order-photo {
 						height: calc(100vw * 0.2);
 						width: calc(100vw * 0.2);
 					}
 
-					.order-cost {
+					.current-order-cost {
 						font-weight: bold;
 						margin-top: 30px;
 					}
 
-					.order-delete {
+					.current-order-delete {
+						height: 32px;
+						width: 32px;
+
+						&:hover {
+							opacity: 0.1;
+						}
+					}
+				}
+			}
+		}
+
+		#show-table-orders-box {
+			background-color: white;
+			height: 90%;
+			margin: 0 auto;
+			width: 90%;
+
+			#show-table-orders-headers {
+				display: flex;
+				flex-direction: column;
+				height: 20%;
+				justify-content: space-around;
+
+				#show-table-orders-close {
+					height: 32px;
+					margin: 0 auto;
+					width: 32px;
+				}
+
+				#show-table-orders-header {
+					font-weight: bold;
+					margin-top: 10px;
+					text-align: center;
+				}
+
+				#show-table-orders-send {
+					border-radius: 5px;
+					border-style: solid;
+					border-width: 1px;
+					margin: 20px auto;
+					padding: 5px;
+					text-align: center;
+					width: 100px;
+
+					&:hover {
+						opacity: 0.1
+					}
+				}
+			}
+
+			#show-table-orders-list {
+				height: 80%;
+				overflow-y: scroll;
+
+				.table-order {
+					border-style: solid;
+					border-width: 1px 0;
+					display: flex;
+					flex-direction: row;
+					justify-content: space-between;
+					padding: 10px;
+
+					.table-order-photo {
+						height: calc(100vw * 0.2);
+						width: calc(100vw * 0.2);
+					}
+
+					.table-order-cost {
+						font-weight: bold;
+						margin-top: 30px;
+					}
+
+					.table-order-delete {
 						height: 32px;
 						width: 32px;
 

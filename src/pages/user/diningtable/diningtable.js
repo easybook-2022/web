@@ -24,7 +24,8 @@ export default function Diningtable(props) {
   const [numTableorders, setNumtableorders] = useState(0)
   const [showProductinfo, setShowproductinfo] = useState({ 
     show: false, 
-    id: -1, name: '', note: '', image: '', sizes: [], quantities: [], percents: [], price: 0, 
+    id: -1, name: '', note: '', image: '', 
+    sizes: [], quantities: [], percents: [], extras: [], price: 0, 
     quantity: 0, cost: 0, 
     errorMsg: "",
     loading: false
@@ -304,6 +305,8 @@ export default function Diningtable(props) {
     } else {
       setShowproductinfo({ ...showProductinfo, errorMsg: "Please select a " + (sizeRequired ? "size" : "quantity") })
     }
+
+    window.scroll(0,0)
   }
   const sendOrders = () => {
     const tableId = localStorage.getItem("tableId")
@@ -400,15 +403,15 @@ export default function Diningtable(props) {
     <div id="diningtable">
       {loaded && ( 
         <>
-          <div id="hover-box">
+          <div id="action-box">
             <div className="row" style={{ width: '100%' }}>
               {showCurrentorders.orders.length > 0 && (
-                <div className="hover-header" onClick={() => setShowcurrentorders({ ...showCurrentorders, show: true })}>
+                <div className="action-header" onClick={() => setShowcurrentorders({ ...showCurrentorders, show: true })}>
                   <div style={{ fontWeight: 'bold' }}>{showCurrentorders.orders.length}</div><div style={{ fontWeight: 'bold' }}>Change Orders/<br/>Send to Kitchen</div>
                 </div>
               )}
                 
-              <div className="hover-header" style={{ pointerEvents: numTableorders > 0 ? '' : 'none' }} onClick={() => viewTheTableOrders()}>
+              <div className="action-header" style={{ pointerEvents: numTableorders > 0 ? '' : 'none' }} onClick={() => viewTheTableOrders()}>
                 <div style={{ fontWeight: 'bold' }}>{numTableorders}</div>Ordered
               </div>
             </div>
@@ -437,7 +440,10 @@ export default function Diningtable(props) {
               {showProductinfo.show && (
                 <div id="product-info-box">
                   <div id="product-info-container">
-                    <div id="product-info-close" onClick={() => setShowproductinfo({ ...showProductinfo, show: false, loading: false })}><FontAwesomeIcon icon={faTimesCircle} size="2x"/></div>
+                  <div id="product-info-close" onClick={() => {
+                    setShowproductinfo({ ...showProductinfo, show: false, loading: false })
+                    window.scroll(0, 0)
+                  }}><FontAwesomeIcon icon={faTimesCircle} size="2x"/></div>
 
                     {showProductinfo.image.name && (
                       <div id="image-holder">
@@ -578,22 +584,26 @@ export default function Diningtable(props) {
                 </div>
               )}
               {showCurrentorders.show && (
-                <div id="show-orders-box">
-                  <div id="show-orders-close" onClick={() => setShowcurrentorders({ ...showCurrentorders, show: false })}><FontAwesomeIcon icon={faTimesCircle} size="2x"/></div>
-                  <div id="show-orders-header">{showCurrentorders.orders.length} Order(s)</div>
+                <div id="show-current-orders-box">
+                  <div id="show-current-orders-headers">
+                    <div>
+                      <div id="show-current-orders-close" onClick={() => setShowcurrentorders({ ...showCurrentorders, show: false })}><FontAwesomeIcon icon={faTimesCircle} size="2x"/></div>
+                      <div id="show-current-orders-header">{showCurrentorders.orders.length} Order(s)</div>
 
-                  <div id="show-orders-send" onClick={() => sendOrders()}>Send to<br/>Kitchen</div>
+                      <div id="show-current-orders-send" onClick={() => sendOrders()}>Send to<br/>Kitchen</div>
+                    </div>
+                  </div>
 
-                  <div id="show-orders-list">
+                  <div id="show-current-orders-list">
                     {showCurrentorders.orders.map((order, index) => (
-                      <div key={order.key} className="order">
+                      <div key={order.key} className="current-order">
                         <div style={{ width: '50%' }}>
                           {order.image.name && (
-                            <div className="order-photo">
+                            <div className="current-order-photo">
                               <img style={{ height: '100%', width: '100%' }} src={logo_url + order.image.name}/>
                             </div>
                           )}
-                          <div className="order-header">{order.name}</div>
+                          <div className="current-order-header">{order.name}</div>
                         </div>
                         <div style={{ width: '50%' }}>
                           {order.price ? 
@@ -608,29 +618,33 @@ export default function Diningtable(props) {
                           {order.percents.map(info => info.selected ? <div key={info.key}>{info.input}: ${info.price}</div> : <div key={info.key}></div>)}
                           {order.extras.map(info => info.selected ? <div key={info.key}>Extra: {info.input}: ${info.price}</div> : <div key={info.key}></div>)}
 
-                          <div className="order-cost">Cost: $ {order.cost}</div>
+                          <div className="current-order-cost">Cost: $ {order.cost}</div>
                         </div>
-                        <div className="order-delete" onClick={() => deleteOrder(index)}><FontAwesomeIcon icon={faTimesCircle} size="2x"/></div>
+                        <div className="current-order-delete" onClick={() => deleteOrder(index)}><FontAwesomeIcon icon={faTimesCircle} size="2x"/></div>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
               {showTableorders.show && (
-                <div id="show-orders-box">
-                  <div id="show-orders-close" onClick={() => setShowtableorders({ ...showTableorders, show: false })}><FontAwesomeIcon icon={faTimesCircle} size="2x"/></div>
-                  <div id="show-orders-header">{showTableorders.orders.length} Ordered</div>
+                <div id="show-table-orders-box">
+                  <div id="show-table-orders-headers">
+                    <div>
+                      <div id="show-table-orders-close" onClick={() => setShowtableorders({ ...showTableorders, show: false })}><FontAwesomeIcon icon={faTimesCircle} size="2x"/></div>
+                      <div id="show-table-orders-header">{showTableorders.orders.length} Ordered</div>
+                    </div>
+                  </div>
 
-                  <div id="show-orders-list">
+                  <div id="show-table-orders-list">
                     {showTableorders.orders.map(order => (
-                      <div key={order.key} className="order">
+                      <div key={order.key} className="table-order">
                         <div style={{ width: '50%' }}>
                           {order.image.name && (
-                            <div className="order-photo">
+                            <div className="table-order-photo">
                               <img style={{ height: '100%', width: '100%' }} src={logo_url + order.image.name}/>
                             </div>
                           )}
-                          <div className="order-header">{order.name}</div>
+                          <div className="table-order-header">{order.name}</div>
                         </div>
                         <div style={{ width: '50%' }}>
                           {order.price ? 
@@ -645,7 +659,7 @@ export default function Diningtable(props) {
                           {order.percents.map(info => <div key={info.key}>{info.input}: ${info.price}</div>)}
                           {order.extras.map(info => <div key={info.key}>{info.input}: ${info.price}</div>)}
 
-                          <div className="order-cost">Cost: $ {order.cost}</div>
+                          <div className="table-order-cost">Cost: $ {order.cost}</div>
                         </div>
                       </div>
                     ))}
