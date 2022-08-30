@@ -1468,7 +1468,7 @@ export default function Main(props) {
             <div className="header" style={{ height: '10%' }}>
               {(locationType === 'hair' || locationType === 'nail') ? 'Appointment(s)' : 'Orderer(s)'}
             </div>
-            
+
             <div style={{ flexDirection: 'row', height: '5%', justifyContent: 'space-around', width: '100%' }}>
               {(locationType === "hair" || locationType === "nail") && (
                 <div id="view-types">
@@ -1661,7 +1661,7 @@ export default function Main(props) {
         :
         <div id="loading"><Loadingprogress/></div>
       }
-
+      
       {(cancelInfo.show || showMenurequired || showInfo.show || showMoreoptions.show || removeBookingconfirm.show || showDisabledscreen) && (
         <div id="hidden-box">
           {cancelInfo.show && (

@@ -10,8 +10,6 @@
 
 # production
 /build
-/public/tutorials
-/public/intro.mp4
 
 # misc
 .DS_Store

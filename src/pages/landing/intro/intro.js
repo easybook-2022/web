@@ -1,276 +1,104 @@
 import './intro.scss';
 import React from 'react';
 
+import Masthead from '../../../widgets/landing/masthead'
+import Footer from '../../../widgets/landing/footer'
+
 export default function Intro() {
   return (
     <div id="intro">
-      <div>
-        <div id="header">
-          <div id="header-row">
-            <div id="header-icon">
-              <img src="/icon.png"/>
-            </div>
-            <div className="column">
-              <div id="header-navs-container">
-                <div id="header-navs">
-                  <div className="header-nav" onClick={() => window.location = '/intro'}>Intro & Setup</div>
-                  <div className="header-nav" onClick={() => window.location = '/privacy'}>Privacy Policy</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="masthead">
-          <div id="masthead-row">
-            <div className="masthead-container">
-              <div id="masthead-intro">
-                <div className="masthead-header">Welcome to EasyGO</div>
-                <div className="masthead-header">
-                  The fastest and easiest
-                  <br/>
-                  <strong>food ordering </strong>
-                  and
-                  <strong> salon appointment booking </strong>
-                  <br/>
-                  service you'll ever use
-                </div>
-              </div>
-            </div>
-            <div className="masthead-container">
-              <div className="masthead-header">What we provide</div>
-              <div id="video-container">
-                <video id="video" controls>
-                  <source src="/intro.mp4" type="video/mp4"/>
-                </video>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Masthead/>
 
       <div id="body">
-        <div className="tutorial">
-          <div className="tutorial-header">Setup an account</div>
-
-          <div className="row">
-            <div className="tutorial-infos">
-              <div className="tutorial-info">
-                <div className="info-icon-holder">
-                  <img className="info-icon" src="/b-icon.png"/>
-                </div>
-
-                <div className="info-header">For Restaurant(s)</div>
-
-                <video className="info-video" width="300" controls>
-                  <source src="/tutorials/restaurant_setup.mp4" type="video/mp4"/>
-                </video>
-              </div>
-              <div className="tutorial-info">
-                <div className="info-icon-holder">
-                  <img className="info-icon" src="/b-icon.png"/>
-                </div>
-
-                <div className="info-header">For Salon(s)</div>
-
-                <video className="info-video" width="300" controls>
-                  <source src="/tutorials/salon_setup.mp4" type="video/mp4"/>
-                </video>
-              </div>
-            </div>
-          </div>
-
-          <div className="tutorial-info">
-            <div className="info-icon-holder">
-              <img className="info-icon" src="/c-icon.png"/>
-            </div>
-
-            <div className="info-header">For User(s)</div>
-
-            <video className="info-video" width="300" controls>
-              <source src="/tutorials/user_setup.mp4" type="video/mp4"/>
-            </video>
-          </div>
+        <div className="body-header">For restaurants</div>
+        <div className="body-mini-header">
+          We will provide each of your tables with<br/>a laminated bar code
         </div>
 
         <div className="tutorial">
-          <div className="tutorial-header">Setup menu for salon</div>
-
           <div className="row">
             <div className="tutorial-infos">
               <div className="tutorial-info">
-                <div className="info-icon-holder">
-                  <img className="info-icon" src="/b-icon.png"/>
-                </div>
-
-                <div className="info-header">Menu photo</div>
+                <div className="info-header">Customer order meals<br/>and send to kitchen</div>
 
                 <video className="info-video" width="300" controls>
-                  <source src="/tutorials/salon_menu_photo_setup.mp4" type="video/mp4"/>
+                  <source src="/tutorials/scan_and_order.mp4" type="video/mp4"/>
                 </video>
               </div>
               <div className="tutorial-info">
-                <div className="info-icon-holder">
-                  <img className="info-icon" src="/b-icon.png"/>
-                </div>
+                <div className="info-header">Kitchen see meals and payment<br/>(iPad/Tablet)</div>
 
-                <div className="info-header">Menu list</div>
-
-                <video className="info-video" width="300" controls>
-                  <source src="/tutorials/salon_menu_list_setup.mp4" type="video/mp4"/>
-                </video>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="tutorial">
-          <div className="tutorial-header">Setup menu for restaurant</div>
-
-          <div className="row">
-            <div className="tutorial-infos">
-              <div className="tutorial-info">
-                <div className="info-icon-holder">
-                  <img className="info-icon" src="/b-icon.png"/>
-                </div>
-
-                <div className="info-header">Menu photo</div>
-
-                <video className="info-video" width="300" controls>
-                  <source src="/tutorials/restaurant_menu_photo_setup.mp4" type="video/mp4"/>
-                </video>
-              </div>
-              <div className="tutorial-info">
-                <div className="info-icon-holder">
-                  <img className="info-icon" src="/b-icon.png"/>
-                </div>
-
-                <div className="info-header">Menu list</div>
-
-                <video className="info-video" width="300" controls>
-                  <source src="/tutorials/restaurant_menu_list_setup.mp4" type="video/mp4"/>
-                </video>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="tutorial">
-          <div className="tutorial-header">Booking and rebook appointment at salon (from menu photo)</div>
-
-          <div className="row">
-            <div className="tutorial-infos">
-              <div className="tutorial-info">
-                <div className="info-icon-holder">
-                  <img className="info-icon" src="/b-icon.png"/>
-                </div>
-
-                <div className="info-header">Booking</div>
-
-                <video className="info-video" width="500" controls>
-                  <source src="/tutorials/salon_booking_photo.mp4" type="video/mp4"/>
-                </video>
-              </div>
-              <div className="tutorial-info">
-                <div className="info-icon-holder">
-                  <img className="info-icon" src="/b-icon.png"/>
-                </div>
-
-                <div className="info-header">Rebooking</div>
-
-                <video className="info-video" width="500" controls>
-                  <source src="/tutorials/salon_rebooking_photo.mp4" type="video/mp4"/>
-                </video>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="tutorial">
-          <div className="tutorial-header">Booking and rebook appointment at salon (from menu list)</div>
-
-          <div className="row">
-            <div className="tutorial-infos">
-              <div className="tutorial-info">
-                <div className="row">
-                  <div className="info-icon-holder">
-                    <img className="info-icon" src="/b-icon.png"/>
-                  </div>
-                  <div className="info-icon-holder">
-                    <img className="info-icon" src="/c-icon.png"/>
-                  </div>
-                </div>
-
-                <div className="info-header">Booking</div>
-
-                <video className="info-video" width="500" controls>
-                  <source src="/tutorials/salon_booking_list.mp4" type="video/mp4"/>
-                </video>
-              </div>
-              <div className="tutorial-info">
-                <div className="row">
-                  <div className="info-icon-holder">
-                    <img className="info-icon" src="/b-icon.png"/>
-                  </div>
-                  <div className="info-icon-holder">
-                    <img className="info-icon" src="/c-icon.png"/>
-                  </div>
-                </div>
-
-                <div className="info-header">Rebooking</div>
-
-                <video className="info-video" width="500" controls>
-                  <source src="/tutorials/salon_rebooking_list.mp4" type="video/mp4"/>
-                </video>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="tutorial">
-          <div className="tutorial-header">Ordering at restaurant</div>
-
-          <div className="row">
-            <div className="tutorial-infos">
-              <div className="tutorial-info">
-                <div className="row">
-                  <div className="info-icon-holder">
-                    <img className="info-icon" src="/b-icon.png"/>
-                  </div>
-                  <div className="info-icon-holder">
-                    <img className="info-icon" src="/c-icon.png"/>
-                  </div>
-                </div>
-
-                <div className="info-header">from menu photo</div>
-
-                <video className="info-video" width="470" controls>
-                  <source src="/tutorials/restaurant_order_photo.mp4" type="video/mp4"/>
-                </video>
-              </div>
-              <div className="tutorial-infos">
-                <div className="tutorial-info">
-                  <div className="row">
-                    <div className="info-icon-holder">
-                      <img className="info-icon" src="/b-icon.png"/>
-                    </div>
-                    <div className="info-icon-holder">
-                      <img className="info-icon" src="/c-icon.png"/>
-                    </div>
-                  </div>
-
-                  <div className="info-header">from menu list</div>
-
-                  <video className="info-video" width="500" controls>
-                    <source src="/tutorials/restaurant_order_list.mp4" type="video/mp4"/>
+                <div className="column">
+                  <video className="info-video" width="400" controls>
+                    <source src="/tutorials/done_order_see_payment.mp4" type="video/mp4"/>
                   </video>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <div className="body-header">For salons</div>
+        
+        <div className="tutorial">
+          <div className="tutorial-header">Booking and rebook<br/>(in a few seconds)</div>
+
+          <div className="row">
+            <div className="tutorial-infos">
+              <div className="tutorial-info">
+                <div className="info-header">Client booking</div>
+
+                <video className="info-video" width="300" controls>
+                  <source src="/tutorials/client booking.mp4" type="video/mp4"/>
+                </video>
+              </div>
+              <div className="tutorial-info">
+                <div className="info-header">Client rebooking</div>
+
+                <video className="info-video" width="300" controls>
+                  <source src="/tutorials/client rebooking.mp4" type="video/mp4"/>
+                </video>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="tutorial">
+          <div className="tutorial-header">
+            Salon rebooking for clients<br/>(in a few seconds)
+            <div style={{ fontSize: 20 }}>(iPad/Tablet/iPhone/Android Phone)</div>
+          </div>
+
+          <div className="row">
+            <div className="tutorial-infos">
+              <div className="tutorial-infos">
+                <div className="tutorial-info">
+                  <div className="info-header">by list</div>
+
+                  <video className="info-video" width="300" controls>
+                    <source src="/tutorials/salon rebooking(by list).mp4" type="video/mp4"/>
+                  </video>
+                </div>
+                <div className="tutorial-info">
+                  <div className="info-header">by table</div>
+
+                  <video className="info-video" width="300" controls>
+                    <source src="/tutorials/salon rebooking(by table).mp4" type="video/mp4"/>
+                  </video>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="start-header">
+          To get started, e-mail us <a href="mailto:kmrobogram@gmail.com">here</a>
+          <br/>and<br/> 
+          we'll get you setup in HOURS
+        </div>
       </div>
 
-      <div id="footer">EasyGO by 2022 Geottuse, Inc.</div>
+      <Footer/>
     </div>
   )
 }

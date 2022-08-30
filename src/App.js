@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { isMobile } from 'react-device-detect';
 
-import Front from './pages/front';
-
 // info pages
 import Intro from './pages/landing/intro';
 import Privacy from './pages/landing/privacy';
@@ -64,7 +62,7 @@ export default function App() {
       }
     }
   }, [])
-
+  
   return (
     isMobile ? 
       <BrowserRouter>
@@ -84,8 +82,7 @@ export default function App() {
       :
       <BrowserRouter>
         <Routes>
-          <Route exact path="/" element={<Front/>}/>
-          <Route path="/intro" element={<Intro/>}/>
+          <Route exact path="/" element={<Intro/>}/>
           <Route path="/privacy" element={<Privacy/>}/>
 
           <Route path="/auth" element={<Auth/>}/>

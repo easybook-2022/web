@@ -1,99 +1,4 @@
 #privacy {
-	display: flex;
-	flex-direction: column;
-	height: 100vh;
-	justify-content: space-between;
-	width: 100vw;
-
-	#header {
-		background-color: white;
-		display: flex;
-		flex-direction: column;
-		height: 100px;
-		justify-content: space-around;
-		padding: 0 20px;
-		width: calc(100vw - 40px);
-
-		#header-row {
-			display: flex;
-			flex-direction: row;
-			justify-content: space-between;
-		}
-
-		#header-icon {
-			height: 80px;
-			width: 80px;
-		}
-
-		#header-icon img {
-			height: 100%;
-			width: 100%;
-		}
-
-		#header-navs-container {
-			display: flex;
-			flex-direction: row;
-			justify-content: space-around;
-			width: 50vw;
-		}
-
-		#header-navs {
-			display: flex;
-			flex-direction: row;
-			justify-content: space-between;
-		}
-
-		.header-nav {
-			color: rgba(127, 127, 127, 0.9);
-			font-size: 20px;
-			font-weight: 500;
-			margin: 0 10px;
-		}
-	}
-
-	#masthead {
-		background-image: linear-gradient(to bottom right, black, grey);
-		display: flex;
-		flex-direction: column;
-		height: 500px;
-		justify-content: space-around;
-		width: 100%;
-
-		#masthead-row {
-			display: flex;
-			flex-direction: row;
-			justify-content: space-between;
-			padding: 0 20px;
-			width: calc(100vw - 40px);
-		}
-
-		.masthead-container {
-			width: calc(50vw - 40px);
-		}
-
-		#masthead-intro {
-			display: flex;
-			flex-direction: column;
-			height: 100%;
-			justify-content: space-around;
-		}
-
-		.masthead-header {
-			color: white;
-			font-size: 30px;
-			text-align: center;
-		}
-
-		#video-container {
-			margin: 0 auto;
-			width: 70%;
-		}
-
-		video {
-			width: 100%;
-		}
-	}
-
 	#body {
 		height: calc(100vh - 290px);
 
@@ -131,15 +36,6 @@
 		#policy-question-header {
 			font-weight: bold;
 		}
-	}
-
-	#footer {
-		background-color: #333333;
-		color: white;
-		font-size: 20px;
-		font-weight: bold;
-		padding: 20px 0;
-		text-align: center;
 	}
 
 	.column {

@@ -301,7 +301,7 @@ export default function Diningtable(props) {
       localStorage.setItem("orders", JSON.stringify(newOrders))
 
       setShowcurrentorders({ ...showCurrentorders, orders: newOrders })
-      setShowproductinfo({ ...showProductinfo, show: false, id: -1, loading: false })
+      setShowproductinfo({ ...showProductinfo, show: false, id: -1, note: '', loading: false })
     } else {
       setShowproductinfo({ ...showProductinfo, errorMsg: "Please select a " + (sizeRequired ? "size" : "quantity") })
     }

@@ -1,52 +1,13 @@
 import './privacy.scss';
 import React from 'react';
 
+import Masthead from '../../../widgets/landing/masthead'
+import Footer from '../../../widgets/landing/footer'
+
 export default function Privacy() {
   return (
     <div id="privacy">
-      <div>
-        <div id="header">
-          <div id="header-row">
-            <div id="header-icon">
-              <img src="/icon.png"/>
-            </div>
-            <div className="column">
-              <div id="header-navs-container">
-                <div id="header-navs">
-                  <div className="header-nav" onClick={() => window.location = '/intro'}>Intro & Setup</div>
-                  <div className="header-nav" onClick={() => window.location = '/privacy'}>Privacy Policy</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="masthead">
-          <div id="masthead-row">
-            <div className="masthead-container">
-              <div id="masthead-intro">
-                <div className="masthead-header">Welcome to EasyGO</div>
-                <div className="masthead-header">
-                  The fastest and easiest
-                  <br/>
-                  <strong>food ordering </strong>
-                  and
-                  <strong> salon appointment booking </strong>
-                  <br/>
-                  service you'll ever use
-                </div>
-              </div>
-            </div>
-            <div className="masthead-container">
-              <div className="masthead-header">What we provide</div>
-              <div id="video-container">
-                <video controls>
-                  <source src="/intro.mp4" type="video/mp4"/>
-                </video>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Masthead/>
       
       <div id="body">
         <div id="policy-information">
@@ -56,7 +17,8 @@ export default function Privacy() {
           <div className="policy-list">
             <div className="policy-list-item">Username</div>
             <div className="policy-list-item">Phone number</div>
-            <div className="policy-list-item">Profile Picture (Salon registration only)</div>
+            <div className="policy-list-item">Geo locations (User and Business registration only)</div>
+            <div className="policy-list-item">Profile Picture (Salons' stylists registration only)</div>
           </div>
 
           <div className="policy-item-header">When do we collect information ?</div>
@@ -79,7 +41,7 @@ export default function Privacy() {
         </div>
       </div>
 
-      <div id="footer">EasyGO by 2022 Geottuse, Inc.</div>
+      <Footer/>
     </div>
   )
 }

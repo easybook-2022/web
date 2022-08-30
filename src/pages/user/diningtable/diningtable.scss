@@ -1,11 +1,7 @@
-body {
-	overflow: hidden;
-}
-
 #diningtable {
 	background-color: rgba(127, 127, 127, 0.2);
 	height: 100vh;
-	overflow: hidden;
+	overflow-y: scroll;
 	width: 100vw;
 
 	#action-box {
